@@ -1,0 +1,322 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:schema id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutUs" xml:space="preserve">
+    <value>About Us</value>
+  </data>
+  <data name="BinaVersionOne" xml:space="preserve">
+    <value>Bina Version 1</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="ImageProcessing" xml:space="preserve">
+    <value>Image Processing</value>
+  </data>
+  <data name="ConvertToText" xml:space="preserve">
+    <value>Convert to Text</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="SaveTwoLines" xml:space="preserve">
+    <value>Save&#13;
+File</value>
+  </data>
+  <data name="RecognitionLanguageLabel" xml:space="preserve">
+    <value>Recognition language:</value>
+  </data>
+  <data name="DocumentLayoutLabel" xml:space="preserve">
+    <value>Document layout:</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="LanguageAndLayout" xml:space="preserve">
+    <value>Language and Layout</value>
+  </data>
+  <data name="UseDictionary" xml:space="preserve">
+    <value>Use dictionary</value>
+  </data>
+  <data name="PostProcessing" xml:space="preserve">
+    <value>Post-processing</value>
+  </data>
+  <data name="Dictionary" xml:space="preserve">
+    <value>Dictionary</value>
+  </data>
+  <data name="BatchProcessingTwoLines" xml:space="preserve">
+    <value>Batch&#13;
+Processing</value>
+  </data>
+  <data name="ProcessWithLineBreak" xml:space="preserve">
+    <value>Process&#13;
+</value>
+  </data>
+  <data name="Font" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>Bina OCR</value>
+  </data>
+  <data name="SelectImageFirst" xml:space="preserve">
+    <value>Please select an image first.</value>
+  </data>
+  <data name="InvalidFontSize" xml:space="preserve">
+    <value>The selected font size is invalid.</value>
+  </data>
+  <data name="InvalidFilePath" xml:space="preserve">
+    <value>The selected file path is invalid.</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>The selected folder path is invalid.</value>
+  </data>
+  <data name="InvalidInputFormat" xml:space="preserve">
+    <value>The input data format is invalid.</value>
+  </data>
+  <data name="FileInUse" xml:space="preserve">
+    <value>The file is being used by another application.</value>
+  </data>
+  <data name="UnexpectedErrorContactSupport" xml:space="preserve">
+    <value>An error occurred. Please contact support.</value>
+  </data>
+  <data name="BinaVersionFormat" xml:space="preserve">
+    <value>Bina Version {0}</value>
+  </data>
+  <data name="LayoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>Orientation and script detection</value>
+  </data>
+  <data name="LayoutAutomaticWithOrientationAndScriptDetection" xml:space="preserve">
+    <value>Automatic layout with orientation and script detection</value>
+  </data>
+  <data name="LayoutAutomaticWithoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>Automatic layout without orientation and script detection</value>
+  </data>
+  <data name="LayoutWithoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>Without orientation or script detection</value>
+  </data>
+  <data name="LayoutSingleColumn" xml:space="preserve">
+    <value>Single column of text</value>
+  </data>
+  <data name="LayoutSingleVerticalTextBlock" xml:space="preserve">
+    <value>Single block of vertically aligned text</value>
+  </data>
+  <data name="LayoutSingleTextBlock" xml:space="preserve">
+    <value>Single block of text</value>
+  </data>
+  <data name="LayoutSingleLine" xml:space="preserve">
+    <value>Single line of text</value>
+  </data>
+  <data name="LayoutCircularWord" xml:space="preserve">
+    <value>Single word in a circle</value>
+  </data>
+  <data name="LayoutSingleCharacter" xml:space="preserve">
+    <value>Single character</value>
+  </data>
+  <data name="LayoutSparseText" xml:space="preserve">
+    <value>Sparse text</value>
+  </data>
+  <data name="LayoutSparseTextWithOrientationAndScriptDetection" xml:space="preserve">
+    <value>Sparse text with orientation and script detection</value>
+  </data>
+  <data name="LayoutRawLine" xml:space="preserve">
+    <value>Raw line of text</value>
+  </data>
+  <data name="LayoutMultipleModes" xml:space="preserve">
+    <value>Assume multiple layout modes</value>
+  </data>
+  <data name="EngineDeep" xml:space="preserve">
+    <value>Deep Learning</value>
+  </data>
+  <data name="EngineStructuralAndDeep" xml:space="preserve">
+    <value>Structural and Deep Learning</value>
+  </data>
+  <data name="EngineStructural" xml:space="preserve">
+    <value>Structural</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="LanguagePersian" xml:space="preserve">
+    <value>Persian</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageMixed" xml:space="preserve">
+    <value>Persian and English</value>
+  </data>
+  <data name="ImageBrightness" xml:space="preserve">
+    <value>Image Brightness</value>
+  </data>
+  <data name="Gamma" xml:space="preserve">
+    <value>Gamma</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>Contrast</value>
+  </data>
+  <data name="Threshold" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Processing ...</value>
+  </data>
+  <data name="ProcessingCompleted" xml:space="preserve">
+    <value>Processing completed.</value>
+  </data>
+  <data name="ProcessingImageFormat" xml:space="preserve">
+    <value>Processing {0} ...</value>
+  </data>
+  <data name="BatchProcessingCompleted" xml:space="preserve">
+    <value>Batch processing completed.</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving ...</value>
+  </data>
+  <data name="SaveCompleted" xml:space="preserve">
+    <value>Saved successfully.</value>
+  </data>
+  <data name="ConvertToTextTab" xml:space="preserve">
+    <value>   Convert to Text   </value>
+  </data>
+  <data name="SaveAllTwoLines" xml:space="preserve">
+    <value>Save&#13;
+All</value>
+  </data>
+  <data name="ProcessingEngineLabel" xml:space="preserve">
+    <value>Processing engine:</value>
+  </data>
+  <data name="ImageProcessingTab" xml:space="preserve">
+    <value>   Image Processing   </value>
+  </data>
+  <data name="ImageSize" xml:space="preserve">
+    <value>Image Size</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>Redo</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="AdjustImageThreshold" xml:space="preserve">
+    <value>Adjust Image Threshold</value>
+  </data>
+  <data name="AdjustImageContrast" xml:space="preserve">
+    <value>Adjust Image Contrast</value>
+  </data>
+  <data name="AdjustImageGamma" xml:space="preserve">
+    <value>Adjust Image Gamma</value>
+  </data>
+  <data name="AdjustImageBrightness" xml:space="preserve">
+    <value>Adjust Image Brightness</value>
+  </data>
+  <data name="ConvertImageToGrayscale" xml:space="preserve">
+    <value>Convert Image to Grayscale</value>
+  </data>
+  <data name="ConvertImageToMonochrome" xml:space="preserve">
+    <value>Convert Image to Monochrome</value>
+  </data>
+  <data name="InvertImageColors" xml:space="preserve">
+    <value>Invert Image Colors</value>
+  </data>
+  <data name="SharpenImage" xml:space="preserve">
+    <value>Sharpen Image</value>
+  </data>
+  <data name="SmoothImage" xml:space="preserve">
+    <value>Smooth Image</value>
+  </data>
+  <data name="HelpTab" xml:space="preserve">
+    <value>   Help   </value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="SelectFilePagesFormat" xml:space="preserve">
+    <value>Select pages from {0} </value>
+  </data>
+  <data name="PageSelectionInstructions" xml:space="preserve">
+    <value>Enter page numbers in the format 1, 4-5, 7-10. (Use "-" for page ranges and "," to separate ranges.)</value>
+  </data>
+  <data name="LoadSelectedPages" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="SelectAllPages" xml:space="preserve">
+    <value>Select all pages</value>
+  </data>
+  <data name="UiLanguageLabel" xml:space="preserve">
+    <value>UI language:</value>
+  </data>
+  <data name="UiLanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="UiLanguagePersian" xml:space="preserve">
+    <value>فارسی</value>
+  </data>
+  <data name="AboutUsDescription" xml:space="preserve">
+  <value>Bina OCR
+Bina is an image-to-text application that uses optical character recognition (OCR) to extract text from images and PDF files and save it as a text file. It offers an alternative to manually typing printed content, converting documents into digital text quickly and accurately.
+</value>
+</data>
+</root>

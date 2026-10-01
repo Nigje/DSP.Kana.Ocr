@@ -1,0 +1,322 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:schema id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutUs" xml:space="preserve">
+    <value>درباره ما</value>
+  </data>
+  <data name="BinaVersionOne" xml:space="preserve">
+    <value>بینا نسخه 1</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>راهنما</value>
+  </data>
+  <data name="ImageProcessing" xml:space="preserve">
+    <value>پردازش تصویر</value>
+  </data>
+  <data name="ConvertToText" xml:space="preserve">
+    <value>تبدیل به متن</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>بارگذاری</value>
+  </data>
+  <data name="SaveTwoLines" xml:space="preserve">
+    <value>ذخیره&#13;
+سازی</value>
+  </data>
+  <data name="RecognitionLanguageLabel" xml:space="preserve">
+    <value>زبان بازشناسی:</value>
+  </data>
+  <data name="DocumentLayoutLabel" xml:space="preserve">
+    <value>ساختار سند:</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>پرونده</value>
+  </data>
+  <data name="LanguageAndLayout" xml:space="preserve">
+    <value>زبان و ساختار</value>
+  </data>
+  <data name="UseDictionary" xml:space="preserve">
+    <value>استفاده از واژگان</value>
+  </data>
+  <data name="PostProcessing" xml:space="preserve">
+    <value>پردازش تکمیلی</value>
+  </data>
+  <data name="Dictionary" xml:space="preserve">
+    <value>واژگان</value>
+  </data>
+  <data name="BatchProcessingTwoLines" xml:space="preserve">
+    <value>پردازش&#13;
+گروهی</value>
+  </data>
+  <data name="ProcessWithLineBreak" xml:space="preserve">
+    <value>پردازش&#13;
+</value>
+  </data>
+  <data name="Font" xml:space="preserve">
+    <value>قلم نوشتاری</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>نویسه خوان نوری بینا</value>
+  </data>
+  <data name="SelectImageFirst" xml:space="preserve">
+    <value>ابتدا تصویر مورد نظر را انتخاب نمایید.</value>
+  </data>
+  <data name="InvalidFontSize" xml:space="preserve">
+    <value>مقدار انتخابی برای اندازه قلم نوشتاری صحیح نمی باشد.</value>
+  </data>
+  <data name="InvalidFilePath" xml:space="preserve">
+    <value>مسیر فایل به درستی انتخاب نشده است.</value>
+  </data>
+  <data name="InvalidFolderPath" xml:space="preserve">
+    <value>مسیر پوشه به درستی انتخاب نشده است.</value>
+  </data>
+  <data name="InvalidInputFormat" xml:space="preserve">
+    <value>فرمت ورودی داده صحیح نمی باشد.</value>
+  </data>
+  <data name="FileInUse" xml:space="preserve">
+    <value>فایل مورد نظر توسط برنامه دیگری در حال استفاده است .</value>
+  </data>
+  <data name="UnexpectedErrorContactSupport" xml:space="preserve">
+    <value>خطایی رخ داده است، با پشتیبانی تماس بگیرید.</value>
+  </data>
+  <data name="BinaVersionFormat" xml:space="preserve">
+    <value>بینا نسخه  {0}</value>
+  </data>
+  <data name="LayoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>وجود چرخش و متن های اسکریپت وار</value>
+  </data>
+  <data name="LayoutAutomaticWithOrientationAndScriptDetection" xml:space="preserve">
+    <value>اتوماتیک و با فرض وجود چرخش و متن های اسکریپتی</value>
+  </data>
+  <data name="LayoutAutomaticWithoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>اتوماتیک بدون تشخیص چرخش و نواحی اسکریپ وار</value>
+  </data>
+  <data name="LayoutWithoutOrientationAndScriptDetection" xml:space="preserve">
+    <value>بدون تشخیص چرخش یا نواحی اسکریپت وار</value>
+  </data>
+  <data name="LayoutSingleColumn" xml:space="preserve">
+    <value>متن یک ستونه</value>
+  </data>
+  <data name="LayoutSingleVerticalTextBlock" xml:space="preserve">
+    <value>بلاک متنی که از یک سمت مرتب است</value>
+  </data>
+  <data name="LayoutSingleTextBlock" xml:space="preserve">
+    <value>یک بلاک متنی</value>
+  </data>
+  <data name="LayoutSingleLine" xml:space="preserve">
+    <value>متن یک خطی</value>
+  </data>
+  <data name="LayoutCircularWord" xml:space="preserve">
+    <value>متن  یک کلمه ای با انحنا</value>
+  </data>
+  <data name="LayoutSingleCharacter" xml:space="preserve">
+    <value>متن یک کاراکتری</value>
+  </data>
+  <data name="LayoutSparseText" xml:space="preserve">
+    <value>متن های پراکنده</value>
+  </data>
+  <data name="LayoutSparseTextWithOrientationAndScriptDetection" xml:space="preserve">
+    <value>متن های پراکنده و کج و اسکریپت وار</value>
+  </data>
+  <data name="LayoutRawLine" xml:space="preserve">
+    <value>متن یک خطی خاص</value>
+  </data>
+  <data name="LayoutMultipleModes" xml:space="preserve">
+    <value>با فرض تعدادی از حالت ها</value>
+  </data>
+  <data name="EngineDeep" xml:space="preserve">
+    <value>پردازش عمیق</value>
+  </data>
+  <data name="EngineStructuralAndDeep" xml:space="preserve">
+    <value>ساختاری و پردازش عمیق</value>
+  </data>
+  <data name="EngineStructural" xml:space="preserve">
+    <value>ساختاری</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>پیشفرض</value>
+  </data>
+  <data name="LanguagePersian" xml:space="preserve">
+    <value>فارسی</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>انگلیسی</value>
+  </data>
+  <data name="LanguageMixed" xml:space="preserve">
+    <value>جامع</value>
+  </data>
+  <data name="ImageBrightness" xml:space="preserve">
+    <value>روشنایی تصویر</value>
+  </data>
+  <data name="Gamma" xml:space="preserve">
+    <value>گاما</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>کنتراست</value>
+  </data>
+  <data name="Threshold" xml:space="preserve">
+    <value>ترشلد</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>در حال پردازش ...</value>
+  </data>
+  <data name="ProcessingCompleted" xml:space="preserve">
+    <value>پردازش به پایان رسید.</value>
+  </data>
+  <data name="ProcessingImageFormat" xml:space="preserve">
+    <value>در حال پردازش {0} ...</value>
+  </data>
+  <data name="BatchProcessingCompleted" xml:space="preserve">
+    <value>پردازش گروهی به پایان رسید.</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>در حال ذخیره سازی ...</value>
+  </data>
+  <data name="SaveCompleted" xml:space="preserve">
+    <value>ذخیره سازی انجام شد.</value>
+  </data>
+  <data name="ConvertToTextTab" xml:space="preserve">
+    <value>   تبدیل به متن   </value>
+  </data>
+  <data name="SaveAllTwoLines" xml:space="preserve">
+    <value>ذخیره&#13;
+همه</value>
+  </data>
+  <data name="ProcessingEngineLabel" xml:space="preserve">
+    <value>موتور پردازشی:</value>
+  </data>
+  <data name="ImageProcessingTab" xml:space="preserve">
+    <value>   پردازش تصویر   </value>
+  </data>
+  <data name="ImageSize" xml:space="preserve">
+    <value>اندازه تصویر</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>بزرگنمایی</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>تغییر بعدی</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>تغییر قبلی</value>
+  </data>
+  <data name="AdjustImageThreshold" xml:space="preserve">
+    <value>تغییر ترشلد تصویر</value>
+  </data>
+  <data name="AdjustImageContrast" xml:space="preserve">
+    <value>تغییر کنتراست تصویر</value>
+  </data>
+  <data name="AdjustImageGamma" xml:space="preserve">
+    <value>تغییر گاما تصویر</value>
+  </data>
+  <data name="AdjustImageBrightness" xml:space="preserve">
+    <value>تغییر روشنایی تصویر</value>
+  </data>
+  <data name="ConvertImageToGrayscale" xml:space="preserve">
+    <value>خاکستری نمودن تصویر</value>
+  </data>
+  <data name="ConvertImageToMonochrome" xml:space="preserve">
+    <value>مونوکروم نمودن تصویر</value>
+  </data>
+  <data name="InvertImageColors" xml:space="preserve">
+    <value>قرینه نمونه رنگ ها</value>
+  </data>
+  <data name="SharpenImage" xml:space="preserve">
+    <value>شارپ کردن تصویر</value>
+  </data>
+  <data name="SmoothImage" xml:space="preserve">
+    <value>نرم کردن تصویر</value>
+  </data>
+  <data name="HelpTab" xml:space="preserve">
+    <value>   راهنما   </value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>افزودن</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="SelectFilePagesFormat" xml:space="preserve">
+    <value>انتخاب صفحات فایل {0} </value>
+  </data>
+  <data name="PageSelectionInstructions" xml:space="preserve">
+    <value>شماره صفحات را به صورت فرمت 1، 4-5 ، 7-10 وارد نمایید. (از "-" برای بازه صفحات و "،" برای بازه های مختلف)</value>
+  </data>
+  <data name="LoadSelectedPages" xml:space="preserve">
+    <value>بارگزاری</value>
+  </data>
+  <data name="SelectAllPages" xml:space="preserve">
+    <value>انتخاب همه صفحات</value>
+  </data>
+  <data name="UiLanguageLabel" xml:space="preserve">
+    <value>زبان رابط کاربری:</value>
+  </data>
+  <data name="UiLanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="UiLanguagePersian" xml:space="preserve">
+    <value>فارسی</value>
+  </data>
+  <data name="AboutUsDescription" xml:space="preserve">
+  <value>نویسه خوان بینا
+نرم‌افزار تبدیل عکس به متن بینا یک سامانه نرم‌افزاری است که می‌تواند با پردازش تصویر (OCR)، متن داخل یک عکس یا فایل PDF را استخراج کرده و در قالب فایل متنی تحویل دهد. بینا جایگزین مناسبی برای تایپ اطلاعات چاپ شده است که قادر است با سرعت و دقت بالا اسناد را به متن الکترونیکی تبدیل کند.
+</value>
+</data>
+</root>

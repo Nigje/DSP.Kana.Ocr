@@ -1,0 +1,49 @@
+# Visual Studio / per-user workspace state
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Generated .NET build output (preserve source/native DLLs elsewhere)
+**/[Bb]in/
+**/[Oo]bj/
+**/[Pp]ublish/
+
+# Test and coverage output
+**/TestResults/
+**/coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# Diagnostic and temporary output
+*.log
+*.binlog
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Local editor / OS state
+.idea/
+.vscode/
+[Tt]humbs.db
+[Dd]esktop.ini
+.DS_Store
+
+# Private signing keys and credential files stay local
+*.snk
+*.pfx
+*.p12
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+id_rsa
+id_ed25519
+
+# Keep packages/, native DLLs, model ZIPs, and resources.
+# They are required source dependencies in this standalone legacy solution.

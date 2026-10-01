@@ -1,0 +1,588 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1A925721-D94D-4F9A-9BC0-E08B8E3267B1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DSP.Bina.Ocr.DesktopApplication.V3</RootNamespace>
+    <AssemblyName>DSP.Bina.Ocr.DesktopApplication.V3</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>0.0.0.0</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>LogoBina.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.AppCenter, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AppCenter.2.6.4\lib\net45\Microsoft.AppCenter.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AppCenter.Analytics, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AppCenter.Analytics.2.6.4\lib\net45\Microsoft.AppCenter.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AppCenter.Crashes, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AppCenter.Crashes.2.6.4\lib\net45\Microsoft.AppCenter.Crashes.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLite-net, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\sqlite-net-pcl.1.3.1\lib\netstandard1.1\SQLite-net.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.batteries_green, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLitePCLRaw.bundle_green.1.1.2\lib\net45\SQLitePCLRaw.batteries_green.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.batteries_v2, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8226ea5df37bcae9, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLitePCLRaw.bundle_green.1.1.2\lib\net45\SQLitePCLRaw.batteries_v2.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1488e028ca7ab535, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLitePCLRaw.core.1.1.2\lib\net45\SQLitePCLRaw.core.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.provider.e_sqlite3, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9c301db686d0bd12, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLitePCLRaw.provider.e_sqlite3.net45.1.1.2\lib\net45\SQLitePCLRaw.provider.e_sqlite3.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ExtentionMudole\ScrollablePictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtentionMudole\ScrollablePictureBox.Designer.cs">
+      <DependentUpon>ScrollablePictureBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\AboutUs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AboutUs.Designer.cs">
+      <DependentUpon>AboutUs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SelectPagesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SelectPagesForm.Designer.cs">
+      <DependentUpon>SelectPagesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFormTemp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFormTemp.Designer.cs">
+      <DependentUpon>MainFormTemp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\BusinessException.cs" />
+    <Compile Include="Model\FixedSizeStack.cs" />
+    <Compile Include="Model\ImageEntity.cs" />
+    <Compile Include="Forms\NewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NewForm.Designer.cs">
+      <DependentUpon>NewForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\NewForm.Localization.cs">
+      <DependentUpon>NewForm.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NewForm.Layout.cs">
+      <DependentUpon>NewForm.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\PairValue.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Forms\TemplateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TemplateForm.Designer.cs">
+      <DependentUpon>TemplateForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TrackbarDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TrackbarDialog.Designer.cs">
+      <DependentUpon>TrackbarDialog.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AboutUs.resx">
+      <DependentUpon>AboutUs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SelectPagesForm.resx">
+      <DependentUpon>SelectPagesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFormTemp.resx">
+      <DependentUpon>MainFormTemp.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\NewForm.resx">
+      <DependentUpon>NewForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Strings.fa-IR.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Forms\TemplateForm.resx">
+      <DependentUpon>TemplateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TrackbarDialog.resx">
+      <DependentUpon>TrackbarDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <EmbeddedResource Include="Properties\Data.zip" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\addons32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bold16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\borderbottom16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\casing16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\close32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\copy16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\copyformat16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cut16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\eraseformat16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\exit16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fill16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\find32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fontcolor16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fontsizedecrease16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fontsizeincrease16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\goto16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hilight16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\indentdecrease16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\indentdecrease161.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\indentincrease16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\invisiblechars16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\italic16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\multilevellist16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\newdocument32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\open16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\open32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\options16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\orderedlist16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pageblank16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\paragraphspacing16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\paste16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\paste32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\paste321.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pastelink16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pastespecial16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\prepare32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\print32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\print321.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\printpreview32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\printquick16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\printquick32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\publish32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\replace16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\save16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\save32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\saveas32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\saveas321.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\select16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\send32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sort16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\strikethru16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\style16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stylechange32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\styleset16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\subindex16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\superindex16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\textaligncenter16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\textalignjustify16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\textalignleft16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\textalignright16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\themefont.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\underline16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\undo16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\unorderedlist16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\word2003doc32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\worddocument32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\wordtemplate32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DSP.Khana.Image.Tools\DSP.Khana.ImageTools.csproj">
+      <Project>{26f448b1-803a-4722-aa3e-7f6a8cb1a5d4}</Project>
+      <Name>DSP.Khana.ImageTools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DSP.Khana.Ocr.Wapper\DSP.Khana.Ocr.Wapper.csproj">
+      <AdditionalProperties>DesktopWithoutLicensing=true</AdditionalProperties>
+      <Project>{11f8cf9e-6dad-4151-9572-66ce25a8e54a}</Project>
+      <Name>DSP.Khana.Ocr.Wapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OtherUsefulLibrary\Docs\Xceed.Document.NET\Xceed.Document.NET.csproj">
+      <Project>{e863d072-aa8b-4108-b5f1-785241b37f67}</Project>
+      <Name>Xceed.Document.NET</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OtherUsefulLibrary\Docs\Xceed.Words.NET\Xceed.Words.NET.csproj">
+      <Project>{6a9b96d0-a011-4f33-8ee2-ac31c948cca9}</Project>
+      <Name>Xceed.Words.NET</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OtherUsefulLibrary\ImageListView\ImageListView.csproj">
+      <Project>{0c295fb8-c6c6-4a40-9f19-05a43f353a04}</Project>
+      <Name>ImageListView</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bina-website.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\miximize.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\close_custom.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Minimize.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\verticalLine.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Batch_Processing-512.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Batch_Processing-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export-text-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Batch_Processing-64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export-text-64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IM_4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Adding_Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Adding_Logo_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Removing_Logo_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Ey_64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aboutUs_64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Redo-icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Redo-icon_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Undo-icon_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Redo-icon_64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Undo-icon__64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\picture-rotate-right-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\picture-rotate-right-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\picture-rotate-Left-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Crop-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icons8-auto-deskew-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ZommIn_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ZoomOut_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RealSize_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Zoom fit-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ActualSize_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\actualsize_32_new.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icons8-Foraward-arrow-80.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Redo-icon_64 - Copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LogoBina.ico" />
+    <EmbeddedResource Include="Properties\BinaOcrEngineV5_64.dll" />
+    <EmbeddedResource Include="Properties\BinaOcrEngineV5_86.dll" />
+    <EmbeddedResource Include="Properties\DSP.Tools32.dll" />
+    <EmbeddedResource Include="Properties\DSP.Tools64.dll" />
+    <EmbeddedResource Include="Properties\liblept1780_64.dll" />
+    <EmbeddedResource Include="Properties\liblept1780_86.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="RemoveLegacyLicensingArtifacts" AfterTargets="Build">
+    <ItemGroup>
+      <LegacyLicensingArtifact Include="$(OutDir)DSP.License.dll;$(OutDir)DSP.License.pdb;$(OutDir)LicenseModel.dll;$(OutDir)LicenseModel.pdb;$(OutDir)FingerPrint.dll;$(OutDir)FingerPrint.pdb" />
+    </ItemGroup>
+    <Delete Files="@(LegacyLicensingArtifact)" />
+  </Target>
+  <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.linux.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.linux.targets'))" />
+    <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.osx.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.osx.targets'))" />
+    <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets'))" />
+  </Target>
+  <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.osx.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.osx.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.osx.targets')" />
+  <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" />
+</Project>

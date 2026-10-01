@@ -9,11 +9,12 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.Model
             ExceptionType = exceptionType;
         }
 
-        public ExceptionType ExceptionType { get; set; }
+        public ExceptionType ExceptionType { get; }
     }
     public enum ExceptionType
     {
         SelectedImage,
+        ProcessingInProgress,
         InvalidFontSize,
         InvalidDirectory,
         InvalidFileDirectory,

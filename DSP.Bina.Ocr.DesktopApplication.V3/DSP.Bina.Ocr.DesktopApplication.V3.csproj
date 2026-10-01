@@ -45,6 +45,16 @@
     <Compile Include="Model\OcrLanguageOption.cs" />
     <Compile Include="Model\OcrEngineOption.cs" />
     <Compile Include="Model\PageSegmentationOption.cs" />
+    <Compile Include="Services\ApplicationErrorService.cs" />
+    <Compile Include="Services\DocumentExportService.cs" />
+    <Compile Include="Model\DocumentSnapshot.cs" />
+    <Compile Include="Services\ImageEditService.cs" />
+    <Compile Include="Services\ImageImportService.cs" />
+    <Compile Include="Forms\MainForm.Workflows.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Services\OcrService.cs" />
+    <Compile Include="Services\RichTextDocumentService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Forms\BaseDialogForm.cs">

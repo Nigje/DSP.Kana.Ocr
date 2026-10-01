@@ -17,13 +17,13 @@ using DSP.Khana.ImageTools.Models;
 using DSP.Khana.Ocr;
 using Xceed.Words.NET;
 
-internal static class SmokeTests
+internal static partial class SmokeTests
 {
     private static readonly string Work = Path.Combine(Path.GetTempPath(), "DSP.Khana.Ocr.SmokeTests", Guid.NewGuid().ToString("N"));
     private static readonly BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
         try
         {
@@ -31,11 +31,13 @@ internal static class SmokeTests
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            if (args.Contains("--refactoring-only")) { CheckRefactorings(); Console.WriteLine("PASS: desktop refactoring checks."); return 0; }
             CheckResources();
             CheckDocx();
             CheckOcr();
             CheckImageHistory();
             CheckForms();
+            CheckRefactorings();
             CheckWrapper();
             CheckPdf();
             Console.WriteLine("PASS: .NET 10 resources, unsigned DOCX export, native OCR, PDF import, and bilingual forms.");
@@ -158,7 +160,7 @@ internal static class SmokeTests
         original.SetPixel(0, 0, Color.Red);
         firstEdit.SetPixel(0, 0, Color.Blue);
         secondEdit.SetPixel(0, 0, Color.Green);
-        var image = new ImageEntity(original) { Name = "image" };
+        using var image = new ImageEntity(original) { Name = "image" };
         Assert(image.NameWithoutExtension == "image", "Extensionless image name.");
         image.Name = "scan.page.png";
         Assert(image.NameWithoutExtension == "scan.page", "Only the final extension is removed.");
@@ -168,7 +170,6 @@ internal static class SmokeTests
         image.Undo();
         image.SetImage(secondEdit);
         Assert(((Bitmap)image.Redo()).GetPixel(0, 0).ToArgb() == Color.Green.ToArgb(), "A new edit discards stale redo history.");
-        image.GetImage().Dispose();
         var history = new FixedSizeStack<int>(2);
         history.Push(1); history.Push(2); history.Push(3);
         Assert(history.Count == 2 && history.Pop() == 3 && history.Pop() == 2, "History capacity discards the oldest entry.");
@@ -252,6 +253,10 @@ internal static class SmokeTests
             string text = BinaOcr.Instance().GetString(image, PageSegmentationModeEnum.SingleLine,
                 LanguageEnum.English, EngineModeEnum.KhanaDeepOnly, true);
             Assert(text.ToUpperInvariant().Contains("HELLO"), "Production wrapper recognition with post-processing.");
+            var options = new DSP.Bina.Ocr.DesktopApplication.V3.Services.OcrOptions(PageSegmentationModeEnum.SingleLine,
+                LanguageEnum.English, EngineModeEnum.KhanaDeepOnly, true);
+            string asyncText = Pump(new DSP.Bina.Ocr.DesktopApplication.V3.Services.OcrService().RecognizeAsync(image, options, CancellationToken.None));
+            Assert(asyncText.ToUpperInvariant().Contains("HELLO"), "Production asynchronous OCR service and owned snapshot.");
         }
         Console.WriteLine("Wrapper: production OCR API and optional post-processing passed.");
     }

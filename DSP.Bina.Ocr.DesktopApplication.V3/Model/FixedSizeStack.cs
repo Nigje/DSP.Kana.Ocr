@@ -6,11 +6,13 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.Model
     public class FixedSizeStack<T> : LinkedList<T>
     {
         private readonly int capacity;
+        private readonly Action<T> onEvicted;
 
-        public FixedSizeStack(int capacity)
+        public FixedSizeStack(int capacity, Action<T> onEvicted = null)
         {
             if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
             this.capacity = capacity;
+            this.onEvicted = onEvicted;
         }
 
         public T Pop()
@@ -24,7 +26,12 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.Model
         public void Push(T item)
         {
             AddFirst(item);
-            if (Count > capacity) RemoveLast();
+            if (Count > capacity)
+            {
+                T evicted = Last.Value;
+                RemoveLast();
+                onEvicted?.Invoke(evicted);
+            }
         }
     }
 }

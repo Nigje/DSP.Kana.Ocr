@@ -835,5 +835,11 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.Properties {
         }
         internal static string ImageAndPdfFilesFilter => ResourceManager.GetString("ImageAndPdfFilesFilter", resourceCulture);
         internal static string WordFilesFilter => ResourceManager.GetString("WordFilesFilter", resourceCulture);
+        internal static string CancelProcessing => ResourceManager.GetString("CancelProcessing", resourceCulture);
+        internal static string CancelingProcessing => ResourceManager.GetString("CancelingProcessing", resourceCulture);
+        internal static string ProcessingCanceled => ResourceManager.GetString("ProcessingCanceled", resourceCulture);
+        internal static string ProcessingAlreadyRunning => ResourceManager.GetString("ProcessingAlreadyRunning", resourceCulture);
+        internal static string AccessDenied => ResourceManager.GetString("AccessDenied", resourceCulture);
+        internal static string FileOperationFailed => ResourceManager.GetString("FileOperationFailed", resourceCulture);
     }
 }

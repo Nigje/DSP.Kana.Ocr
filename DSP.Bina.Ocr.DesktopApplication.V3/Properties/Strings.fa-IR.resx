@@ -321,4 +321,10 @@
 </data>
   <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>فایل‌های تصویر یا PDF (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>
   <data name="WordFilesFilter" xml:space="preserve"><value>فایل‌های Microsoft Word (*.docx)|*.docx</value></data>
+  <data name="CancelProcessing" xml:space="preserve"><value>لغو پردازش</value></data>
+  <data name="CancelingProcessing" xml:space="preserve"><value>لغو پس از پایان صفحهٔ جاری…</value></data>
+  <data name="ProcessingCanceled" xml:space="preserve"><value>پردازش لغو شد.</value></data>
+  <data name="ProcessingAlreadyRunning" xml:space="preserve"><value>منتظر پایان پردازش جاری بمانید یا آن را لغو کنید.</value></data>
+  <data name="AccessDenied" xml:space="preserve"><value>دسترسی مجاز نیست. مسیری را انتخاب کنید که اجازهٔ نوشتن در آن دارید.</value></data>
+  <data name="FileOperationFailed" xml:space="preserve"><value>عملیات فایل ناموفق بود. مسیر و فضای خالی دیسک را بررسی کنید.</value></data>
 </root>

@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="RefactoringTests.cs" />
     <ProjectReference Include="..\..\DSP.Bina.Ocr.DesktopApplication.V3\DSP.Bina.Ocr.DesktopApplication.V3.csproj" />
   </ItemGroup>
 </Project>

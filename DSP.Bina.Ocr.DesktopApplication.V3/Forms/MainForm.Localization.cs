@@ -79,6 +79,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             string status = statusLabel.Text;
             bool processing = status == Properties.Strings.Processing;
             bool saving = status == Properties.Strings.Saving;
+            bool canceling = status == Properties.Strings.CancelingProcessing;
             var processingImage = images.FirstOrDefault(image =>
                 status == string.Format(Properties.Strings.ProcessingImageFormat, image.Name));
 
@@ -92,6 +93,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             try
             {
                 Text = Properties.Strings.ApplicationTitle;
+                if (cancelRecognitionButton != null) cancelRecognitionButton.Text = Properties.Strings.CancelProcessing;
                 uiLanguageLabel.Text = Properties.Strings.UiLanguageLabel;
                 uiLanguageComboBox.AccessibleName = Properties.Strings.UiLanguageLabel;
                 versionLabel.Text = string.Format(Properties.Strings.BinaVersionFormat, Application.ProductVersion);
@@ -136,7 +138,9 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
                     .Concat(OwnedForms.OfType<Forms.AboutUsForm>()).Distinct().ToArray())
                     aboutUs.RefreshUiLanguage();
 
-                if (processing)
+                if (canceling)
+                    statusLabel.Text = Properties.Strings.CancelingProcessing;
+                else if (processing)
                     statusLabel.Text = Properties.Strings.Processing;
                 else if (saving)
                     statusLabel.Text = Properties.Strings.Saving;

@@ -1,31 +1,31 @@
 using Bina.Ocr.Wapper;
 using DSP.Bina.Ocr.DesktopApplication.V3.Forms;
 using DSP.Bina.Ocr.DesktopApplication.V3.Model;
-using DSP.Khana.ImageTools.Models;
+using DSP.Bina.Ocr.DesktopApplication.V3.Services;
 using Manina.Windows.Forms;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Xceed.Words.NET;
 
 namespace DSP.Bina.Ocr.DesktopApplication.V3
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        public MainForm() : this(new OcrService()) { }
+
+        public MainForm(IOcrService ocrService)
         {
+            this.ocrService = ocrService ?? throw new ArgumentNullException(nameof(ocrService));
             InitializeComponent();
             InitializeImageListView();
             InitializeDirectionalLayout();
-            sessionTempDirectory = Path.Combine(Path.GetTempPath(), "DSP.Khana.Ocr", sessionId);
             InitializeOcrOptions();
             InitializeUiLanguageSelector();
             this.CenterToScreen();
-            _ = BinaOcr.Instance();
+            InitializeWorkflowControls();
         }
         private ImageListView imageListView;
 
@@ -104,18 +104,11 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         private Point dragStartWindowPosition;
         private readonly List<ImageEntity> images = new List<ImageEntity>();
         private Guid selectedImageId = Guid.Empty;
-        private const double MinimumDeskewThreshold = 0.05d;
-        private Image brightnessPreviewImage = null;
-        private Image gammaPreviewImage = null;
-        private Image contrastPreviewImage = null;
-        private Image thresholdPreviewImage = null;
         protected float scaleX = 1f;
         protected float scaleY = 1f;
         private const float ZoomFactor = 1.25f;
         protected Point previousScrollPosition;
         protected bool isImageFitToWindow;
-        private readonly string sessionId = Guid.NewGuid().ToString();
-        private readonly string sessionTempDirectory;
         private readonly List<float> fontSizes = new List<float>() { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 };
         private readonly List<OcrEngineOption> ocrEngineOptions = new List<OcrEngineOption>();
         private readonly List<PageSegmentationOption> pageSegmentationOptions = new List<PageSegmentationOption>();
@@ -187,45 +180,66 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
 
         }
 
-        private void RemoveImage(Guid guid)
+        private void RemoveImage(Guid imageId)
         {
-            EnsureImageSelected();
-            var temp = imageListView.Items.Where(x => (Guid)x.VirtualItemKey == guid).FirstOrDefault();
-            imageListView.Items.Remove(temp);
-            ImageEntity imageEntity = images.FirstOrDefault(x => x.Id == guid);
-            images.Remove(imageEntity);
-            if (images.Any())
+            EnsureNotProcessing();
+            RecordEditorState();
+            ImageEntity image = images.FirstOrDefault(item => item.Id == imageId);
+            if (image == null) return;
+            var thumbnail = imageListView.Items.FirstOrDefault(item => (Guid)item.VirtualItemKey == imageId);
+            selectedImageId = Guid.Empty;
+            imagePreviewPictureBox.Image = null;
+            images.Remove(image);
+            if (thumbnail != null) imageListView.Items.Remove(thumbnail);
+            image.Dispose();
+            if (images.Count > 0)
             {
-                selectedImageId = images.FirstOrDefault().Id;
-                SetImage(images.FirstOrDefault().GetImage());
+                selectedImageId = images[0].Id;
+                SetImage(images[0].GetImage());
+                LoadEditorState(images[0]);
+                imageListView.Items[0].Selected = true;
             }
-            else
-            {
-                selectedImageId = Guid.Empty;
-                imagePreviewPictureBox.Image = null;
-            }
-
+            else LoadEditorState(null);
         }
 
         private void AddImage(ImageEntity imageEntity)
         {
-            images.Add(imageEntity);
-            imageListView.Items.Add(imageEntity.Id, imageEntity.Name, imageEntity.GetImage());
+            EnsureNotProcessing();
+            // The thumbnail cache takes ownership; it must not own the editable bitmap.
+            if (imageEntity.RecognitionResult == null)
+                imageEntity.TextRightToLeft = ((OcrLanguageOption)ocrLanguageComboBox.SelectedItem).Value != LanguageEnum.English;
+            Image source = imageEntity.GetImage();
+            float ratio = Math.Min(150f / source.Width, 150f / source.Height);
+            Image thumbnail = source.GetThumbnailImage(Math.Max(1, (int)(source.Width * ratio)), Math.Max(1, (int)(source.Height * ratio)), null, IntPtr.Zero);
+            try
+            {
+                images.Add(imageEntity);
+                imageListView.Items.Add(imageEntity.Id, imageEntity.Name, thumbnail);
+            }
+            catch
+            {
+                images.Remove(imageEntity);
+                thumbnail.Dispose();
+                imageEntity.Dispose();
+                throw;
+            }
         }
         private void ImageListView_SelectionChanged(object sender, EventArgs e)
         {
-            ImageListView imageListView = (ImageListView)sender;
-
+            if (resourcesReleased) return;
+            RecordEditorState();
             if (!imageListView.SelectedItems.Any())
             {
+                selectedImageId = Guid.Empty;
                 imagePreviewPictureBox.Image = null;
+                LoadEditorState(null);
                 return;
             }
-            var temp = imageListView.SelectedItems[0];
-            selectedImageId = (Guid)temp.VirtualItemKey;
-            ImageEntity imageEntity = images.FirstOrDefault(x => x.Id == selectedImageId);
-            SetImage(imageEntity.GetImage());
-            recognizedTextBox.Text = imageEntity.RecognitionResult;
+            selectedImageId = (Guid)imageListView.SelectedItems[0].VirtualItemKey;
+            ImageEntity image = images.FirstOrDefault(item => item.Id == selectedImageId);
+            if (image == null) return;
+            SetImage(image.GetImage());
+            LoadEditorState(image);
             FitImageToWindow();
         }
 
@@ -309,12 +323,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         #endregion
 
         #region Click on base button
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            this.Close();
-            if (Directory.Exists(sessionTempDirectory))
-                Directory.Delete(sessionTempDirectory, true);
-        }
+        private void CloseButton_Click(object sender, EventArgs e) => Close();
 
         private void MaximizeButton_Click(object sender, EventArgs e)
         {
@@ -355,23 +364,13 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
 
         private void UndoImageButton_Click(object sender, EventArgs e)
         {
-            this.Cursor = Cursors.WaitCursor;
-            ImageEntity imageEntity = GetSelectedImage();
-            if (imageEntity != null)
-            {
-                SetImage(imageEntity.Undo());
-            }
-            this.Cursor = Cursors.Default;
+            EnsureNotProcessing();
+            SetImage(GetSelectedImage().Undo());
         }
         private void RedoImageButton_Click(object sender, EventArgs e)
         {
-            this.Cursor = Cursors.WaitCursor;
-            ImageEntity imageEntity = GetSelectedImage();
-            if (imageEntity != null)
-            {
-                SetImage(imageEntity.Redo());
-            }
-            this.Cursor = Cursors.Default;
+            EnsureNotProcessing();
+            SetImage(GetSelectedImage().Redo());
         }
         private void SetImage(Image image)
         {
@@ -379,211 +378,51 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             CenterImagePreview();
             this.imagePreviewPictureBox.Deselect();
         }
-        private void ApplyImageEdit(Image image)
-        {
-            ImageEntity selectedImage = GetSelectedImage();
-            selectedImage.SetImage(image);
-            SetImage(selectedImage.GetImage());
-        }
+
         private ImageEntity GetSelectedImage()
         {
             EnsureImageSelected();
-            return images.FirstOrDefault(x => x.Id == selectedImageId);
+            return images.First(x => x.Id == selectedImageId);
         }
         # region Other image update
-        private void DeskewButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            bool ischanged = false;
-            Image image = ImageHelper.Deskew((Bitmap)GetSelectedImage().GetImage(), MinimumDeskewThreshold, out ischanged);
-            if (ischanged)
-                ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
-        private void SmoothButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            var image = ImageHelper.GaussianBlur((Bitmap)GetSelectedImage().GetImage());
-            ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
-        private void SharpenButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            var image = ImageHelper.Sharpen((Bitmap)GetSelectedImage().GetImage());
-            ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
-        private void InvertColorsButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            var image = ImageHelper.InvertColor((Bitmap)GetSelectedImage().GetImage());
-            ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
-        private void MonochromeButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            var image = ImageHelper.ConvertMonochrome((Bitmap)GetSelectedImage().GetImage());
-            ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
-        private void GrayscaleButton_Click(object sender, EventArgs e)
-        {
-            this.Cursor = Cursors.WaitCursor;
-            var image = ImageHelper.ConvertGrayscale((Bitmap)GetSelectedImage().GetImage());
-            ApplyImageEdit(image);
-            this.Cursor = Cursors.Default;
-        }
+        private void DeskewButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Deskew);
+        private void SmoothButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Smooth);
+        private void SharpenButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Sharpen);
+        private void InvertColorsButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Invert);
+        private void MonochromeButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Monochrome);
+        private void GrayscaleButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.Grayscale);
         #endregion
         #region Update Brightness
-        private void BrightnessButton_Click(object sender, EventArgs e)
-        {
-            brightnessPreviewImage = GetSelectedImage().GetImage();
-            using TrackBarDialog dialog = new TrackBarDialog();
-            dialog.LabelText = Properties.Strings.ImageBrightness;
-            dialog.ValueUpdated += new TrackBarDialog.HandleValueChange(PreviewBrightness);
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                ApplyImageEdit(brightnessPreviewImage);
-            }
-            else
-            {
-                SetImage(GetSelectedImage().GetImage());
-            }
-        }
-        private void PreviewBrightness(object sender, TrackBarDialog.ValueChangedEventArgs e)
-        {
-            brightnessPreviewImage = GetSelectedImage().GetImage();
-            Image image = ImageHelper.Brighten(GetSelectedImage().GetImage(), e.NewValue * 0.005f);
-            if (image != null)
-            {
-                brightnessPreviewImage = image;
-                SetImage(image);
-            }
-        }
+        private void BrightnessButton_Click(object sender, EventArgs e) => ShowImageAdjustment(ImageAdjustment.Brightness);
+
         #endregion
         #region Gamma
-        private void GammaButton_Click(object sender, EventArgs e)
-        {
-            gammaPreviewImage = GetSelectedImage().GetImage();
-            using TrackBarDialog dialog = new TrackBarDialog();
-            dialog.SetForGamma();
-            dialog.LabelText = Properties.Strings.Gamma;
-            dialog.ValueUpdated += new TrackBarDialog.HandleValueChange(PreviewGamma);
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                ApplyImageEdit(gammaPreviewImage);
-            }
-            else
-            {
-                SetImage(GetSelectedImage().GetImage());
-            }
+        private void GammaButton_Click(object sender, EventArgs e) => ShowImageAdjustment(ImageAdjustment.Gamma);
 
-        }
-        private void PreviewGamma(object sender, TrackBarDialog.ValueChangedEventArgs e)
-        {
-            gammaPreviewImage = GetSelectedImage().GetImage();
-            Image image = ImageHelper.AdjustGamma(GetSelectedImage().GetImage(), e.NewValue * 0.02f);
-            if (image != null)
-            {
-                gammaPreviewImage = image;
-                SetImage(image);
-            }
-        }
         #endregion
         #region Contrast
-        private void ContrastButton_Click(object sender, EventArgs e)
-        {
-            contrastPreviewImage = GetSelectedImage().GetImage();
-            using TrackBarDialog dialog = new TrackBarDialog();
-            dialog.LabelText = Properties.Strings.Contrast;
-            dialog.SetForContrast();
-            dialog.ValueUpdated += new TrackBarDialog.HandleValueChange(PreviewContrast);
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                ApplyImageEdit(contrastPreviewImage);
-            }
-            else
-            {
-                SetImage(GetSelectedImage().GetImage());
-            }
-        }
-        private void PreviewContrast(object sender, TrackBarDialog.ValueChangedEventArgs e)
-        {
-            contrastPreviewImage = GetSelectedImage().GetImage();
-            Image image = ImageHelper.Contrast(GetSelectedImage().GetImage(), e.NewValue * 0.04f);
-            if (image != null)
-            {
-                contrastPreviewImage = image;
-                SetImage(image);
-            }
-        }
+        private void ContrastButton_Click(object sender, EventArgs e) => ShowImageAdjustment(ImageAdjustment.Contrast);
+
         #endregion
         #region Threshold
-        private void ThresholdButton_Click(object sender, EventArgs e)
-        {
-            thresholdPreviewImage = GetSelectedImage().GetImage();
-            this.Cursor = Cursors.WaitCursor;
-            using TrackBarDialog dialog = new TrackBarDialog();
-            dialog.SetForThreshold();
-            dialog.LabelText = Properties.Strings.Threshold;
-            dialog.ValueUpdated += new TrackBarDialog.HandleValueChange(PreviewThreshold);
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                ApplyImageEdit(thresholdPreviewImage);
-            }
-            else
-            {
-                SetImage(GetSelectedImage().GetImage());
-            }
-            this.Cursor = Cursors.Default;
-        }
-        private void PreviewThreshold(object sender, TrackBarDialog.ValueChangedEventArgs e)
-        {
-            thresholdPreviewImage = GetSelectedImage().GetImage();
-            Image image = ImageHelper.AdjustThreshold(GetSelectedImage().GetImage(), e.NewValue * 0.01f);
-            if (image != null)
-            {
-                thresholdPreviewImage = image;
-                SetImage(image);
-            }
-        }
+        private void ThresholdButton_Click(object sender, EventArgs e) => ShowImageAdjustment(ImageAdjustment.Threshold);
+
         #endregion
         #region Crop
         private void CropButton_Click(object sender, EventArgs e)
         {
-            EnsureImageSelected();
-            Rectangle rect = this.imagePreviewPictureBox.GetSelectionRectangle();
-
-            if (rect == Rectangle.Empty)
-            {
-                return;
-            }
-            rect = new Rectangle((int)(rect.X * scaleX), (int)(rect.Y * scaleY), (int)(rect.Width * scaleX), (int)(rect.Height * scaleY));
-            Image croppedImage = ImageHelper.Crop(GetSelectedImage().GetImage(), rect);
-            if (GetSelectedImage().GetImage().PixelFormat == PixelFormat.Format8bppIndexed)
-            {
-                croppedImage = ImageHelper.ConvertGrayscale(croppedImage);
-            }
-            ApplyImageEdit(croppedImage);
+            EnsureNotProcessing();
+            ImageEntity image = GetSelectedImage();
+            Rectangle selection = imagePreviewPictureBox.GetSelectionRectangle();
+            if (selection == Rectangle.Empty) return;
+            var crop = new Rectangle((int)(selection.X * scaleX), (int)(selection.Y * scaleY), (int)(selection.Width * scaleX), (int)(selection.Height * scaleY));
+            imageEditService.Crop(image, crop);
+            SetImage(image.GetImage());
         }
         #endregion
         #region Rotate
-        private void RotateRightButton_Click(object sender, EventArgs e)
-        {
-            Image image = GetSelectedImage().GetClonedImage();
-            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            ApplyImageEdit(image);
-            AdjustPictureBoxAfterFlip();
-        }
-        private void RotateLeftButton_Click(object sender, EventArgs e)
-        {
-            Image image = GetSelectedImage().GetClonedImage();
-            image.RotateFlip(RotateFlipType.Rotate270FlipNone);
-            ApplyImageEdit(image);
-            AdjustPictureBoxAfterFlip();
-        }
+        private void RotateRightButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.RotateRight);
+        private void RotateLeftButton_Click(object sender, EventArgs e) => RunImageEdit(ImageEdit.RotateLeft);
         private void AdjustPictureBoxAfterFlip()
         {
             this.imagePreviewPictureBox.Size = new Size(this.imagePreviewPictureBox.Height, this.imagePreviewPictureBox.Width);
@@ -650,7 +489,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         }
         private bool HasSelectedImage()
         {
-            return selectedImageId != Guid.Empty;
+            return images.Any(image => image.Id == selectedImageId);
         }
         private void EnsureImageSelected()
         {
@@ -725,6 +564,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         }
         public void ShowImportDialog()
         {
+            EnsureNotProcessing();
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -740,6 +580,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         }
         public void ImportFiles(OpenFileDialog openFileDialog)
         {
+            EnsureNotProcessing();
             Cursor = Cursors.WaitCursor;
             try
             {
@@ -749,27 +590,23 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
                     if (string.Equals(Path.GetExtension(filePath), ".pdf", StringComparison.OrdinalIgnoreCase))
                         ImportPdf(filePath, fileName);
                     else
-                        AddImage(new ImageEntity(new Bitmap(filePath)) { Name = fileName, FilePath = filePath });
+                        AddImage(imageImportService.ImportImage(filePath));
                 }
                 if (!images.Any()) return;
-                selectedImageId = images[0].Id;
-                SetImage(images[0].GetImage());
+                imageListView.Items[0].Selected = true;
             }
             finally { Cursor = Cursors.Default; }
         }
         public void ImportPdf(string filePath, string fileName)
         {
+            EnsureNotProcessing();
             using var pageSelectionDialog = new PdfPageSelectionForm(fileName);
             if (pageSelectionDialog.ShowDialog(this) != DialogResult.OK) return;
             Cursor = Cursors.WaitCursor;
             try
             {
                 string pages = pageSelectionDialog.allPagesCheckBox.Checked ? "" : pageSelectionDialog.pageRangeTextBox.Text;
-                string outputDirectory = Path.Combine(sessionTempDirectory, Guid.NewGuid().ToString("N"));
-                List<string> pageFiles = PDFConvert.ConvertPdf2Png(filePath, out string error, outputDirectory, 150, pages);
-                if (!string.IsNullOrWhiteSpace(error)) throw new IOException(error);
-                foreach (string pageFile in pageFiles)
-                    AddImage(new ImageEntity(new Bitmap(pageFile)) { Name = Path.GetFileName(pageFile), FilePath = pageFile, FileType = FileType.Pdf });
+                foreach (ImageEntity page in imageImportService.ImportPdf(filePath, pages)) AddImage(page);
             }
             finally { Cursor = Cursors.Default; }
         }
@@ -779,16 +616,19 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         private void AlignRightButton_Click(object sender, EventArgs e)
         {
             recognizedTextBox.SelectionAlignment = HorizontalAlignment.Right;
+            RecordEditorState();
         }
 
         private void AlignCenterButton_Click(object sender, EventArgs e)
         {
             recognizedTextBox.SelectionAlignment = HorizontalAlignment.Center;
+            RecordEditorState();
         }
 
         private void AlignLeftButton_Click(object sender, EventArgs e)
         {
             recognizedTextBox.SelectionAlignment = HorizontalAlignment.Left;
+            RecordEditorState();
         }
 
         private void DecreaseFontSizeButton_Click(object sender, EventArgs e)
@@ -804,46 +644,57 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         private void ToggleBulletsButton_Click(object sender, EventArgs e)
         {
             this.recognizedTextBox.SelectionBullet = !this.recognizedTextBox.SelectionBullet;
+            RecordEditorState();
         }
 
         private void IncreaseIndentButton_Click(object sender, EventArgs e)
         {
             this.recognizedTextBox.SelectionIndent += 10;
+            RecordEditorState();
         }
 
         private void DecreaseIndentButton_Click(object sender, EventArgs e)
         {
             this.recognizedTextBox.SelectionIndent -= 10;
+            RecordEditorState();
         }
 
         private void UndoTextButton_Click(object sender, EventArgs e)
         {
             if (this.recognizedTextBox.CanUndo)
                 this.recognizedTextBox.Undo();
+            RecordEditorState();
         }
 
         private void RedoTextButton_Click(object sender, EventArgs e)
         {
             if (this.recognizedTextBox.CanRedo)
                 this.recognizedTextBox.Redo();
+            RecordEditorState();
         }
 
         private void ItalicButton_Click(object sender, EventArgs e)
         {
-            Font selectionFont = recognizedTextBox.SelectionFont ?? recognizedTextBox.Font;
-            recognizedTextBox.SelectionFont = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Italic));
+            using Font selectionFont = recognizedTextBox.SelectionFont ?? (Font)recognizedTextBox.Font.Clone();
+            using var updated = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Italic));
+            recognizedTextBox.SelectionFont = updated;
+            RecordEditorState();
         }
 
         private void BoldButton_Click(object sender, EventArgs e)
         {
-            Font selectionFont = recognizedTextBox.SelectionFont ?? recognizedTextBox.Font;
-            recognizedTextBox.SelectionFont = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Bold));
+            using Font selectionFont = recognizedTextBox.SelectionFont ?? (Font)recognizedTextBox.Font.Clone();
+            using var updated = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Bold));
+            recognizedTextBox.SelectionFont = updated;
+            RecordEditorState();
         }
 
         private void UnderlineButton_Click(object sender, EventArgs e)
         {
-            Font selectionFont = recognizedTextBox.SelectionFont ?? recognizedTextBox.Font;
-            recognizedTextBox.SelectionFont = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Underline));
+            using Font selectionFont = recognizedTextBox.SelectionFont ?? (Font)recognizedTextBox.Font.Clone();
+            using var updated = new Font(selectionFont.FontFamily, selectionFont.Size, ToggleFontStyle(selectionFont.Style, FontStyle.Underline));
+            recognizedTextBox.SelectionFont = updated;
+            RecordEditorState();
         }
         private FontStyle ToggleFontStyle(FontStyle item, FontStyle toggle)
         {
@@ -857,7 +708,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             string fontFamily = (string)comboBox.SelectedItem;
             if (string.IsNullOrWhiteSpace(fontFamily))
                 return;
-            recognizedTextBox.Font = new Font(fontFamily, recognizedTextBox.Font.Size, recognizedTextBox.Font.Style);
+            ReplaceEditorFont(new Font(fontFamily, recognizedTextBox.Font.Size, recognizedTextBox.Font.Style));
         }
         private void FontSizeComboBox_TextChanged(object sender, EventArgs e)
         {
@@ -870,7 +721,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         {
             if (!float.IsFinite(fontSize) || fontSize <= 0)
                 throw new BusinessException(Properties.Strings.InvalidFontSize, ExceptionType.InvalidFontSize);
-            recognizedTextBox.Font = new Font(recognizedTextBox.Font.FontFamily, fontSize, recognizedTextBox.Font.Style);
+            ReplaceEditorFont(new Font(recognizedTextBox.Font.FontFamily, fontSize, recognizedTextBox.Font.Style));
             fontSizeComboBox.Text = fontSize.ToString();
         }
         #endregion
@@ -886,110 +737,51 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
 
         #endregion
 
-        private async void RecognizeButton_Click(object sender, EventArgs e)
-        {
-
-            statusLabel.Text = Properties.Strings.Processing;
-            BinaOcr binaOcr = BinaOcr.Instance();
-            ImageEntity imageEntity = GetSelectedImage();
-            PageSegmentationModeEnum pageSegmentationModeEnum = ((PageSegmentationOption)pageSegmentationComboBox.SelectedItem).Value;
-            EngineModeEnum engineModeEnum = ((OcrEngineOption)ocrEngineComboBox.SelectedItem).Value;
-            LanguageEnum languageEnum = ((OcrLanguageOption)ocrLanguageComboBox.SelectedItem).Value;
-            string result = await binaOcr.GetStringAsync((Bitmap)imageEntity.GetImage(), pageSegmentationModeEnum, languageEnum, engineModeEnum, postProcessingCheckBox.Checked);
-            SetRecognitionResult(result, imageEntity);
-            statusLabel.Text = "";
-            MessageBox.Show(Properties.Strings.ProcessingCompleted);
-
-        }
+        private async void RecognizeButton_Click(object sender, EventArgs e) => await RunRecognitionAndNotifyAsync(false);
 
         private void SetRecognitionResult(string text, ImageEntity imageEntity = null)
         {
-            if (imageEntity == null)
-            {
-                imageEntity = GetSelectedImage();
-            }
+            imageEntity ??= GetSelectedImage();
             imageEntity.SetRecognitionResult(text);
-            if (selectedImageId == imageEntity.Id)
-                recognizedTextBox.Text = text;
+            if (selectedImageId == imageEntity.Id) LoadEditorState(imageEntity);
         }
 
-        private async void RecognizeAllButton_Click(object sender, EventArgs e)
-        {
-            statusLabel.Text = Properties.Strings.Processing;
-            BinaOcr binaOcr = BinaOcr.Instance();
-            PageSegmentationModeEnum pageSegmentationModeEnum = ((PageSegmentationOption)pageSegmentationComboBox.SelectedItem).Value;
-            EngineModeEnum engineModeEnum = ((OcrEngineOption)ocrEngineComboBox.SelectedItem).Value;
-            LanguageEnum languageEnum = ((OcrLanguageOption)ocrLanguageComboBox.SelectedItem).Value;
-            foreach (var image in images.ToArray())
-            {
-                statusLabel.Text = string.Format(Properties.Strings.ProcessingImageFormat, image.Name);
-                string result = await binaOcr.GetStringAsync((Bitmap)image.GetImage(), pageSegmentationModeEnum, languageEnum, engineModeEnum, postProcessingCheckBox.Checked);
-                SetRecognitionResult(result, image);
-            }
-            statusLabel.Text = "";
-            MessageBox.Show(Properties.Strings.BatchProcessingCompleted);
-        }
+        private async void RecognizeAllButton_Click(object sender, EventArgs e) => await RunRecognitionAndNotifyAsync(true);
 
         #region Save
         private void SaveButton_Click(object sender, EventArgs e)
         {
+            EnsureNotProcessing();
+            RecordEditorState();
             ImageEntity selectedImage = GetSelectedImage();
             string filePath = SelectExportFilePath();
             if (filePath == null) return;
             statusLabel.Text = Properties.Strings.Saving;
+            string exportedBasePath;
             try
             {
-                SaveResult(Path.ChangeExtension(filePath, null), selectedImage.RecognitionResult, selectedImage.GetImage());
+                exportedBasePath = documentExportService.Export(Path.ChangeExtension(filePath, null), selectedImage.GetImage(), RichTextDocumentService.Capture(selectedImage));
             }
             finally { statusLabel.Text = ""; }
-            MessageBox.Show(Properties.Strings.SaveCompleted);
+            MessageBox.Show(Properties.Strings.SaveCompleted + Environment.NewLine + exportedBasePath);
         }
         private void SaveAllButton_Click(object sender, EventArgs e)
         {
+            EnsureNotProcessing();
             EnsureImageSelected();
+            RecordEditorState();
             string directory = SelectExportDirectory();
             if (directory == null) return;
             statusLabel.Text = Properties.Strings.Saving;
             try
             {
                 foreach (ImageEntity image in images)
-                    SaveResult(Path.Combine(directory, image.NameWithoutExtension), image.RecognitionResult, image.GetImage());
+                    documentExportService.Export(Path.Combine(directory, image.NameWithoutExtension), image.GetImage(), RichTextDocumentService.Capture(image));
             }
             finally { statusLabel.Text = ""; }
-            MessageBox.Show(Properties.Strings.SaveCompleted);
+            MessageBox.Show(Properties.Strings.SaveCompleted + Environment.NewLine + directory);
         }
-        private void SaveResult(string filePathWithoutExtension, string recognitionResult, Image image)
-        {
 
-            image.Save(filePathWithoutExtension + ".jpeg", ImageFormat.Jpeg);
-            if (recognitionResult == null || recognitionResult == "")
-            {
-                return;
-            }
-            // Create a new document.
-            using (var document = DocX.Create(filePathWithoutExtension + ".docx"))
-            {
-                document.SetDefaultFont(new Xceed.Document.NET.Font("B Nazanin"), 14d, Color.Black);
-                document.PageBackground = Color.LightGray;
-
-                // Add a title
-
-                // Insert a Paragraph into this document.
-                var paragraph = document.InsertParagraph();
-
-                // Append some text and add formatting.
-                paragraph.Append(recognitionResult)
-                .Font(new Xceed.Document.NET.Font("B Nazanin"))
-                .FontSize(14)
-                .Color(Color.Black).SpacingAfter(40).Direction = recognizedTextBox.RightToLeft == RightToLeft.Yes
-                    ? Xceed.Document.NET.Direction.RightToLeft : Xceed.Document.NET.Direction.LeftToRight;
-
-                // Insert another Paragraph into this document.
-
-                // Save this document to disk.
-                document.Save();
-            }
-        }
         private string SelectExportDirectory()
         {
             using var dialog = new FolderBrowserDialog();
@@ -997,7 +789,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         }
         private string SelectExportFilePath()
         {
-            using var dialog = new SaveFileDialog { Filter = Properties.Strings.WordFilesFilter, DefaultExt = "docx", AddExtension = true };
+            using var dialog = new SaveFileDialog { Filter = Properties.Strings.WordFilesFilter, DefaultExt = "docx", AddExtension = true, OverwritePrompt = false };
             return dialog.ShowDialog(this) == DialogResult.OK ? dialog.FileName : null;
         }
         #endregion
@@ -1032,6 +824,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             ocrEngineComboBox.SelectedItem = ocrEngineOptions.FirstOrDefault(x => x.Value == EngineModeEnum.KhanaDeepOnly);
 
             recognizedTextBox.RightToLeft = RightToLeft.Yes;
+            RecordEditorState();
         }
         private void LoadEnglishLanguage()
         {
@@ -1042,6 +835,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             ocrEngineComboBox.SelectedItem = ocrEngineOptions.FirstOrDefault(x => x.Value == EngineModeEnum.KhanaDeepOnly);
 
             recognizedTextBox.RightToLeft = RightToLeft.No;
+            RecordEditorState();
         }
         private void LoadMixedLanguage()
         {
@@ -1052,6 +846,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             ocrEngineComboBox.SelectedItem = ocrEngineOptions.FirstOrDefault(x => x.Value == EngineModeEnum.KhanaDeepOnly);
 
             recognizedTextBox.RightToLeft = RightToLeft.Yes;
+            RecordEditorState();
         }
         #endregion
     }

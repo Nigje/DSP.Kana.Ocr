@@ -33,19 +33,33 @@ Run the integration smoke checks on Windows with:
 dotnet run --project tests/SmokeTests/SmokeTests.csproj -c Release
 ```
 
-The checks exercise all 261 English/Persian resource lookups, DOCX export and reload, unsigned document assemblies, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As in normal application startup, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
+The checks exercise all 279 English/Persian resource lookups, DOCX export and reload, unsigned document assemblies, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As during normal recognition and PDF import, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
 
 ## How the application works
 
 1. **Startup:** [Program.cs](DSP.Bina.Ocr.DesktopApplication.V3/Program.cs) initializes WinForms, registers UI exception handling, creates `MainForm`, and enters the Windows message loop.
-2. **OCR initialization:** `MainForm` obtains `BinaOcr.Instance()`. The wrapper extracts the embedded native OCR libraries and trained language models, selecting native binaries for the current process architecture.
+2. **OCR initialization:** `OcrService` initializes `BinaOcr.Instance()` on the first recognition request. PDF import also initializes the wrapper before rendering. The wrapper extracts the embedded native OCR libraries and trained language models, selecting native binaries for the current process architecture.
 3. **Input:** The user imports images, pastes a clipboard image, or imports selected PDF pages. `PDFConvert` renders PDF pages to image files through the `DSP.Tools32.dll` / `DSP.Tools64.dll` Ghostscript API. `ImageEntity` holds each image and its associated application state; `ImageListView` presents the image list.
 4. **Image preparation:** The desktop uses `DSP.Khana.ImageTools` for operations such as image adjustment and deskew. Preparing an image can improve recognition before it reaches the OCR engine.
-5. **Recognition:** The form passes the selected image, OCR language, engine mode, and page segmentation mode to `BinaOcr`. The wrapper maps those options to the managed engine, which calls the native OCR library. Optional post-processing applies text cleanup rules to the recognized result.
-6. **Editing and export:** Recognized text is displayed in the rich-text editor. Users can format it and save text as DOCX through `Xceed.Words.NET` and `Xceed.Document.NET`; the application also supports saving images as JPEG.
+5. **Recognition:** The form passes the selected image and a snapshot of OCR options to `OcrService`, which serializes calls to `BinaOcr`. The wrapper maps those options to the managed engine, which calls the native OCR library. Optional post-processing applies text cleanup rules to the recognized result.
+6. **Editing and export:** Text edits, RTF formatting, and text direction are stored per image and restored when selection changes. `RichTextDocumentService` captures font family/size, bold, italic, underline, color, paragraph alignment, bullets, indentation, and direction. `DocumentExportService` writes that snapshot as DOCX and saves the image as JPEG. Existing base filenames receive ` (2)`, ` (3)`, and subsequent suffixes; exclusive file creation prevents accidental overwrites. The completion message shows the actual export name or output directory.
 7. **UI language:** The footer language selector switches resource strings and directional layout between English and Persian. It also refreshes the About Us dialog when open.
 
 Changing the **UI language** changes labels, messages, and arrangement. The separate **OCR language** option selects the recognition model: Persian, English, or mixed. The current UI selection is not saved as a persistent user preference; startup chooses from the thread's UI culture.
+
+## Recognition cancellation and resource ownership
+
+Only one recognition run can be started per form, and a shared service gate permits only one native call across forms. Import, editing, export, and image selection are disabled during recognition. The footer offers a Cancel OCR button. Cancellation stops queued work and prevents a canceled result from replacing text; the native engine cannot interrupt a page already in progress, so that page is allowed to finish before its owned snapshot is disposed. Closing the form requests cancellation and waits for active recognition before releasing resources.
+
+`ImageEntity` owns its current bitmap and a bounded undo/redo history. Evicted entries, discarded redo states, and all remaining images are disposed when no longer needed. Imported bitmaps are detached from their source files. The thumbnail cache receives a separate, small image so disposing an editable image does not invalidate its thumbnail. Adjustment previews are replaced and disposed as the slider moves and when the dialog closes. Form closure or disposal releases the image list, entities, temporary session directory, and owned editor font.
+
+For the focused deterministic regression checks, run:
+
+```powershell
+dotnet run --project tests/SmokeTests/SmokeTests.csproj -c Debug -- --refactoring-only
+```
+
+The focused checks cover image ownership, unlocked imported files, formatted export and collision preservation, per-image edited text/RTF, serialized OCR calls, cancellation, failure recovery, and closing while OCR is active. The full smoke suite also runs native OCR, PDF conversion, and live bilingual layout checks.
 
 ## Why each project is included
 
@@ -85,6 +99,13 @@ DSP.Bina.Ocr.DesktopApplication.V3
 | `Forms/MainForm.Designer.cs` and `.resx` | WinForms-generated controls, initial layout, and designer resources. These are part of the form and must accompany its behavior file. |
 | `Forms/MainForm.Localization.cs` | Creates the footer language selector, applies `Properties.Strings`, and refreshes language-dependent controls and open About Us windows. |
 | `Forms/MainForm.Layout.cs` | Applies RTL/LTR layout and alignment changes, including control arrangements and resizing. Translated text alone cannot rearrange the original Persian layout. |
+| `Forms/MainForm.Workflows.cs` | Coordinates OCR busy/cancel/close state, per-image editor persistence, adjustment preview ownership, and lifetime cleanup. |
+| `Services/ImageImportService.cs` | Loads detached bitmaps, renders PDF pages into a private session directory, and cleans up temporary files. |
+| `Services/ImageEditService.cs` | Performs image operations and creates previews; temporary images are disposed after committing or canceling an edit. |
+| `Services/OcrService.cs` | Takes an owned bitmap snapshot, serializes native OCR calls, and implements cooperative cancellation. Its interface allows deterministic workflow tests without native OCR. |
+| `Services/RichTextDocumentService.cs` and `Model/DocumentSnapshot.cs` | Convert saved RTF into paragraph/run formatting suitable for DOCX export without modifying the visible editor. |
+| `Services/DocumentExportService.cs` | Produces formatted DOCX/JPEG pairs, chooses collision-free names, and creates new files exclusively. |
+| `Services/ApplicationErrorService.cs` | Maps validation and typed filesystem errors to localized messages and records diagnostic details in the local error log. |
 | `Forms/AboutUsForm.*`, `Forms/PdfPageSelectionForm.*`, and `Forms/BaseDialogForm.*` | Supporting dialogs and shared form presentation used by the desktop. Their designer and resource files belong with the C# files. |
 | `Controls/ScrollablePictureBox.*` and `Forms/TrackBarDialog.*` | Supporting WinForms controls/dialogs for image presentation and adjustment. |
 | `Model/` | Image state, selection-related values, undo/history support, and application-specific exceptions. Keeps form operations and error handling consistent. |
@@ -94,7 +115,7 @@ DSP.Bina.Ocr.DesktopApplication.V3
 | `Properties/Resources.*` and `Resources/` | Embedded UI images and icons referenced by forms. Resource file references must remain valid. |
 | `Properties/Settings.*`, `Properties/AssemblyInfo.cs`, and `App.config` | Existing settings infrastructure, assembly metadata, and application configuration. |
 | `DSP.Khana.Ocr.Wapper/Properties/Data.zip` | Embedded OCR data. The wrapper's archive supplies trained models, including the English, Persian, and mixed-language models used by the UI. Without model data, the engine cannot recognize text. The desktop references the wrapper instead of embedding duplicate archives or native libraries. |
-| Native DLLs embedded from the wrapper's `Properties/` folder | Architecture-specific OCR, Leptonica, and PDF helper binaries. The wrapper extracts them at startup, so they also travel inside its DLL when publishing. They are source dependencies, not disposable build output. |
+| Native DLLs embedded from the wrapper's `Properties/` folder | Architecture-specific OCR, Leptonica, and PDF helper binaries. The wrapper extracts them when OCR or PDF import initializes it, so they also travel inside its DLL when publishing. They are source dependencies, not disposable build output. |
 | `Xceed.Document.NET/Resources/*.xml.gz` | Embedded defaults for constructing Word document styles and numbering. |
 | Document-library signing | Both document libraries build unsigned in this standalone solution. Their private signing keys stay local, are ignored by Git, and are not needed to build or export DOCX. The friend-assembly declaration allows the unsigned `Xceed.Words.NET` library to access the document library's internals. |
 | Third-party license notices | Attribution and license terms for bundled third-party code. Removing desktop activation does not remove these notices. |

@@ -13,6 +13,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing) ReleaseDesktopResources();
             if (disposing && (components != null))
             {
                 components.Dispose();

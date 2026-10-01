@@ -321,4 +321,10 @@ Bina is an image-to-text application that uses optical character recognition (OC
 </data>
   <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>Image or PDF files (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>
   <data name="WordFilesFilter" xml:space="preserve"><value>Microsoft Word files (*.docx)|*.docx</value></data>
+  <data name="CancelProcessing" xml:space="preserve"><value>Cancel OCR</value></data>
+  <data name="CancelingProcessing" xml:space="preserve"><value>Canceling after the current page…</value></data>
+  <data name="ProcessingCanceled" xml:space="preserve"><value>Recognition was canceled.</value></data>
+  <data name="ProcessingAlreadyRunning" xml:space="preserve"><value>Wait for the current recognition task to finish or cancel it.</value></data>
+  <data name="AccessDenied" xml:space="preserve"><value>Access was denied. Choose a location you can write to.</value></data>
+  <data name="FileOperationFailed" xml:space="preserve"><value>The file operation failed. Check the path and available disk space.</value></data>
 </root>

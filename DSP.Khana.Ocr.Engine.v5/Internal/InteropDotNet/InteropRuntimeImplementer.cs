@@ -1,4 +1,4 @@
-﻿//  Copyright (c) 2014 Andrey Akinshin
+//  Copyright (c) 2014 Andrey Akinshin
 //  Project URL: https://github.com/AndreyAkinshin/InteropDotNet
 //  Distributed under the MIT License: http://opensource.org/licenses/MIT
 using System;
@@ -22,7 +22,7 @@ namespace InteropDotNet
 
             var assemblyName = GetAssemblyName(interfaceType);
 #if NETFULL
-            var assemblyBuilder = Thread.GetDomain().DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
 #elif NETSTANDARD
              var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
 #endif

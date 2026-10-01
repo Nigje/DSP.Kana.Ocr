@@ -1,16 +1,7 @@
-﻿using Bina.Ocr.Wapper;
-using DSP.Bina.Ocr.DesktopApplication.V3.Forms;
 using DSP.Bina.Ocr.DesktopApplication.V3.Model;
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
+using System.IO;
 using System.Windows.Forms;
 
 namespace DSP.Bina.Ocr.DesktopApplication.V3
@@ -30,9 +21,6 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             Application.ThreadException += new ThreadExceptionEventHandler(MyCommonExceptionHandlingMethod);
 
             newForm = new NewForm();
-            AppCenter.Start("1065278b-fb89-49f4-9cf1-5f84812ff8a6",
-                   typeof(Analytics), typeof(Crashes));
-
             Application.Run(newForm);
             //Application.Run(new AboutUs());
 
@@ -84,20 +72,16 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         {
             try
             {
-                string appName = "";
-                string userName = "";
-                try
-                {
-                    appName = BinaOcr.GetApplicationName();
-                    userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-                }
-                catch
-                { }
-                Crashes.TrackError(exception, new Dictionary<string, string> { { "AppName", appName }, { "UserName", userName } });
+                string directory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "DSP.Khana.Ocr", "Logs");
+                Directory.CreateDirectory(directory);
+                File.AppendAllText(Path.Combine(directory, "errors.log"),
+                    DateTimeOffset.Now.ToString("O") + Environment.NewLine +
+                    exception + Environment.NewLine + Environment.NewLine);
             }
-            catch
-            { }
-
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
         }
     }
 }

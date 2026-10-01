@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -79,6 +79,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.ExtentionMudole
         /// <summary>
         /// Segmented regions.
         /// </summary>
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public Dictionary<Color, List<Rectangle>> SegmentedRegions
         { get; set; }
 

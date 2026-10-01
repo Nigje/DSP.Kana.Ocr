@@ -45,5 +45,8 @@
 id_rsa
 id_ed25519
 
-# Keep packages/, native DLLs, model ZIPs, and resources.
-# They are required source dependencies in this standalone legacy solution.
+# Modern NuGet restores use the user cache; do not commit a legacy package cache.
+packages/
+
+# Keep native DLLs, embedded model ZIPs, UI resources, and package lock files.
+# They are source dependencies; private signing keys remain excluded.

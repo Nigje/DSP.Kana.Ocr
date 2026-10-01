@@ -1,4 +1,4 @@
-﻿// ImageListView - A listview control for image files
+// ImageListView - A listview control for image files
 // Copyright (C) 2009 Ozgur Ozcitak
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,6 +209,7 @@ namespace Manina.Windows.Forms
         /// Gets or sets the placeholder image.
         /// </summary>
         [Category("Appearance"), Description("Gets or sets the placeholder image.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Image DefaultImage { get { return mDefaultImage; } set { mDefaultImage = value; Refresh(); } }
         /// <summary>
         /// Gets the rectangle that represents the display area of the control.
@@ -219,6 +220,7 @@ namespace Manina.Windows.Forms
         /// Gets or sets the error image.
         /// </summary>
         [Category("Appearance"), Description("Gets or sets the error image.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Image ErrorImage { get { return mErrorImage; } set { mErrorImage = value; Refresh(); } }
         /// <summary>
         /// Gets or sets the font of the column headers.
@@ -393,6 +395,7 @@ namespace Manina.Windows.Forms
         /// <summary>
         /// Gets or sets the scroll offset.
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal Point ViewOffset { get { return mViewOffset; } set { mViewOffset = value; } }
         /// <summary>
         /// Gets the scroll orientation.

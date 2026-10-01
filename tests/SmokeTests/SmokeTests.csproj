@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>DSP.Khana.Ocr.SmokeTests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <ProjectReference Include="..\..\DSP.Bina.Ocr.DesktopApplication.V3\DSP.Bina.Ocr.DesktopApplication.V3.csproj" />
+  </ItemGroup>
+</Project>

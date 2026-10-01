@@ -1,91 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup>
+    <RootNamespace>DSP.Khana.Ocr.Engine.v5</RootNamespace>
+    <AssemblyName>DSP.Khana.Ocr.Engine.v5</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>DSP.Khana.Ocr.Engine.v5</PackageId>
-    <Authors>DSP.Khana</Authors>
-    <Company>DSP.Khana</Company>
-    <Product>OCR</Product>
-    <Description></Description>
-    <Copyright>Copyright 2012-2019 DSP.Khana</Copyright>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <PackageProjectUrl>http://KhanaSoft.ir</PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
-    <PackageTags>DSP.Khana.Ocr.Engine.v5</PackageTags>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Version>5.0.0</Version>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <NeutralLanguage></NeutralLanguage>
-    <PackageLicenseUrl></PackageLicenseUrl>
+    <DefineConstants>$(DefineConstants);NETFULL</DefineConstants>
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>true</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>true</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
-  
-  <!-- .NET 2.0 references, compilation flags and build options -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net20'">
-	  <DefineConstants>NET20;NETFULL</DefineConstants>
-  </PropertyGroup>
-  
-  <!-- .NET 4.0 references, compilation flags and build options -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40'">
-	  <DefineConstants>NET40;NETFULL</DefineConstants>
-  </PropertyGroup>
-  
-  <!-- .NET 4.5 references, compilation flags and build options -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
-	  <DefineConstants>NET45;NETFULL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- .NET 4.7 references, compilation flags and build options -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net47'">
-    <DefineConstants>NET47;NETFULL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- .NET Standard 2.0 references, compilation flags and build options -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-	  <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DesktopWithoutLicensing)' == 'true'">
-    <DefineConstants>$(DefineConstants);DESKTOP_WITHOUT_LICENSING</DefineConstants>
-    <OutputPath>bin\$(Configuration)\DesktopWithoutLicensing\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\DesktopWithoutLicensing\$(TargetFramework)\</IntermediateOutputPath>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Reflection.Emit">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
-
-    <CSFile Include="*.cs" Exclude="obj\**\.cs" />
-
-    <Folder Include="x86\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="x64\*.dll" Pack="true" PackageCopyToOutput="true" PackagePath="x64">
+    <Compile Include="**\*.cs" Exclude="bin\**;obj\**" />
+    <Content Include="x86\*.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="x86\*.dll" Pack="true" PackageCopyToOutput="true" PackagePath="x86">
+    <Content Include="x64\*.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tesseract.targets" Pack="true" PackageCopyToOutput="true" PackagePath="build/">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Update="x64\BinaOcrEngineV5.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="x64\liblept1780.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="x86\BinaOcrEngineV5.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="x86\liblept1780.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
   </ItemGroup>
 </Project>

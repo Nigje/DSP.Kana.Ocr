@@ -1,4 +1,4 @@
-﻿#region Using directives
+#region Using directives
 
 using System;
 using System.Reflection;
@@ -17,3 +17,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("DSP.Khana.Ocr.Net45Tests")]
 [assembly: InternalsVisibleTo("DSP.Khana.Ocr.NetCore2Tests")]
 
+
+[assembly: InternalsVisibleTo("DSP.Khana.Ocr.SmokeTests")]

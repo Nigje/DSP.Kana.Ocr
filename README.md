@@ -4,6 +4,8 @@ A Windows Forms desktop application that converts images and PDF pages into edit
 
 This solution contains the desktop application and its seven supporting projects. Existing namespaces and project names are preserved, including the original `Wapper` spelling. Desktop builds use the license-free profile; activation and licensing projects are not required.
 
+See [CHANGELOG.md](CHANGELOG.md) for the accumulated changes and notes for the next release.
+
 ## Build and run
 
 ### Prerequisites

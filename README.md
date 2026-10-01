@@ -12,7 +12,7 @@ This solution contains the desktop application and its seven supporting projects
 - .NET Framework **4.8** and **4.7** targeting packs. The desktop and legacy libraries target 4.8; the managed OCR engine targets 4.7.
 - A .NET SDK recognized by Visual Studio's MSBuild for the SDK-style OCR engine project.
 
-Open [DSP.Khana.Ocr.New.sln](DSP.Khana.Ocr.New.sln), set **DSP.Bina.Ocr.DesktopApplication.V3** as the startup project, restore NuGet packages, and build **Debug | Any CPU** or **Release | Any CPU**. Press F5 to run.
+Open [DSP.Khana.Ocr.sln](DSP.Khana.Ocr.sln), set **DSP.Bina.Ocr.DesktopApplication.V3** as the startup project, restore NuGet packages, and build **Debug | Any CPU** or **Release | Any CPU**. Press F5 to run.
 
 The required legacy package folders are already included under `packages/`. Restore is still needed to generate the SDK-style engine's `obj/project.assets.json` after a clean checkout.
 
@@ -21,8 +21,8 @@ From a **Developer PowerShell for Visual Studio**, run:
 ```powershell
 Set-Location D:\_Repositories\DSP.Khana.Ocr.New
 msbuild .\DSP.Khana.Ocr.Engine.v5\DSP.Khana.Ocr.Engine.v5.csproj /t:Restore
-msbuild .\DSP.Khana.Ocr.New.sln /p:Configuration=Debug /m
-msbuild .\DSP.Khana.Ocr.New.sln /p:Configuration=Release /m
+msbuild .\DSP.Khana.Ocr.sln /p:Configuration=Debug /m
+msbuild .\DSP.Khana.Ocr.sln /p:Configuration=Release /m
 & .\DSP.Bina.Ocr.DesktopApplication.V3\bin\Debug\DSP.Bina.Ocr.DesktopApplication.V3.exe
 ```
 

@@ -33,12 +33,12 @@ Run the integration smoke checks on Windows with:
 dotnet run --project tests/SmokeTests/SmokeTests.csproj -c Release
 ```
 
-The checks exercise all 255 English/Persian resource lookups, DOCX export and reload, unsigned document assemblies, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production and legacy form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As in normal application startup, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
+The checks exercise all 261 English/Persian resource lookups, DOCX export and reload, unsigned document assemblies, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As in normal application startup, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
 
 ## How the application works
 
-1. **Startup:** [Program.cs](DSP.Bina.Ocr.DesktopApplication.V3/Program.cs) initializes WinForms, registers UI exception handling, creates `NewForm`, and enters the Windows message loop.
-2. **OCR initialization:** `NewForm` obtains `BinaOcr.Instance()`. The wrapper extracts the embedded native OCR libraries and trained language models, selecting native binaries for the current process architecture.
+1. **Startup:** [Program.cs](DSP.Bina.Ocr.DesktopApplication.V3/Program.cs) initializes WinForms, registers UI exception handling, creates `MainForm`, and enters the Windows message loop.
+2. **OCR initialization:** `MainForm` obtains `BinaOcr.Instance()`. The wrapper extracts the embedded native OCR libraries and trained language models, selecting native binaries for the current process architecture.
 3. **Input:** The user imports images, pastes a clipboard image, or imports selected PDF pages. `PDFConvert` renders PDF pages to image files through the `DSP.Tools32.dll` / `DSP.Tools64.dll` Ghostscript API. `ImageEntity` holds each image and its associated application state; `ImageListView` presents the image list.
 4. **Image preparation:** The desktop uses `DSP.Khana.ImageTools` for operations such as image adjustment and deskew. Preparing an image can improve recognition before it reaches the OCR engine.
 5. **Recognition:** The form passes the selected image, OCR language, engine mode, and page segmentation mode to `BinaOcr`. The wrapper maps those options to the managed engine, which calls the native OCR library. Optional post-processing applies text cleanup rules to the recognized result.
@@ -81,24 +81,23 @@ DSP.Bina.Ocr.DesktopApplication.V3
 | [Directory.Build.props](Directory.Build.props) | Shared .NET 10 target and build settings, platform metadata, preserved assembly attributes, and the `DESKTOP_WITHOUT_LICENSING` constant. Projects built directly also exclude guarded licensing code. |
 | [global.json](global.json) | Keeps CLI builds on the .NET 10 SDK rather than accidentally selecting an older SDK. |
 | `tests/SmokeTests/` | Reproducible migration integration checks using the actual assemblies, native libraries, models, and forms. |
-| `Forms/NewForm.cs` | Main form behavior: image import, editing, recognition, text formatting, and export. |
-| `Forms/NewForm.Designer.cs` and `.resx` | WinForms-generated controls, initial layout, and designer resources. These are part of the form and must accompany its behavior file. |
-| `Forms/NewForm.Localization.cs` | Creates the footer language selector, applies `Properties.Strings`, and refreshes language-dependent controls and open About Us windows. |
-| `Forms/NewForm.Layout.cs` | Applies RTL/LTR layout and alignment changes, including control arrangements and resizing. Translated text alone cannot rearrange the original Persian layout. |
-| `Forms/AboutUs.*`, `Forms/SelectPagesForm.*`, and `Forms/TemplateForm.*` | Supporting dialogs and shared form presentation used by the desktop. Their designer and resource files belong with the C# files. |
-| `ExtentionMudole/ScrollablePictureBox.*` and `TrackbarDialog.*` | Supporting WinForms controls/dialogs for image presentation and adjustment. |
+| `Forms/MainForm.cs` | Main form behavior: image import, editing, recognition, text formatting, and export. |
+| `Forms/MainForm.Designer.cs` and `.resx` | WinForms-generated controls, initial layout, and designer resources. These are part of the form and must accompany its behavior file. |
+| `Forms/MainForm.Localization.cs` | Creates the footer language selector, applies `Properties.Strings`, and refreshes language-dependent controls and open About Us windows. |
+| `Forms/MainForm.Layout.cs` | Applies RTL/LTR layout and alignment changes, including control arrangements and resizing. Translated text alone cannot rearrange the original Persian layout. |
+| `Forms/AboutUsForm.*`, `Forms/PdfPageSelectionForm.*`, and `Forms/BaseDialogForm.*` | Supporting dialogs and shared form presentation used by the desktop. Their designer and resource files belong with the C# files. |
+| `Controls/ScrollablePictureBox.*` and `Forms/TrackBarDialog.*` | Supporting WinForms controls/dialogs for image presentation and adjustment. |
 | `Model/` | Image state, selection-related values, undo/history support, and application-specific exceptions. Keeps form operations and error handling consistent. |
 | `Properties/Strings.resx` | Neutral English strings and fallback translations. |
 | `Properties/Strings.fa-IR.resx` | Persian translations using the same keys as the neutral resource file. Built into a `fa-IR` satellite assembly. |
 | `Properties/Strings.Designer.cs` | Strongly typed `Properties.Strings` accessors used by application code. Regenerate it when resource keys change. |
 | `Properties/Resources.*` and `Resources/` | Embedded UI images and icons referenced by forms. Resource file references must remain valid. |
-| `Properties/Settings.*`, `Properties/AssemblyInfo.cs`, and `App.config` | Existing settings infrastructure, assembly metadata, and .NET Framework runtime configuration. |
-| `Properties/Data.zip` | Embedded OCR data. The wrapper's archive supplies trained models, including the English, Persian, and mixed-language models used by the UI. Without model data, the engine cannot recognize text. |
+| `Properties/Settings.*`, `Properties/AssemblyInfo.cs`, and `App.config` | Existing settings infrastructure, assembly metadata, and application configuration. |
+| `DSP.Khana.Ocr.Wapper/Properties/Data.zip` | Embedded OCR data. The wrapper's archive supplies trained models, including the English, Persian, and mixed-language models used by the UI. Without model data, the engine cannot recognize text. The desktop references the wrapper instead of embedding duplicate archives or native libraries. |
 | Native DLLs embedded from the wrapper's `Properties/` folder | Architecture-specific OCR, Leptonica, and PDF helper binaries. The wrapper extracts them at startup, so they also travel inside its DLL when publishing. They are source dependencies, not disposable build output. |
 | `Xceed.Document.NET/Resources/*.xml.gz` | Embedded defaults for constructing Word document styles and numbering. |
 | Document-library signing | Both document libraries build unsigned in this standalone solution. Their private signing keys stay local, are ignored by Git, and are not needed to build or export DOCX. The friend-assembly declaration allows the unsigned `Xceed.Words.NET` library to access the document library's internals. |
 | Third-party license notices | Attribution and license terms for bundled third-party code. Removing desktop activation does not remove these notices. |
-| `Form1.*` and `MainFormTemp.*` | Legacy forms still listed in the desktop project. They are not the startup form, but were retained to preserve the existing compilable project. Removing them is a separate cleanup task rather than a requirement for OCR. |
 
 Paths in the source-file table are relative to the desktop project unless they explicitly name another project.
 
@@ -125,7 +124,7 @@ DSP.Bina.Ocr.DesktopApplication.V3/bin/Release/net10.0-windows/
 
 Run or distribute the **complete desktop output folder**, including its managed dependencies, `.deps.json`, `.runtimeconfig.json`, `fa-IR` satellite resource folder, and native subfolders. Copying only the `.exe` omits required files. A framework-dependent build needs the .NET 10 Desktop Runtime on the target machine.
 
-The wrapper extracts OCR libraries and language models under `%APPDATA%\.temporalapp`, using version-specific `.app_<version>` and `.model_<version>` directories. It also writes the appropriate `DSP.Tools32.dll` or `DSP.Tools64.dll` beside the executable. The application therefore needs write access to its executable directory as well as the user's application-data directory under the current implementation. PDF conversion also creates temporary rendered page images.
+The wrapper extracts OCR libraries and language models under `%APPDATA%\.temporalapp`, using version-specific `.app_<version>` and `.model_<version>` directories. It also writes the appropriate `DSP.Tools32.dll` or `DSP.Tools64.dll` beside the executable. The application therefore needs write access to its executable directory as well as the user's application-data directory under the current implementation. PDF conversion creates rendered page images in a unique session directory under `%TEMP%\DSP.Khana.Ocr`.
 
 Libraries build into `bin/<Configuration>/<TargetFramework>/`; project references copy their required output into the desktop folder.
 
@@ -139,7 +138,7 @@ Publish the complete folder. Keep trimming and Native AOT disabled: the applicat
 
 ## Working on localization
 
-Add matching keys to `Strings.resx` and `Strings.fa-IR.resx`, regenerate `Strings.Designer.cs`, and bind UI text through `Properties.Strings`. Update `NewForm.Localization.cs` for new controls and `NewForm.Layout.cs` when a control needs direction-specific placement or alignment. Keep the footer selector on the left and refresh both languages when checking dialogs and resize behavior.
+Add matching keys to `Strings.resx` and `Strings.fa-IR.resx`, regenerate `Strings.Designer.cs`, and bind UI text through `Properties.Strings`. Update `MainForm.Localization.cs` for new controls and `MainForm.Layout.cs` when a control needs direction-specific placement or alignment. Keep the footer selector on the left and refresh both languages when checking dialogs and resize behavior.
 
 ## Version control
 

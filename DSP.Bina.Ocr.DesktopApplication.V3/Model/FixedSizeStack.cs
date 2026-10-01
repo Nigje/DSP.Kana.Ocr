@@ -1,35 +1,30 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DSP.Bina.Ocr.DesktopApplication.V3.Model
 {
     public class FixedSizeStack<T> : LinkedList<T>
     {
-        private int limit;
+        private readonly int capacity;
 
-        public FixedSizeStack(int limit)
-            : base()
+        public FixedSizeStack(int capacity)
         {
-            this.limit = limit;
+            if (capacity <= 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+            this.capacity = capacity;
         }
 
         public T Pop()
         {
-            T obj = base.First.Value;
-            base.RemoveFirst();
-            return obj;
+            if (Count == 0) throw new InvalidOperationException("The stack is empty.");
+            T item = First.Value;
+            RemoveFirst();
+            return item;
         }
 
-        public void Push(T obj)
+        public void Push(T item)
         {
-            base.AddFirst(obj);
-            if (this.Count > limit)
-            {
-                base.RemoveLast();
-            }
+            AddFirst(item);
+            if (Count > capacity) RemoveLast();
         }
     }
 }

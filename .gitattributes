@@ -1,0 +1,2 @@
+# Preserve resource values that contain explicit carriage returns.
+*.resx text eol=lf

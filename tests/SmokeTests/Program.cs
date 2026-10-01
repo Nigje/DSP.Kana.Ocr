@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using Bina.Ocr.Wapper;
 using DSP.Bina.Ocr.DesktopApplication.V3;
 using DSP.Bina.Ocr.DesktopApplication.V3.Forms;
+using DSP.Bina.Ocr.DesktopApplication.V3.Model;
 using DSP.Khana.ImageTools.Models;
 using DSP.Khana.Ocr;
 using Xceed.Words.NET;
@@ -19,7 +20,7 @@ using Xceed.Words.NET;
 internal static class SmokeTests
 {
     private static readonly string Work = Path.Combine(Path.GetTempPath(), "DSP.Khana.Ocr.SmokeTests", Guid.NewGuid().ToString("N"));
-    private static readonly BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
+    private static readonly BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
     [STAThread]
     private static int Main()
@@ -33,6 +34,7 @@ internal static class SmokeTests
             CheckResources();
             CheckDocx();
             CheckOcr();
+            CheckImageHistory();
             CheckForms();
             CheckWrapper();
             CheckPdf();
@@ -63,7 +65,7 @@ internal static class SmokeTests
 
     private static void CheckResources()
     {
-        var assembly = typeof(NewForm).Assembly;
+        var assembly = typeof(MainForm).Assembly;
         var type = assembly.GetType("DSP.Bina.Ocr.DesktopApplication.V3.Properties.Strings", true);
         var flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         var manager = (System.Resources.ResourceManager)type.GetProperty("ResourceManager", flags).GetValue(null);
@@ -148,11 +150,36 @@ internal static class SmokeTests
 
     private static T Field<T>(object owner, string name) => (T)owner.GetType().GetField(name, PrivateInstance).GetValue(owner);
 
+    private static void CheckImageHistory()
+    {
+        using var original = new Bitmap(2, 2);
+        using var firstEdit = new Bitmap(2, 2);
+        using var secondEdit = new Bitmap(2, 2);
+        original.SetPixel(0, 0, Color.Red);
+        firstEdit.SetPixel(0, 0, Color.Blue);
+        secondEdit.SetPixel(0, 0, Color.Green);
+        var image = new ImageEntity(original) { Name = "image" };
+        Assert(image.NameWithoutExtension == "image", "Extensionless image name.");
+        image.Name = "scan.page.png";
+        Assert(image.NameWithoutExtension == "scan.page", "Only the final extension is removed.");
+        image.SetImage(firstEdit);
+        Assert(((Bitmap)image.Undo()).GetPixel(0, 0).ToArgb() == Color.Red.ToArgb(), "Undo restores the original image.");
+        Assert(((Bitmap)image.Redo()).GetPixel(0, 0).ToArgb() == Color.Blue.ToArgb(), "Redo restores the edit.");
+        image.Undo();
+        image.SetImage(secondEdit);
+        Assert(((Bitmap)image.Redo()).GetPixel(0, 0).ToArgb() == Color.Green.ToArgb(), "A new edit discards stale redo history.");
+        image.GetImage().Dispose();
+        var history = new FixedSizeStack<int>(2);
+        history.Push(1); history.Push(2); history.Push(3);
+        Assert(history.Count == 2 && history.Pop() == 3 && history.Pop() == 2, "History capacity discards the oldest entry.");
+        Console.WriteLine("Image history: undo, redo invalidation, bounded history, and filename handling passed.");
+    }
+
     private static void CheckForms()
     {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en");
-        using (var main = new NewForm())
-        using (var about = new AboutUs())
+        using (var main = new MainForm())
+        using (var about = new AboutUsForm())
         {
             main.ShowInTaskbar = false;
             main.Opacity = 0;
@@ -160,8 +187,20 @@ internal static class SmokeTests
             about.ShowInTaskbar = false;
             about.Opacity = 0;
             about.Show(main);
-            var selector = Field<ComboBox>(main, "cb_uiLanguage");
-            var editor = Field<RichTextBox>(about, "rtb_AboutUs");
+            var imageList = Field<Manina.Windows.Forms.ImageListView>(main, "imageListView");
+            var imageListPanel = Field<TableLayoutPanel>(main, "imageListLayoutPanel");
+            Assert(imageList != null && imageList.Parent == imageListPanel, "Startup creates and mounts the image list.");
+            Assert(imageListPanel.GetPositionFromControl(imageList) == new TableLayoutPanelCellPosition(0, 1), "Image list occupies the thumbnail row.");
+            Assert(imageList.ThumbnailSize == new Size(150, 150), "Image list thumbnail configuration.");
+            using var sampleImage = new Bitmap(300, 100);
+            var sample = new ImageEntity(sampleImage) { Name = "startup-test.png" };
+            typeof(MainForm).GetMethod("AddImage", PrivateInstance).Invoke(main, new object[] { sample });
+            Assert(imageList.Items.Count == 1, "Image import reaches the initialized image list.");
+            imageList.Items[0].Selected = true;
+            Application.DoEvents();
+            Assert(Field<Guid>(main, "selectedImageId") == sample.Id, "Image list selection handler is wired.");
+            var selector = Field<ComboBox>(main, "uiLanguageComboBox");
+            var editor = Field<RichTextBox>(about, "descriptionTextBox");
             foreach (int selection in new[] { 0, 1, 0, 1 })
             {
                 selector.SelectedIndex = selection;
@@ -179,14 +218,25 @@ internal static class SmokeTests
                     Assert(selector.Width > 0 && selector.Height > 0, "Language selector layout after resize.");
                 }
             }
+            var setFontSize = typeof(MainForm).GetMethod("SetFontSize", PrivateInstance);
+            foreach (float invalidSize in new[] { 0f, -1f, float.NaN, float.PositiveInfinity })
+            {
+                bool rejected = false;
+                try { setFontSize.Invoke(main, new object[] { invalidSize }); }
+                catch (TargetInvocationException error)
+                {
+                    rejected = error.InnerException is BusinessException validation && validation.ExceptionType == ExceptionType.InvalidFontSize;
+                }
+                Assert(rejected, "Invalid font size produces the localized validation error.");
+            }
+            setFontSize.Invoke(main, new object[] { 16f });
+            Assert(Field<RichTextBox>(main, "recognizedTextBox").Font.Size == 16f, "Valid font size is applied.");
             about.Close();
             main.Close();
         }
-        using (var legacy = new Form1()) { legacy.CreateControl(); }
-        using (var legacy = new MainFormTemp()) { legacy.CreateControl(); }
-        using (var pages = new SelectPagesForm("sample.pdf")) { pages.CreateControl(); }
-        using (var adjustment = new TrackbarDialog()) { adjustment.CreateControl(); }
-        Console.WriteLine("Forms: production and legacy forms, resources, live About Us translation, RTL/LTR, and resizing passed.");
+        using (var pages = new PdfPageSelectionForm("sample.pdf")) { pages.CreateControl(); }
+        using (var adjustment = new TrackBarDialog()) { adjustment.CreateControl(); }
+        Console.WriteLine("Forms: production forms, resources, live About Us translation, RTL/LTR, and resizing passed.");
     }
 
     private static void CheckWrapper()

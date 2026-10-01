@@ -8,7 +8,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
 {
     static class Program
     {
-        static NewForm newForm = null;
+        static MainForm mainForm = null;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -18,19 +18,17 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.ThreadException += new ThreadExceptionEventHandler(MyCommonExceptionHandlingMethod);
+            Application.ThreadException += new ThreadExceptionEventHandler(HandleUiException);
 
-            newForm = new NewForm();
-            Application.Run(newForm);
-            //Application.Run(new AboutUs());
+            mainForm = new MainForm();
+            Application.Run(mainForm);
 
         }
-        private static void MyCommonExceptionHandlingMethod(object sender, ThreadExceptionEventArgs threadExceptionEventArgs)
+        private static void HandleUiException(object sender, ThreadExceptionEventArgs threadExceptionEventArgs)
         {
-            newForm.Cursor = Cursors.Default;
+            mainForm.Cursor = Cursors.Default;
             Exception exception = threadExceptionEventArgs.Exception;
-            newForm.l_processingText.Text = "";
-            //newForm.rt_main.Text = exception.Message;
+            mainForm.statusLabel.Text = "";
             if (exception.GetType() == typeof(BusinessException))
             {
                 if (((BusinessException)exception).ExceptionType == ExceptionType.SelectedImage)
@@ -52,7 +50,6 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             }
             else if (exception.GetType() == typeof(FormatException))
             {
-                //if(exception.Message.Contains("The input is not a valid Base-64 string as it"))
                 MessageBox.Show(Properties.Strings.InvalidInputFormat);
             }
             else if (exception.Message.Contains("The process cannot access the file"))
@@ -63,12 +60,10 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             {
                 MessageBox.Show(Properties.Strings.UnexpectedErrorContactSupport);
             }
-            //var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            //string version1 = System.Windows.Forms.Application.ProductVersion;
-            LogCrashes(exception);
+            LogException(exception);
 
         }
-        private static void LogCrashes(Exception exception)
+        private static void LogException(Exception exception)
         {
             try
             {

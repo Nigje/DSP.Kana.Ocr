@@ -1,80 +1,68 @@
-﻿using DSP.Khana.ImageTools;
 using DSP.Khana.ImageTools.Models;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace DSP.Bina.Ocr.DesktopApplication.V3.Model
 {
     public class ImageEntity
     {
+        private Image currentImage;
+        private readonly FixedSizeStack<Image> undoHistory = new FixedSizeStack<Image>(20);
+        private readonly FixedSizeStack<Image> redoHistory = new FixedSizeStack<Image>(20);
+
         public ImageEntity(Bitmap bitmap)
         {
-            Bitmap = bitmap;
-            LastStateImage = bitmap;
+            currentImage = bitmap ?? throw new ArgumentNullException(nameof(bitmap));
             Id = Guid.NewGuid();
         }
+
         public Guid Id { get; set; }
         public string RecognitionResult { get; set; }
         public string Name { get; set; }
-        public string NameWithoutExtention { get => Name.Substring(0, Name.LastIndexOf(".")); }
-        private Bitmap Bitmap { get; set; }
-        private Image LastStateImage { get; set; }
-        public string FileFullName { get; set; }
+        public string NameWithoutExtension => Path.GetFileNameWithoutExtension(Name);
+        public string FilePath { get; set; }
         public FileType FileType { get; set; }
-        FixedSizeStack<Image> LastStack = new FixedSizeStack<Image>(20);
-        FixedSizeStack<Image> NextStack = new FixedSizeStack<Image>(20);
-        public Image GetImage()
-        {
-            if (LastStateImage == null)
-                return Bitmap;
-            return LastStateImage;
-        }
-        public Image GetClonedImage()
-        {
-            return ImageHelper.CloneImage((Bitmap)GetImage());
-        }
+
+        public Image GetImage() => currentImage;
+        public Image GetClonedImage() => ImageHelper.CloneImage((Bitmap)currentImage);
+
         public string SetRecognitionResult(string text)
         {
             RecognitionResult = text;
-            return RecognitionResult;
+            return text;
         }
+
         public void SetImage(Image image)
         {
-            Image newimage=ImageHelper.CloneImage((Bitmap)image);
+            ArgumentNullException.ThrowIfNull(image);
+            Image editedImage = ImageHelper.CloneImage((Bitmap)image);
+            undoHistory.Push(currentImage);
+            currentImage = editedImage;
+            foreach (Image redoImage in redoHistory) redoImage.Dispose();
+            redoHistory.Clear();
+        }
 
-            LastStack.Push((Image)ImageHelper.CloneImage((Bitmap)LastStateImage));
-            
-            LastStateImage = newimage;
-        }
-        public Image Backward()
+        public Image Undo()
         {
-            
-            if (LastStack.Count == 0)
-            {
-                return LastStateImage;
-            }
-            NextStack.Push(LastStateImage);
-            LastStateImage = LastStack.Pop();
-            return LastStateImage;
+            if (undoHistory.Count == 0) return currentImage;
+            redoHistory.Push(currentImage);
+            currentImage = undoHistory.Pop();
+            return currentImage;
         }
-        public Image ImageForward()
+
+        public Image Redo()
         {
-            if (NextStack.Count == 0)
-            {
-                return LastStateImage;
-            }
-            LastStack.Push(LastStateImage);
-            LastStateImage = NextStack.Pop();
-            return LastStateImage;
+            if (redoHistory.Count == 0) return currentImage;
+            undoHistory.Push(currentImage);
+            currentImage = redoHistory.Pop();
+            return currentImage;
         }
     }
+
     public enum FileType
     {
-        Image=1,
-        PDF=2
+        Image = 1,
+        Pdf = 2
     }
 }

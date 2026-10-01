@@ -319,4 +319,6 @@
 نرم‌افزار تبدیل عکس به متن بینا یک سامانه نرم‌افزاری است که می‌تواند با پردازش تصویر (OCR)، متن داخل یک عکس یا فایل PDF را استخراج کرده و در قالب فایل متنی تحویل دهد. بینا جایگزین مناسبی برای تایپ اطلاعات چاپ شده است که قادر است با سرعت و دقت بالا اسناد را به متن الکترونیکی تبدیل کند.
 </value>
 </data>
+  <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>فایل‌های تصویر یا PDF (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>
+  <data name="WordFilesFilter" xml:space="preserve"><value>فایل‌های Microsoft Word (*.docx)|*.docx</value></data>
 </root>

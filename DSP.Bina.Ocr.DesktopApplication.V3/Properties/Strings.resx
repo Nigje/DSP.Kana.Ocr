@@ -319,4 +319,6 @@ All</value>
 Bina is an image-to-text application that uses optical character recognition (OCR) to extract text from images and PDF files and save it as a text file. It offers an alternative to manually typing printed content, converting documents into digital text quickly and accurately.
 </value>
 </data>
+  <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>Image or PDF files (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>
+  <data name="WordFilesFilter" xml:space="preserve"><value>Microsoft Word files (*.docx)|*.docx</value></data>
 </root>

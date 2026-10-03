@@ -11,7 +11,7 @@ using Bina.Ocr.Wapper;
 using DSP.Bina.Ocr.DesktopApplication.V3;
 using DSP.Bina.Ocr.DesktopApplication.V3.Model;
 using DSP.Bina.Ocr.DesktopApplication.V3.Services;
-using Xceed.Words.NET;
+using DocumentFormat.OpenXml.Packaging;
 
 internal static partial class SmokeTests
 {
@@ -99,8 +99,10 @@ internal static partial class SmokeTests
         Assert(fourth.EndsWith("scan (4)"), "A conflicting DOCX alone reserves its base filename.");
         Assert(File.ReadAllBytes(first + ".docx").SequenceEqual(originalWord) && File.ReadAllBytes(first + ".jpeg").SequenceEqual(originalJpeg), "Existing exports are never overwritten.");
         Assert(File.ReadAllText(Path.Combine(directory, "scan (3).docx")) == "existing document", "Conflicting user files stay intact.");
-        using var document = DocX.Load(first + ".docx");
-        Assert(document.Text.Contains("Hello") && document.Text.Contains("سلام"), "Bilingual edited text round-trips.");
+        using var document = WordprocessingDocument.Open(first + ".docx", false);
+        string documentText = document.MainDocumentPart.Document.Body.InnerText;
+        Assert(documentText.Contains("Hello") && documentText.Contains("سلام"), "Bilingual edited text round-trips.");
+        AssertValidDocx(document);
         using var zip = ZipFile.OpenRead(first + ".docx");
         using var xmlStream = zip.GetEntry("word/document.xml").Open();
         var xml = XDocument.Load(xmlStream);
@@ -111,6 +113,50 @@ internal static partial class SmokeTests
         Assert(xml.Descendants(w + "jc").Any(e => (string)e.Attribute(w + "val") == "center"), "DOCX preserves paragraph alignment.");
         Assert(xml.Descendants(w + "numPr").Any() && xml.Descendants(w + "bidi").Any(), "DOCX preserves bullets and RTL direction.");
         Assert(xml.Descendants(w + "ind").Any(), "DOCX preserves indentation.");
+        Assert(xml.Descendants(w + "rFonts").Any(e => (string)e.Attribute(w + "cs") == "Tahoma"), "Persian font is set for complex scripts.");
+        Assert(xml.Descendants(w + "szCs").Any(e => (string)e.Attribute(w + "val") == "32"), "Persian font size is set for complex scripts.");
+        var numbering = document.MainDocumentPart.NumberingDefinitionsPart;
+        Assert(numbering != null && numbering.Numbering.Descendants<DocumentFormat.OpenXml.Wordprocessing.NumberingFormat>()
+            .Any(n => n.Val.Value == DocumentFormat.OpenXml.Wordprocessing.NumberFormatValues.Bullet), "Bullets reference a real numbering definition.");
+        using (var exportedImage = Image.FromFile(first + ".jpeg"))
+            Assert(exportedImage.Size == image.Size, "JPEG companion image retains its dimensions.");
+        CheckDocumentWhitespaceAndIndents(exporter, image, directory);
+        string imageOnly = exporter.Export(Path.Combine(directory, "image-only"), image, new DocumentSnapshot());
+        Assert(File.Exists(imageOnly + ".jpeg") && !File.Exists(imageOnly + ".docx"), "An empty snapshot exports only the image.");
+    }
+
+    private static void CheckDocumentWhitespaceAndIndents(DocumentExportService exporter, Image image, string directory)
+    {
+        var snapshot = new DocumentSnapshot();
+        var first = new ParagraphSnapshot { Alignment = HorizontalAlignment.Left, IndentPoints = 18, HangingIndentPoints = -6 };
+        first.Runs.Add(new TextRunSnapshot("  A\tB\r\nC  ", "Arial", 11.5f, FontStyle.Strikeout, Color.Blue));
+        snapshot.Paragraphs.Add(first);
+        snapshot.Paragraphs.Add(new ParagraphSnapshot());
+        var last = new ParagraphSnapshot { RightToLeft = true, Alignment = HorizontalAlignment.Right, Bullet = true, IndentPoints = 24, HangingIndentPoints = 8 };
+        last.Runs.Add(new TextRunSnapshot("سلام", "Tahoma", 14, FontStyle.Bold | FontStyle.Italic, Color.Black));
+        snapshot.Paragraphs.Add(last);
+        string exported = exporter.Export(Path.Combine(directory, "whitespace"), image, snapshot);
+        using var document = WordprocessingDocument.Open(exported + ".docx", false);
+        AssertValidDocx(document);
+        using var zip = ZipFile.OpenRead(exported + ".docx");
+        using var stream = zip.GetEntry("word/document.xml").Open();
+        var xml = XDocument.Load(stream);
+        XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+        var paragraphs = xml.Descendants(w + "body").Elements(w + "p").ToArray();
+        Assert(paragraphs.Length == 3 && !paragraphs[1].Elements(w + "r").Any(), "Blank paragraph and paragraph order are retained.");
+        Assert(paragraphs[0].Descendants(w + "tab").Count() == 1 && paragraphs[0].Descendants(w + "br").Count() == 1, "Tab and CRLF are proper Word elements.");
+        Assert(paragraphs[0].Descendants(w + "t").First().Value == "  A" && paragraphs[0].Descendants(w + "t").Last().Value == "C  ", "Leading and trailing spaces are retained.");
+        Assert(paragraphs[0].Descendants(w + "t").All(e => (string)e.Attribute(XNamespace.Xml + "space") == "preserve"), "Word preserves text whitespace.");
+        var firstIndent = paragraphs[0].Descendants(w + "ind").Single();
+        var lastIndent = paragraphs[2].Descendants(w + "ind").Single();
+        Assert((string)firstIndent.Attribute(w + "start") == "360" && (string)firstIndent.Attribute(w + "firstLine") == "120", "First-line indentation converts points to twips.");
+        Assert((string)lastIndent.Attribute(w + "start") == "480" && (string)lastIndent.Attribute(w + "hanging") == "160", "Hanging indentation converts points to twips.");
+        Assert(paragraphs[0].Descendants(w + "sz").Any(e => (string)e.Attribute(w + "val") == "23"), "Fractional font sizes retain half-point precision.");
+        Assert(paragraphs[0].Descendants(w + "strike").Any(e => (string)e.Attribute(w + "val") == "true"), "Strikethrough is preserved.");
+        Assert(paragraphs[2].Descendants(w + "bCs").Any(e => (string)e.Attribute(w + "val") == "true") &&
+            paragraphs[2].Descendants(w + "iCs").Any(e => (string)e.Attribute(w + "val") == "true"), "Persian bold and italic formatting is preserved.");
+        Assert((string)paragraphs[0].Descendants(w + "bidi").Single().Attribute(w + "val") == "false" &&
+            (string)paragraphs[2].Descendants(w + "bidi").Single().Attribute(w + "val") == "true", "Mixed LTR/RTL paragraph directions are explicit.");
     }
 
     private static T Pump<T>(Task<T> task)

@@ -330,14 +330,6 @@
       <Project>{11f8cf9e-6dad-4151-9572-66ce25a8e54a}</Project>
       <Name>DSP.Khana.Ocr.Wapper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OtherUsefulLibrary\Docs\Xceed.Document.NET\Xceed.Document.NET.csproj">
-      <Project>{e863d072-aa8b-4108-b5f1-785241b37f67}</Project>
-      <Name>Xceed.Document.NET</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OtherUsefulLibrary\Docs\Xceed.Words.NET\Xceed.Words.NET.csproj">
-      <Project>{6a9b96d0-a011-4f33-8ee2-ac31c948cca9}</Project>
-      <Name>Xceed.Words.NET</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OtherUsefulLibrary\ImageListView\ImageListView.csproj">
       <Project>{0c295fb8-c6c6-4a40-9f19-05a43f353a04}</Project>
       <Name>ImageListView</Name>
@@ -447,5 +439,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="LogoBina.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+    <Content Include="..\LICENSES\OpenXmlSdk-MIT.txt" Link="LICENSES\OpenXmlSdk-MIT.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 </Project>

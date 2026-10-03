@@ -92,7 +92,7 @@ Sources:
 
 ## Remaining release scope
 
-No top-level license or third-party notice was found; ImageListView has its own License.txt. This audit does not clear the entire solution for publication. Check the actual versions/terms of vendored Xceed/DocX, ImageListView, Ghostscript-based native DLLs, native Tesseract/Leptonica, trained model archives, and other shipped dependencies/assets. Identify source and terms of renamed native binaries separately; C# comparison cannot determine their origin or modifications. Verify ownership/publication rights for your own code and models. No license has been chosen or source/license metadata changed by this audit.
+No top-level license or third-party notice was found; ImageListView has its own License.txt. This audit does not clear the entire solution for publication. Check the actual versions/terms of ImageListView, Ghostscript-based native DLLs, native Tesseract/Leptonica, trained model archives, and other shipped dependencies/assets. Identify source and terms of renamed native binaries separately; C# comparison cannot determine their origin or modifications. Verify ownership/publication rights for your own code and models. No license has been chosen or source/license metadata changed by this audit.
 
 ## File inventory against current Tesseract master
 

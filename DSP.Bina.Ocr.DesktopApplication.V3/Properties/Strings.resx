@@ -328,6 +328,9 @@ Copyright (c) 2014 Andrey Akinshin. Licensed under MIT.
 https://github.com/AndreyAkinshin/InteropDotNet
 
 This application uses a modified copy. License texts and attribution are included in the LICENSES folder and THIRD-PARTY-NOTICES.md beside the application.
+
+DOCX export uses Open XML SDK by the .NET Foundation and Contributors, licensed under MIT.
+https://github.com/dotnet/Open-XML-SDK
 </value>
 </data>
   <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>Image or PDF files (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>

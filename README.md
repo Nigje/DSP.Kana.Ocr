@@ -2,17 +2,19 @@
 
 A Windows Forms desktop application that converts images and PDF pages into editable text using Persian, English, or mixed-language OCR. Users can prepare images, recognize individual images or a batch, edit the results, and export them.
 
-This solution contains the desktop application and its seven supporting projects. Application namespaces and project names are preserved, including the original `Wapper` spelling; the managed OCR engine uses the upstream Tesseract namespaces. Desktop builds use the license-free profile; activation and licensing projects are not required.
+This solution contains the desktop application and its five supporting projects. Application namespaces and project names are preserved, including the original `Wapper` spelling; the managed OCR engine uses the upstream Tesseract namespaces. Desktop builds use the license-free profile; activation and licensing projects are not required.
 
 See [CHANGELOG.md](CHANGELOG.md) for the accumulated changes and notes for the next release.
 
-## OCR engine attribution and licensing
+## Third-party attribution and licensing
 
 `DSP.Khana.Ocr.Engine.v5` is a modified copy of [Charles Weld's Tesseract .NET wrapper](https://github.com/charlesw/tesseract), licensed under **Apache-2.0**, incorporating [Andrey Akinshin's InteropDotNet](https://github.com/AndreyAkinshin/InteropDotNet), licensed under **MIT**. Copyright 2012-2022 Charles Weld; Copyright (c) 2014 Andrey Akinshin.
 
 The engine uses the upstream namespaces and type names, with local requirements documented in its [README](DSP.Khana.Ocr.Engine.v5/README.md). See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and the full license texts in [LICENSES](LICENSES). Attribution is also shown in the English and Persian About dialogs, and the notice and license files accompany build and publish output.
 
-These notices cover the managed OCR components. A license for independently authored application code has not yet been selected, and the remaining bundled dependencies and assets need separate license review before publishing the complete solution as open source.
+DOCX export uses [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) 3.5.1 by the .NET Foundation and contributors under MIT. Its full license is included in `LICENSES/OpenXmlSdk-MIT.txt`.
+
+These notices cover the managed OCR and DOCX components. A license for independently authored application code has not yet been selected, and the remaining bundled dependencies and assets need separate license review before publishing the complete solution as open source.
 
 ## Build and run
 
@@ -22,7 +24,7 @@ These notices cover the managed OCR components. A license for independently auth
 - For Visual Studio, use **Visual Studio 2026** with the .NET desktop development workload. Visual Studio 2022 does not provide the .NET 10 development toolchain.
 - For framework-dependent deployment, install the **.NET 10 Desktop Runtime** on the target machine.
 
-Open [DSP.Khana.Ocr.sln](DSP.Khana.Ocr.sln) and set **DSP.Bina.Ocr.DesktopApplication.V3** as the startup project. All eight application projects use SDK-style project files. The post-processing library targets `net10.0`; the desktop and its Windows-dependent libraries target `net10.0-windows`.
+Open [DSP.Khana.Ocr.sln](DSP.Khana.Ocr.sln) and set **DSP.Bina.Ocr.DesktopApplication.V3** as the startup project. All six application projects use SDK-style project files. The post-processing library targets `net10.0`; the desktop and its Windows-dependent libraries target `net10.0-windows`.
 
 From PowerShell in the solution directory:
 
@@ -43,7 +45,7 @@ Run the integration smoke checks on Windows with:
 dotnet run --project tests/SmokeTests/SmokeTests.csproj -c Release
 ```
 
-The checks exercise all 279 English/Persian resource lookups, DOCX export and reload, unsigned document assemblies, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As during normal recognition and PDF import, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
+The checks exercise all 279 English/Persian resource lookups, DOCX export and reload, Open XML schema validation, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As during normal recognition and PDF import, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
 
 ## How the application works
 
@@ -52,7 +54,7 @@ The checks exercise all 279 English/Persian resource lookups, DOCX export and re
 3. **Input:** The user imports images, pastes a clipboard image, or imports selected PDF pages. `PDFConvert` renders PDF pages to image files through the `DSP.Tools32.dll` / `DSP.Tools64.dll` Ghostscript API. `ImageEntity` holds each image and its associated application state; `ImageListView` presents the image list.
 4. **Image preparation:** The desktop uses `DSP.Khana.ImageTools` for operations such as image adjustment and deskew. Preparing an image can improve recognition before it reaches the OCR engine.
 5. **Recognition:** The form passes the selected image and a snapshot of OCR options to `OcrService`, which serializes calls to `BinaOcr`. The wrapper maps those options to the managed engine, which calls the native OCR library. Optional post-processing applies text cleanup rules to the recognized result.
-6. **Editing and export:** Text edits, RTF formatting, and text direction are stored per image and restored when selection changes. `RichTextDocumentService` captures font family/size, bold, italic, underline, color, paragraph alignment, bullets, indentation, and direction. `DocumentExportService` writes that snapshot as DOCX and saves the image as JPEG. Existing base filenames receive ` (2)`, ` (3)`, and subsequent suffixes; exclusive file creation prevents accidental overwrites. The completion message shows the actual export name or output directory.
+6. **Editing and export:** Text edits, RTF formatting, and text direction are stored per image and restored when selection changes. `RichTextDocumentService` captures font family/size, bold, italic, underline, color, paragraph alignment, bullets, indentation, and direction. `DocumentExportService` writes that snapshot as DOCX using Open XML SDK and saves the image as JPEG. Existing base filenames receive ` (2)`, ` (3)`, and subsequent suffixes; exclusive file creation prevents accidental overwrites. The completion message shows the actual export name or output directory.
 7. **UI language:** The footer language selector switches resource strings and directional layout between English and Persian. It also refreshes the About Us dialog when open.
 
 Changing the **UI language** changes labels, messages, and arrangement. The separate **OCR language** option selects the recognition model: Persian, English, or mixed. The current UI selection is not saved as a persistent user preference; startup chooses from the thread's UI culture.
@@ -80,8 +82,6 @@ The focused checks cover image ownership, unlocked imported files, formatted exp
 | `DSP.Khana.Ocr.Wapper` | The `BinaOcr` facade, option mapping, native/model extraction, recognition calls, and optional cleanup. | Provides the desktop's OCR API and manages the assets needed by the engine. |
 | `DSP.Khana.Ocr.Engine.v5` | Managed OCR engine, image/page objects, and native interop. | Bridges the C# wrapper to the native OCR and Leptonica libraries. The Windows-dependent engine now targets `net10.0-windows`; its bitmap conversion and native interop remain available. |
 | `DSP.Khana.Ocr.PostPRocessing` (`DSP.Khana.Ocr.PostProcessing.csproj`) | Text cleanup rules for spacing, line breaks, and word filtering. | Required by the wrapper's optional post-processing path. |
-| `OtherUsefulLibrary/Docs/Xceed.Document.NET` | Document objects, paragraphs, formatting, tables, and embedded default document resources. | Supplies the document implementation used by the DOCX export library. |
-| `OtherUsefulLibrary/Docs/Xceed.Words.NET` | The `DocX` API for creating and saving Word documents. | The desktop calls this API when exporting recognized text to `.docx`. It depends on `Xceed.Document.NET`. |
 | `OtherUsefulLibrary/ImageListView` | WinForms image-list control, thumbnail caching, selection, and rendering. | Displays imported images and PDF pages and lets the user select them for editing and recognition. |
 
 The direct project dependencies are:
@@ -92,9 +92,6 @@ DSP.Bina.Ocr.DesktopApplication.V3
 ├── Bina.Ocr.Wapper
 │   ├── DSP.Khana.Ocr.Engine.v5
 │   └── DSP.Khana.Ocr.PostProcessing
-├── Xceed.Words.NET
-│   └── Xceed.Document.NET
-├── Xceed.Document.NET
 └── ImageListView
 ```
 
@@ -126,8 +123,6 @@ DSP.Bina.Ocr.DesktopApplication.V3
 | `Properties/Settings.*`, `Properties/AssemblyInfo.cs`, and `App.config` | Existing settings infrastructure, assembly metadata, and application configuration. |
 | `DSP.Khana.Ocr.Wapper/Properties/Data.zip` | Embedded OCR data. The wrapper's archive supplies trained models, including the English, Persian, and mixed-language models used by the UI. Without model data, the engine cannot recognize text. The desktop references the wrapper instead of embedding duplicate archives or native libraries. |
 | Native DLLs embedded from the wrapper's `Properties/` folder | Architecture-specific OCR, Leptonica, and PDF helper binaries. The wrapper extracts them when OCR or PDF import initializes it, so they also travel inside its DLL when publishing. They are source dependencies, not disposable build output. |
-| `Xceed.Document.NET/Resources/*.xml.gz` | Embedded defaults for constructing Word document styles and numbering. |
-| Document-library signing | Both document libraries build unsigned in this standalone solution. Their private signing keys stay local, are ignored by Git, and are not needed to build or export DOCX. The friend-assembly declaration allows the unsigned `Xceed.Words.NET` library to access the document library's internals. |
 | Third-party license notices | Attribution and license terms for bundled third-party code. Removing desktop activation does not remove these notices. |
 
 Paths in the source-file table are relative to the desktop project unless they explicitly name another project.
@@ -136,8 +131,8 @@ Paths in the source-file table are relative to the desktop project unless they e
 
 | Dependency | Why it is needed |
 | --- | --- |
-| `System.Drawing.Common` 10.0.12 | Bitmap, font, image conversion, and graphics APIs used by the OCR, image-tool, wrapper, and document libraries. These operations remain Windows-only. |
-| `System.IO.Packaging` 10.0.12 | Open Packaging Convention APIs used to read and write DOCX document parts. |
+| `System.Drawing.Common` 10.0.12 | Bitmap, font, image conversion, and graphics APIs used by the OCR, image-tool, wrapper, and desktop export. These operations remain Windows-only. |
+| `DocumentFormat.OpenXml` 3.5.1 (MIT) | DOCX generation and typed document APIs. Its Framework dependency supplies package support through `System.IO.Packaging`. |
 | .NET 10 Windows Desktop framework | WinForms, designer APIs, resources, and configuration APIs used by the executable and image-list control. These are provided by `UseWindowsForms`; redundant package references are not needed. |
 
 The old App Center, Newtonsoft.Json, SQLite/SQLitePCLRaw, and RuntimeInformation assembly references and imported targets were removed. SQLite and Newtonsoft.Json had no active source usage in this copied desktop workflow; RuntimeInformation is supplied by modern .NET. App Center startup and crash reporting were replaced with local error logging to `%LOCALAPPDATA%\DSP.Khana.Ocr\Logs\errors.log`. The old `packages.config` and bundled legacy package cache are no longer part of the solution.

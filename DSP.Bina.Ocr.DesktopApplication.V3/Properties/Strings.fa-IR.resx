@@ -328,6 +328,9 @@ Copyright (c) 2014 Andrey Akinshin. مجوز: MIT.
 https://github.com/AndreyAkinshin/InteropDotNet
 
 این برنامه از نسخهٔ تغییر‌یافته استفاده می‌کند. متن مجوزها و اطلاعات پدیدآورندگان در پوشهٔ LICENSES و فایل THIRD-PARTY-NOTICES.md کنار برنامه قرار دارند.
+
+خروجی DOCX با Open XML SDK اثر .NET Foundation و مشارکت‌کنندگان ساخته می‌شود. مجوز: MIT.
+https://github.com/dotnet/Open-XML-SDK
 </value>
 </data>
   <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>فایل‌های تصویر یا PDF (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>

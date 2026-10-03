@@ -4,6 +4,13 @@ This file records the changes completed during the standalone desktop modernizat
 
 ## Unreleased
 
+### DOCX export dependency replacement
+
+- Implemented DOCX export using MIT-licensed Open XML SDK (`DocumentFormat.OpenXml` 3.5.1).
+- Export retains fonts, sizes, colors, bold/italic/underline, paragraph direction/alignment, bullets, indentation, blank paragraphs, and safe filenames; it also handles strikethrough, tabs, and explicit line breaks.
+- Added Open XML schema validation and SDK round-trip checks to production export regressions, including Persian complex-script formatting and companion JPEG output.
+- Added the SDK's MIT license to output and updated the English/Persian About credits and third-party notice.
+
 ### OCR source attribution and licensing
 
 - Restored the Tesseract wrapper's original namespaces, engine/API/exception/environment names, engine-mode member names, logging identity, and error-help URL. Source filenames already matched upstream. The local project/assembly identity and runtime integration are retained.

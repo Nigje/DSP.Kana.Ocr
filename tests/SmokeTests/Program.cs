@@ -15,7 +15,11 @@ using DSP.Bina.Ocr.DesktopApplication.V3.Forms;
 using DSP.Bina.Ocr.DesktopApplication.V3.Model;
 using DSP.Khana.ImageTools.Models;
 using Tesseract;
-using Xceed.Words.NET;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Validation;
+using DSP.Bina.Ocr.DesktopApplication.V3.Services;
+using W = DocumentFormat.OpenXml.Wordprocessing;
 
 internal static partial class SmokeTests
 {
@@ -40,7 +44,7 @@ internal static partial class SmokeTests
             CheckRefactorings();
             CheckWrapper();
             CheckPdf();
-            Console.WriteLine("PASS: .NET 10 resources, unsigned DOCX export, native OCR, PDF import, and bilingual forms.");
+            Console.WriteLine("PASS: .NET 10 resources, Open XML DOCX export, native OCR, PDF import, and bilingual forms.");
             return 0;
         }
         catch (Exception error)
@@ -71,7 +75,10 @@ internal static partial class SmokeTests
         var type = assembly.GetType("DSP.Bina.Ocr.DesktopApplication.V3.Properties.Strings", true);
         var flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         var manager = (System.Resources.ResourceManager)type.GetProperty("ResourceManager", flags).GetValue(null);
-        string project = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../DSP.Bina.Ocr.DesktopApplication.V3"));
+        var workspace = new DirectoryInfo(AppContext.BaseDirectory);
+        while (workspace != null && !File.Exists(Path.Combine(workspace.FullName, "DSP.Khana.Ocr.sln"))) workspace = workspace.Parent;
+        Assert(workspace != null, "Find the solution for resource-source checks.");
+        string project = Path.Combine(workspace.FullName, "DSP.Bina.Ocr.DesktopApplication.V3");
         int count = 0;
         foreach (string language in new[] { "en", "en-US", "fa-IR" })
         {
@@ -92,20 +99,29 @@ internal static partial class SmokeTests
 
     private static void CheckDocx()
     {
-        string path = Path.Combine(Work, "export.docx");
-        foreach (var type in new[] { typeof(DocX), typeof(Xceed.Document.NET.Document) })
-            Assert(type.Assembly.GetName().GetPublicKeyToken().Length == 0, "Document library must not require signing keys.");
-        using (var document = DocX.Create(path))
-        {
-            document.InsertParagraph("Hello / سلام");
-            document.Save();
-        }
-        using (var archive = ZipFile.OpenRead(path))
+        var snapshot = new DocumentSnapshot();
+        var paragraph = new ParagraphSnapshot { RightToLeft = true };
+        paragraph.Runs.Add(new TextRunSnapshot("Hello / سلام", "Tahoma", 12, FontStyle.Regular, Color.Black));
+        snapshot.Paragraphs.Add(paragraph);
+        using var image = new Bitmap(10, 10);
+        string exported = new DocumentExportService().Export(Path.Combine(Work, "export"), image, snapshot);
+        using (var archive = ZipFile.OpenRead(exported + ".docx"))
         using (var reader = new StreamReader(archive.GetEntry("word/document.xml").Open()))
             Assert(reader.ReadToEnd().Contains("سلام"), "DOCX export preserves Persian text.");
-        using (var document = DocX.Load(path))
-            Assert(document.Text.Contains("Hello"), "DOCX round-trip.");
-        Console.WriteLine("DOCX: bilingual export and round-trip passed.");
+        using (var document = WordprocessingDocument.Open(exported + ".docx", false))
+        {
+            Assert(document.MainDocumentPart.Document.Body.InnerText.Contains("Hello / سلام"), "DOCX round-trip.");
+            AssertValidDocx(document);
+        }
+        Assert(!typeof(MainForm).Assembly.GetReferencedAssemblies().Any(a => a.Name.StartsWith("Xceed", StringComparison.Ordinal)),
+            "Desktop no longer references Xceed assemblies.");
+        Console.WriteLine("DOCX: production bilingual export, SDK round-trip, and schema validation passed.");
+    }
+
+    private static void AssertValidDocx(WordprocessingDocument document)
+    {
+        var errors = new OpenXmlValidator(FileFormatVersions.Office2010).Validate(document).Take(10).ToArray();
+        Assert(errors.Length == 0, "DOCX schema validation: " + string.Join("; ", errors.Select(e => e.Description)));
     }
 
     private static void Extract(string resource, string destination)

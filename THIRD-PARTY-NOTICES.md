@@ -1,4 +1,4 @@
-# Third-party notices: managed OCR engine
+# Third-party notices: managed OCR and DOCX export
 
 `DSP.Khana.Ocr.Engine.v5` contains a modified copy of Charles Weld's Tesseract .NET wrapper, which incorporates Andrey Akinshin's InteropDotNet. These authors retain copyright in their original work. Local modifications do not imply their endorsement of this application.
 
@@ -30,10 +30,21 @@ Comparison reference: upstream commit `0b15eee809716c50562458d6fe95d52bea46b9c6`
 
 The embedded copy includes wrapper-specific library search and logging integration, native-function error handling, and runtime compatibility changes. Some of these adaptations were inherited from the Tesseract wrapper; they are not claimed as original application code. Original MIT headers remain in the source.
 
+## Open XML SDK
+
+- Copyright: **Copyright (c) .NET Foundation and Contributors**.
+- Source: <https://github.com/dotnet/Open-XML-SDK>
+- Packages: `DocumentFormat.OpenXml` **3.5.1** and its `DocumentFormat.OpenXml.Framework` dependency.
+- License: **MIT**.
+- Full copyright, permission notice, and warranty disclaimer: [LICENSES/OpenXmlSdk-MIT.txt](LICENSES/OpenXmlSdk-MIT.txt), copied from the upstream `v3.5.1` release.
+- Usage: DOCX export in `DocumentExportService`; validation and reading in the smoke tests.
+
+The SDK is consumed as NuGet packages.
+
 ## Distribution and scope
 
-Keep this notice and both full license texts with source and binary distributions containing these components. The engine project copies them into build and publish output, including output reached through project references, under `THIRD-PARTY-NOTICES.md` and `LICENSES/`.
+Keep this notice and the applicable full license texts with source and binary distributions containing these components. The engine project copies the OCR licenses and this notice, and the desktop project copies the SDK license, into build and publish output, including output reached through project references, under `THIRD-PARTY-NOTICES.md` and `LICENSES/`.
 
-This notice covers the two managed-source components above. It is not a complete license inventory for the solution or for the renamed native binaries, bundled OCR models, Ghostscript integration, Xceed/DocX, ImageListView, and other dependencies/assets. The existing PDF smoke test reports Ghostscript 9.50 and GNU AGPLv3. Those components retain their respective terms and require separate release review. Native binary filenames are retained for compatibility and do not establish ownership or licensing.
+This notice covers the managed OCR components and Open XML SDK above. It is not a complete license inventory for the solution or for the renamed native binaries, bundled OCR models, Ghostscript integration, ImageListView, and other dependencies/assets. The existing PDF smoke test reports Ghostscript 9.50 and GNU AGPLv3. Those components retain their respective terms and require separate release review. Native binary filenames are retained for compatibility and do not establish ownership or licensing.
 
 No repository-wide license for independently authored application code is selected by this notice. The local `LanguageModel.cs` is application code, not attributed to either upstream author. A license for independently authored code must be chosen before presenting the complete project as open source; these third-party license texts do not make that choice.

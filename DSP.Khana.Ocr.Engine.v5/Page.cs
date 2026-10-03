@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,19 +20,19 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using DSP.Khana.Ocr.Internal;
-using DSP.Khana.Ocr.Interop;
+using Tesseract.Internal;
+using Tesseract.Interop;
 
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     internal sealed class Page : DisposableBase
     {
-        private static readonly TraceSource trace = new TraceSource("KhanaOcrEngine");
+        private static readonly TraceSource trace = new TraceSource("Tesseract");
 
         private bool runRecognitionPhase;
         private Rect regionOfInterest;
 
-        public KhanaOcrEngine Engine { get; private set; }
+        public TesseractEngine Engine { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="Pix"/> that is being ocr'd.
@@ -38,7 +52,7 @@ namespace DSP.Khana.Ocr
         /// </summary>
         public PageSegMode PageSegmentMode { get; private set; }
 
-        internal Page(KhanaOcrEngine engine, Pix image, string imageName, Rect regionOfInterest, PageSegMode pageSegmentMode)
+        internal Page(TesseractEngine engine, Pix image, string imageName, Rect regionOfInterest, PageSegMode pageSegmentMode)
         {
             Engine = engine;
             Image = image;
@@ -65,7 +79,7 @@ namespace DSP.Khana.Ocr
                     regionOfInterest = value;
 
                     // update region of interest in image
-                    Interop.KhanaOcrEngineApi.Native.BaseApiSetRectangle(Engine.Handle, regionOfInterest.X1, regionOfInterest.Y1, regionOfInterest.Width, regionOfInterest.Height);
+                    Interop.TessApi.Native.BaseApiSetRectangle(Engine.Handle, regionOfInterest.X1, regionOfInterest.Y1, regionOfInterest.Width, regionOfInterest.Height);
 
                     // request rerun of recognition on the next call that requires recognition
                     runRecognitionPhase = false;
@@ -81,9 +95,9 @@ namespace DSP.Khana.Ocr
         {
             Recognize();
 
-            var pixHandle = Interop.KhanaOcrEngineApi.Native.BaseAPIGetThresholdedImage(Engine.Handle);
+            var pixHandle = Interop.TessApi.Native.BaseAPIGetThresholdedImage(Engine.Handle);
             if (pixHandle == IntPtr.Zero) {
-                throw new KhanaOcrEngineException("Failed to get thresholded image.");
+                throw new TesseractException("Failed to get thresholded image.");
             }
 
             return Pix.Create(pixHandle);
@@ -97,7 +111,7 @@ namespace DSP.Khana.Ocr
         {
             Guard.Verify(PageSegmentMode != PageSegMode.OsdOnly, "Cannot analyse image layout when using OSD only page segmentation, please use DetectBestOrientation instead.");
 
-            var resultIteratorHandle = Interop.KhanaOcrEngineApi.Native.BaseAPIAnalyseLayout(Engine.Handle);
+            var resultIteratorHandle = Interop.TessApi.Native.BaseAPIAnalyseLayout(Engine.Handle);
             return new PageIterator(this, resultIteratorHandle);
         }
 
@@ -108,7 +122,7 @@ namespace DSP.Khana.Ocr
         public ResultIterator GetIterator()
         {
             Recognize();
-            var resultIteratorHandle = Interop.KhanaOcrEngineApi.Native.BaseApiGetIterator(Engine.Handle);
+            var resultIteratorHandle = Interop.TessApi.Native.BaseApiGetIterator(Engine.Handle);
             return new ResultIterator(this, resultIteratorHandle);
         }
 
@@ -119,7 +133,7 @@ namespace DSP.Khana.Ocr
         public string GetText()
         {
             Recognize();
-            return Interop.KhanaOcrEngineApi.BaseAPIGetUTF8Text(Engine.Handle);
+            return Interop.TessApi.BaseAPIGetUTF8Text(Engine.Handle);
         }
 
         /// <summary>
@@ -134,9 +148,9 @@ namespace DSP.Khana.Ocr
             Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
             Recognize();
             if(useXHtml)
-                return Interop.KhanaOcrEngineApi.BaseAPIGetHOCRText2(Engine.Handle, pageNum);
+                return Interop.TessApi.BaseAPIGetHOCRText2(Engine.Handle, pageNum);
             else
-                return Interop.KhanaOcrEngineApi.BaseAPIGetHOCRText(Engine.Handle, pageNum);
+                return Interop.TessApi.BaseAPIGetHOCRText(Engine.Handle, pageNum);
         }
 
         /// <summary>
@@ -146,7 +160,7 @@ namespace DSP.Khana.Ocr
         public float GetMeanConfidence()
         {
             Recognize();
-            return Interop.KhanaOcrEngineApi.Native.BaseAPIMeanTextConf(Engine.Handle) / 100.0f;
+            return Interop.TessApi.Native.BaseAPIMeanTextConf(Engine.Handle) / 100.0f;
         }
 
         /// <summary>
@@ -156,7 +170,7 @@ namespace DSP.Khana.Ocr
         /// <returns></returns>
         public List<Rectangle> GetSegmentedRegions(PageIteratorLevel pageIteratorLevel)
         {
-            var boxArray = Interop.KhanaOcrEngineApi.Native.BaseAPIGetComponentImages(Engine.Handle, pageIteratorLevel, Interop.Constants.TRUE, IntPtr.Zero, IntPtr.Zero);
+            var boxArray = Interop.TessApi.Native.BaseAPIGetComponentImages(Engine.Handle, pageIteratorLevel, Interop.Constants.TRUE, IntPtr.Zero, IntPtr.Zero);
             int boxCount = Interop.LeptonicaApi.Native.boxaGetCount(new HandleRef(this, boxArray));
 
             List<Rectangle> boxList = new List<Rectangle>();
@@ -249,14 +263,14 @@ namespace DSP.Khana.Ocr
             IntPtr script_nameHandle;
             float script_conf;
 
-            if (Interop.KhanaOcrEngineApi.Native.TessBaseAPIDetectOrientationScript(Engine.Handle, out orient_deg, out orient_conf, out script_nameHandle, out script_conf) != 0)
+            if (Interop.TessApi.Native.TessBaseAPIDetectOrientationScript(Engine.Handle, out orient_deg, out orient_conf, out script_nameHandle, out script_conf) != 0)
             {
                 orientation = orient_deg;
                 confidence = orient_conf;
                 if (script_nameHandle != IntPtr.Zero)
                 {
                     scriptName = MarshalHelper.PtrToString(script_nameHandle, Encoding.ASCII);
-                    // Don't delete script_nameHandle as it points to internal memory managed by KhanaOcrEngine.
+                    // Don't delete script_nameHandle as it points to internal memory managed by TesseractEngine.
                 } else
                 {
                     scriptName = null;
@@ -265,7 +279,7 @@ namespace DSP.Khana.Ocr
             }
             else
             {
-                throw new KhanaOcrEngineException("Failed to detect image orientation.");
+                throw new TesseractException("Failed to detect image orientation.");
             }
         }
 
@@ -273,7 +287,7 @@ namespace DSP.Khana.Ocr
         {
             Guard.Verify(PageSegmentMode != PageSegMode.OsdOnly, "Cannot OCR image when using OSD only page segmentation, please use DetectBestOrientation instead.");
             if (!runRecognitionPhase) {
-                if (Interop.KhanaOcrEngineApi.Native.BaseApiRecognize(Engine.Handle, new HandleRef(this, IntPtr.Zero)) != 0) {
+                if (Interop.TessApi.Native.BaseApiRecognize(Engine.Handle, new HandleRef(this, IntPtr.Zero)) != 0) {
                     throw new InvalidOperationException("Recognition of image failed.");
                 }
 
@@ -298,7 +312,7 @@ namespace DSP.Khana.Ocr
         protected override void Dispose(bool disposing)
         {
             if (disposing) {
-                Interop.KhanaOcrEngineApi.Native.BaseAPIClear(Engine.Handle);
+                Interop.TessApi.Native.BaseAPIClear(Engine.Handle);
             }
         }
     }

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>DSP.Khana.Ocr.Engine.v5</RootNamespace>
+    <RootNamespace>Tesseract</RootNamespace>
     <AssemblyName>DSP.Khana.Ocr.Engine.v5</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -24,5 +24,19 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>true</Pack>
+      <PackagePath>THIRD-PARTY-NOTICES.md</PackagePath>
+    </Content>
+    <Content Include="..\LICENSES\InteropDotNet-MIT.txt;..\LICENSES\Tesseract-Apache-2.0.txt" Link="LICENSES\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>true</Pack>
+      <PackagePath>LICENSES\</PackagePath>
+    </Content>
   </ItemGroup>
 </Project>

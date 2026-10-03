@@ -1,5 +1,5 @@
 ﻿
-using DSP.Khana.Ocr;
+using Tesseract;
 using DSP.Khana.Ocr.Engine.v5;
 using DSP.Khana.Ocr.PostProcessing;
 #if !DESKTOP_WITHOUT_LICENSING
@@ -259,7 +259,7 @@ namespace Bina.Ocr.Wapper
             LanguageModel languageModelKhana = MapLicense(binaLicense);
 #endif
             CheckAndCreateModel();
-            KhanaOcrEngine khanaEngine = new KhanaOcrEngine(languageModelKhana, ModelDirectoryPath, language, engineMode, DllDirectoryPath);
+            TesseractEngine khanaEngine = new TesseractEngine(languageModelKhana, ModelDirectoryPath, language, engineMode, DllDirectoryPath);
             var page = khanaEngine.Process(image, pageSegMode);
             string result = page.GetText();
             khanaEngine.Dispose();
@@ -329,7 +329,7 @@ namespace Bina.Ocr.Wapper
             LanguageModel languageModelKhana = MapLicense(binaLicense);
 #endif
             CheckAndCreateModel();
-            KhanaOcrEngine khanaEngine = new KhanaOcrEngine(languageModelKhana, ModelDirectoryPath, language, engineMode, DllDirectoryPath);
+            TesseractEngine khanaEngine = new TesseractEngine(languageModelKhana, ModelDirectoryPath, language, engineMode, DllDirectoryPath);
             var page = khanaEngine.Process(image, pageSegMode);
             var iter = page.GetIterator();
             iter.Begin();
@@ -359,11 +359,11 @@ namespace Bina.Ocr.Wapper
             switch (engineModeEnum)
             {
                 case EngineModeEnum.KhanaStructuralOnly:
-                    return EngineMode.KhanaOcrEngineOnly;
+                    return EngineMode.TesseractOnly;
                 case EngineModeEnum.KhanaDeepOnly:
                     return EngineMode.LstmOnly;
                 case EngineModeEnum.KhanaStructuralAndKhanaDeep:
-                    return EngineMode.KhanaOcrEngineAndLstm;
+                    return EngineMode.TesseractAndLstm;
                 default:
                     return EngineMode.Default;
             }

@@ -1,15 +1,19 @@
-﻿//  Copyright (c) 2014 Andrey Akinshin
+﻿// SPDX-License-Identifier: MIT
+// Modified for DSP.Khana.Ocr: wrapper integration and .NET runtime compatibility.
+// See THIRD-PARTY-NOTICES.md and LICENSES/InteropDotNet-MIT.txt.
+
+//  Copyright (c) 2014 Andrey Akinshin
 //  Project URL: https://github.com/AndreyAkinshin/InteropDotNet
 //  Distributed under the MIT License: http://opensource.org/licenses/MIT
 using System;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace DSP.Khana.Ocr.Internal
+namespace Tesseract.Internal
 {
     static class Logger
     {
-		readonly static TraceSource trace = new TraceSource("KhanaOcrEngine");
+		readonly static TraceSource trace = new TraceSource("Tesseract");
         
 
         public static void TraceInformation(string format, params object[] args)

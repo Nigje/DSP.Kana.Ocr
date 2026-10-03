@@ -317,6 +317,17 @@ All</value>
   <data name="AboutUsDescription" xml:space="preserve">
   <value>Bina OCR
 Bina is an image-to-text application that uses optical character recognition (OCR) to extract text from images and PDF files and save it as a text file. It offers an alternative to manually typing printed content, converting documents into digital text quickly and accurately.
+
+Third-party OCR components
+The managed OCR engine is derived from Charles Weld's Tesseract .NET wrapper.
+Copyright 2012-2022 Charles Weld. Licensed under Apache-2.0.
+https://github.com/charlesw/tesseract
+
+It includes InteropDotNet by Andrey Akinshin.
+Copyright (c) 2014 Andrey Akinshin. Licensed under MIT.
+https://github.com/AndreyAkinshin/InteropDotNet
+
+This application uses a modified copy. License texts and attribution are included in the LICENSES folder and THIRD-PARTY-NOTICES.md beside the application.
 </value>
 </data>
   <data name="ImageAndPdfFilesFilter" xml:space="preserve"><value>Image or PDF files (*.bmp;*.jpg;*.jpeg;*.png;*.pdf)|*.bmp;*.jpg;*.jpeg;*.png;*.pdf</value></data>

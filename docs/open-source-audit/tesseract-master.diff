@@ -1,0 +1,3777 @@
+--- upstream/AddNewColorStatus.cs
++++ local/AddNewColorStatus.cs
+@@ -2,9 +2,9 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public enum AddNewColorStatus
++    internal enum AddNewColorStatus
+     {
+         Ok = 0,
+         Error = 1,
+--- upstream/AggregateResultRenderer.cs
++++ local/AggregateResultRenderer.cs
+@@ -1,13 +1,13 @@
+ using System;
+ using System.Collections.Generic;
+-using Tesseract.Internal;
++using DSP.Khana.Ocr.Internal;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Aggregate result renderer.
+     /// </summary>
+-    public class AggregateResultRenderer : DisposableBase, IResultRenderer
++    internal class AggregateResultRenderer : DisposableBase, IResultRenderer
+     {
+         /// <summary>
+         /// Ensures the renderer's EndDocument when disposed off.
+--- upstream/BitmapHelper.cs
++++ local/BitmapHelper.cs
+@@ -2,25 +2,54 @@
+ using System;
+ using System.Runtime.CompilerServices;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Description of BitmapHelper.
+-	/// </summary>
+-	public static unsafe class BitmapHelper
++    /// <summary>
++    /// Description of BitmapHelper.
++    /// </summary>
++    internal static unsafe class BitmapHelper
+     {
+-        #region Bitmap Data Access
++        #if NETFULL
++        /// <summary>
++        /// gets the number of Bits Per Pixel (BPP)
++        /// </summary>
++        /// <param name="bitmap"></param>
++        /// <returns></returns>
++        public static int GetBPP(System.Drawing.Bitmap bitmap)
++        {
++            switch (bitmap.PixelFormat) {
++                case System.Drawing.Imaging.PixelFormat.Format1bppIndexed: return 1;
++                case System.Drawing.Imaging.PixelFormat.Format4bppIndexed: return 4;
++                case System.Drawing.Imaging.PixelFormat.Format8bppIndexed: return 8;
++                case System.Drawing.Imaging.PixelFormat.Format16bppArgb1555:  
++                case System.Drawing.Imaging.PixelFormat.Format16bppGrayScale:
++                case System.Drawing.Imaging.PixelFormat.Format16bppRgb555:
++                case System.Drawing.Imaging.PixelFormat.Format16bppRgb565: return 16;
++                case System.Drawing.Imaging.PixelFormat.Format24bppRgb: return 24;
++                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
++                case System.Drawing.Imaging.PixelFormat.Format32bppPArgb:
++                case System.Drawing.Imaging.PixelFormat.Format32bppRgb: return 32;
++                case System.Drawing.Imaging.PixelFormat.Format48bppRgb: return 48;
++                case System.Drawing.Imaging.PixelFormat.Format64bppArgb:
++                case System.Drawing.Imaging.PixelFormat.Format64bppPArgb: return 64;
++                default: throw new ArgumentException(String.Format("The bitmap's pixel format of {0} was not recognised.", bitmap.PixelFormat), "bitmap");
++            }
++        }
++        
++        #endif
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#region Bitmap Data Access
++
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static byte GetDataBit(byte* data, int index)
+ 		{			
+ 			return (byte)((*(data + (index >> 3)) >> (index & 0x7)) & 1);
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static void SetDataBit(byte* data, int index, byte value)
+ 		{			
+@@ -28,17 +57,17 @@
+             *wordPtr &= (byte)~(0x80 >> (index & 7)); 			// clear bit, note first pixel in the byte is most significant (1000 0000)
+             *wordPtr |= (byte)((value & 1) << (7 - (index & 7)));		// set bit, if value is 1
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static byte GetDataQBit(byte* data, int index)
+ 		{
+             return (byte)((*(data + (index >> 1)) >> (4 * (index & 1))) & 0xF);
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static void SetDataQBit(byte* data, int index, byte value)
+ 		{			
+@@ -47,48 +76,48 @@
+             *wordPtr |= (byte)((value & 0x0F) << (4 - (4 * (index & 1)))); // applys qbit to n
+ 		}
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static byte GetDataByte(byte* data, int index)
+ 		{			
+ 			return *(data + index);
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static void SetDataByte(byte* data, int index, byte value)
+ 		{			
+ 			*(data + index) = value;
+ 		}
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static ushort GetDataUInt16(ushort* data, int index)
+ 		{			
+ 			return *(data + index);
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static void SetDataUInt16(ushort* data, int index, ushort value)
+ 		{			
+ 			*(data + index) = value;
+-		}
++		}	
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static uint GetDataUInt32(uint* data, int index)
+ 		{			
+ 			return *(data + index);
+ 		}
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++		
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+ 		public static void SetDataUInt32(uint* data, int index, uint value)
+ 		{			
+@@ -96,12 +125,12 @@
+         }
+ 
+ 
+-        #endregion
++#endregion
+ 
+-        #region PixelFormat conversion
++#region PixelFormat conversion
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static uint ConvertRgb555ToRGBA(uint val)
+         {
+@@ -114,9 +143,9 @@
+                 ((blue << 3 | blue >> 2) << 8) |
+                 0xFF;
+         }
+-
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++        
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static uint ConvertRgb565ToRGBA(uint val)
+         {
+@@ -131,8 +160,8 @@
+         }
+ 
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static uint ConvertArgb1555ToRGBA(uint val)
+         {
+@@ -147,8 +176,8 @@
+                 ((alpha << 8) - alpha); // effectively alpha * 255, only works as alpha will be either 0 or 1
+         }
+ 
+-#if Net45 || NETSTANDARD
+-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
++#if Net45
++       	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+ #endif
+         public static uint EncodeAsRGBA(byte red, byte green, byte blue, byte alpha)
+         {
+--- upstream/BitmapToPixConverter.cs
++++ local/BitmapToPixConverter.cs
+@@ -1,15 +1,15 @@
+-#if SYSTEM_DRAWING_SUPPORT
++#if NETFULL
+ 
+ using System;
+ using System.Drawing;
+ using System.Drawing.Imaging;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Converts a <see cref="Bitmap"/> to a <see cref="Pix"/>.
+     /// </summary>
+-    public class BitmapToPixConverter
++    internal class BitmapToPixConverter
+     {
+         public BitmapToPixConverter()
+         {
+@@ -23,7 +23,7 @@
+         public Pix Convert(Bitmap img)
+         {
+             var pixDepth = GetPixDepth(img.PixelFormat);
+-            var pix = Pix.Create(img.Width, img.Height, pixDepth);            
++            var pix = Pix.Create(img.Width, img.Height, pixDepth);
+             pix.XRes = (int) Math.Round(img.HorizontalResolution);
+             pix.YRes = (int) Math.Round(img.VerticalResolution);
+ 
+@@ -42,8 +42,6 @@
+ 
+                 if (imgData.PixelFormat == PixelFormat.Format32bppArgb) {
+                     TransferDataFormat32bppArgb(imgData, pixData);
+-                } else if (imgData.PixelFormat == PixelFormat.Format32bppRgb) {
+-                    TransferDataFormat32bppRgb(imgData, pixData);
+                 } else if (imgData.PixelFormat == PixelFormat.Format24bppRgb) {
+                     TransferDataFormat24bppRgb(imgData, pixData);
+                 } else if (imgData.PixelFormat == PixelFormat.Format8bppIndexed) {
+@@ -69,7 +67,7 @@
+             var pixColormap = PixColormap.Create(pix.Depth);
+             try {
+                 for (int i = 0; i < imgPaletteEntries.Length; i++) {
+-                    if (!pixColormap.AddColor(imgPaletteEntries[i].ToPixColor())) {
++                    if (!pixColormap.AddColor((PixColor)imgPaletteEntries[i])) {
+                         throw new InvalidOperationException(String.Format("Failed to add colormap entry {0}.", i));
+                     }
+                 }
+@@ -90,7 +88,6 @@
+                     return 8;
+ 
+                 case PixelFormat.Format32bppArgb:
+-                case PixelFormat.Format32bppRgb:
+                 case PixelFormat.Format24bppRgb:
+                     return 32;
+ 
+@@ -134,7 +131,7 @@
+             }
+         }
+ 
+-        private unsafe void TransferDataFormat32bppRgb(BitmapData imgData, PixData pixData)
++        private unsafe void TransferDataFormat32bppArgb(BitmapData imgData, PixData pixData)
+         {
+             var imgFormat = imgData.PixelFormat;
+             var height = imgData.Height;
+@@ -145,28 +142,6 @@
+                 uint* pixLine = (uint*)pixData.Data + (y * pixData.WordsPerLine);
+ 
+                 for (int x = 0; x < width; x++) {
+-                    byte* pixelPtr = imgLine + (x << 2);
+-                    byte blue = *pixelPtr;
+-                    byte green = *(pixelPtr + 1);
+-                    byte red = *(pixelPtr + 2);
+-                    PixData.SetDataFourByte(pixLine, x, BitmapHelper.EncodeAsRGBA(red, green, blue, 255));
+-                }
+-            }
+-        }
+-
+-        private unsafe void TransferDataFormat32bppArgb(BitmapData imgData, PixData pixData)
+-        {
+-            var imgFormat = imgData.PixelFormat;
+-            var height = imgData.Height;
+-            var width = imgData.Width;
+-
+-            for (int y = 0; y < height; y++)
+-            {
+-                byte* imgLine = (byte*)imgData.Scan0 + (y * imgData.Stride);
+-                uint* pixLine = (uint*)pixData.Data + (y * pixData.WordsPerLine);
+-
+-                for (int x = 0; x < width; x++)
+-                {
+                     byte* pixelPtr = imgLine + (x << 2);
+                     byte blue = *pixelPtr;
+                     byte green = *(pixelPtr + 1);
+--- upstream/ChoiceIterator.cs
++++ local/ChoiceIterator.cs
+@@ -1,12 +1,12 @@
+ using System;
+ using System.Runtime.InteropServices;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Class to iterate over the classifier choices for a single symbol.
+     /// </summary>
+-    public sealed class ChoiceIterator : DisposableBase
++    internal sealed class ChoiceIterator : DisposableBase
+     {
+         private readonly HandleRef _handleRef;
+         
+@@ -24,7 +24,7 @@
+             VerifyNotDisposed();
+             if (_handleRef.Handle == IntPtr.Zero)
+                 return false;
+-            return Interop.TessApi.Native.ChoiceIteratorNext(_handleRef) != 0;
++            return Interop.KhanaOcrEngineApi.Native.ChoiceIteratorNext(_handleRef) != 0;
+         }
+ 
+         /// <summary>
+@@ -40,7 +40,7 @@
+             if (_handleRef.Handle == IntPtr.Zero)
+                 return 0f;
+ 
+-            return Interop.TessApi.Native.ChoiceIteratorGetConfidence(_handleRef);
++            return Interop.KhanaOcrEngineApi.Native.ChoiceIteratorGetConfidence(_handleRef);
+         }
+ 
+         /// <summary>
+@@ -53,14 +53,14 @@
+             if (_handleRef.Handle == IntPtr.Zero)            
+                 return String.Empty;
+             
+-            return Interop.TessApi.ChoiceIteratorGetUTF8Text(_handleRef);
++            return Interop.KhanaOcrEngineApi.ChoiceIteratorGetUTF8Text(_handleRef);
+         }
+ 
+         protected override void Dispose(bool disposing)
+         {
+             if (_handleRef.Handle != IntPtr.Zero)
+             {
+-                Interop.TessApi.Native.ChoiceIteratorDelete(_handleRef);
++                Interop.KhanaOcrEngineApi.Native.ChoiceIteratorDelete(_handleRef);
+             }
+         }
+     }
+--- upstream/DisposableBase.cs
++++ local/DisposableBase.cs
+@@ -2,11 +2,11 @@
+ using System;
+ using System.Diagnostics;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	public abstract class DisposableBase: IDisposable
++    public abstract class DisposableBase: IDisposable
+ 	{
+-		static readonly TraceSource trace = new TraceSource("Tesseract");
++		static readonly TraceSource trace = new TraceSource("KhanaOcrEngine");
+ 		
+ 		protected DisposableBase()
+ 		{
+--- upstream/ElementProperties.cs
++++ local/ElementProperties.cs
+@@ -2,12 +2,12 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Represents properties that describe a text block's orientation.
+-	/// </summary>
+-    public struct ElementProperties
++    /// <summary>
++    /// Represents properties that describe a text block's orientation.
++    /// </summary>
++    internal struct ElementProperties
+     {
+         private Orientation orientation;
+         private TextLineOrder textLineOrder;
+--- upstream/EngineConfig.cs
++++ local/EngineConfig.cs
+@@ -1,9 +1,9 @@
+ 
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	public class EngineConfig
++    internal class EngineConfig
+ 	{
+ 		public EngineConfig()
+ 		{
+--- upstream/EngineMode.cs
++++ local/EngineMode.cs
+@@ -1,29 +1,14 @@
+ 
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	
+-	public enum EngineMode : int
++
++    internal enum EngineMode
+ 	{
+-        /// <summary>
+-        /// Only the legacy tesseract OCR engine is used.
+-        /// </summary>
+-        TesseractOnly = 0,
+-
+-        /// <summary>
+-        /// Only the new LSTM-based OCR engine is used.
+-        /// </summary>
++		KhanaOcrEngineOnly = 0, 
+         LstmOnly,
+-
+-        /// <summary>
+-        /// Both the legacy and new LSTM based OCR engine is used.
+-        /// </summary>
+-        TesseractAndLstm,
+-
+-        /// <summary>
+-        /// The default OCR engine is used (currently LSTM-ased OCR engine).
+-        /// </summary>
++        KhanaOcrEngineAndLstm,
+         Default
+ 	}
+ }
+--- upstream/FontAttributes.cs
++++ local/FontAttributes.cs
+@@ -1,6 +1,6 @@
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     // This class is the return type of
+     // ResultIterator.GetWordFontAttributes().  We can't
+@@ -10,7 +10,7 @@
+     // scheme we're using for FontInfo objects, we can't simply
+     // augment that class since these extra properties are not
+     // accounted for by the FontInfo's unique ID.
+-    public class FontAttributes
++    internal class FontAttributes
+     {
+         public FontInfo FontInfo { get; private set; }
+ 
+--- upstream/FontInfo.cs
++++ local/FontInfo.cs
+@@ -1,13 +1,13 @@
+ using System;
+ using System.Collections.Generic;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     // The .NET equivalent of the ccstruct/fontinfo.h
+     // FontInfo struct. It's missing spacing info
+     // since we don't have any way of getting it (and
+     // it's probably not all that useful anyway)
+-    public class FontInfo
++    internal class FontInfo
+     {
+         internal FontInfo(
+             string name, int id,
+--- upstream/ImageFormat.cs
++++ local/ImageFormat.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     public enum ImageFormat : int
+     {
+--- upstream/Internal/ErrorMessage.cs
++++ local/Internal/ErrorMessage.cs
+@@ -1,11 +1,11 @@
+ using System;
+ 
+-namespace Tesseract.Internal
++namespace DSP.Khana.Ocr.Internal
+ {
+-	static class ErrorMessage
++	static class ErrorMessage 
+ 	{
+ 		private const string ErrorMessageFormat = "{0}. See {1} for details.";
+-		private const string WikiUrlFormat = "https://github.com/charlesw/tesseract/wiki/Error-{0}";
++		private const string WikiUrlFormat = "https://KhanaSoft.com";
+ 		
+ 		public static string Format(int errorNumber, string messageFormat, params object[] messageArgs)
+ 		{
+--- upstream/Internal/Guard.cs
++++ local/Internal/Guard.cs
+@@ -2,7 +2,7 @@
+ using System;
+ using System.Diagnostics;
+ 
+-namespace Tesseract.Internal
++namespace DSP.Khana.Ocr.Internal
+ {
+ 	static class Guard
+ 	{
+--- upstream/Internal/InteropDotNet/InteropRuntimeImplementer.cs
++++ local/Internal/InteropDotNet/InteropRuntimeImplementer.cs
+@@ -22,7 +22,7 @@
+ 
+             var assemblyName = GetAssemblyName(interfaceType);
+ #if NETFULL
+-            var assemblyBuilder = Thread.GetDomain().DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
++            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+ #elif NETSTANDARD
+              var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+ #endif
+--- upstream/Internal/InteropDotNet/LibraryLoader.cs
++++ local/Internal/InteropDotNet/LibraryLoader.cs
+@@ -5,8 +5,8 @@
+ using System.Collections.Generic;
+ using System.IO;
+ using System.Reflection;
+-using Tesseract;
+-using Tesseract.Internal;
++using DSP.Khana.Ocr;
++using DSP.Khana.Ocr.Internal;
+ 
+ namespace InteropDotNet
+ {
+@@ -42,6 +42,11 @@
+                     Logger.TraceInformation("Current platform: " + platformName);
+                                         
+                     IntPtr dllHandle = CheckCustomSearchPath(fileName, platformName);
++                    
++                    //searchAppData
++                    if (dllHandle == IntPtr.Zero)
++                        dllHandle = CheckAppDataDirecotry(KhanaOcrEngine.DllDirectory,fileName);
++
+                     if (dllHandle == IntPtr.Zero)
+                         dllHandle = CheckExecutingAssemblyDomain(fileName, platformName);
+                     if (dllHandle == IntPtr.Zero)
+@@ -50,6 +55,7 @@
+                         dllHandle = CheckCurrentAppDomainBin(fileName, platformName);
+                     if (dllHandle == IntPtr.Zero)
+                         dllHandle = CheckWorkingDirecotry(fileName, platformName);
++
+ 
+                     if (dllHandle != IntPtr.Zero)
+                         loadedAssemblies[fileName] = dllHandle;
+@@ -59,6 +65,11 @@
+ 
+                 return loadedAssemblies[fileName];
+             }
++        }
++
++        private IntPtr CheckAppDataDirecotry(string path,string fileName)
++        {
++            return InternalLoadLibrary(path, "", fileName);
+         }
+ 
+         private IntPtr CheckCustomSearchPath(string fileName, string platformName)
+@@ -76,13 +87,7 @@
+ 
+         private IntPtr CheckExecutingAssemblyDomain(string fileName, string platformName)
+         {
+-            var executingAssembly = Assembly.GetExecutingAssembly();
+-            if(executingAssembly == null) {
+-                // #591 Executing assembly may be null in some cases
+-                return IntPtr.Zero;
+-            }
+-
+-            var baseDirectory = Path.GetDirectoryName(executingAssembly.Location);
++            var baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+             Logger.TraceInformation("Checking executing application domain location '{0}' for '{1}' on platform {2}.", baseDirectory, fileName, platformName);
+             return InternalLoadLibrary(baseDirectory, platformName, fileName);
+         }
+@@ -102,7 +107,7 @@
+         /// 
+         /// <list type="bullet">
+         ///     <item>That the current application domain's location for web applications corresponds to the web applications root directory.</item>
+-        ///     <item>That the tesseract\leptonica dlls reside in the corresponding x86 or x64 directories in the bin directory under the apps root directory.</item>
++        ///     <item>That the DSP.Khana.Ocr\leptonica dlls reside in the corresponding x86 or x64 directories in the bin directory under the apps root directory.</item>
+         /// </list>
+         /// </remarks>
+         /// <param name="fileName"></param>
+--- upstream/Internal/InteropDotNet/SystemManager.cs
++++ local/Internal/InteropDotNet/SystemManager.cs
+@@ -2,7 +2,6 @@
+ //  Project URL: https://github.com/AndreyAkinshin/InteropDotNet
+ //  Distributed under the MIT License: http://opensource.org/licenses/MIT
+ using System;
+-using System.Runtime.InteropServices;
+ 
+ namespace InteropDotNet
+ {
+@@ -15,17 +14,6 @@
+ 
+         public static OperatingSystem GetOperatingSystem()
+         {
+-            // Environment.OSVersion.Platform detects MacOS as Unix in .net core environment
+-#if NETCORE || NETSTANDARD
+-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+-                return OperatingSystem.Windows;
+-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+-                return OperatingSystem.Unix;
+-            if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+-                return OperatingSystem.MacOSX;
+-            
+-            return OperatingSystem.Unknown;
+-#else
+             var pid = (int)Environment.OSVersion.Platform;
+             switch (pid)
+             {
+@@ -42,7 +30,6 @@
+                 default:
+                     return OperatingSystem.Unknown;
+             }
+-#endif
+         }
+     }
+ 
+--- upstream/Internal/InteropDotNet/UnixLibraryLoaderLogic.cs
++++ local/Internal/InteropDotNet/UnixLibraryLoaderLogic.cs
+@@ -4,7 +4,7 @@
+ using System;
+ using System.Runtime.InteropServices;
+ 
+-using Tesseract.Internal;
++using DSP.Khana.Ocr.Internal;
+ 
+ namespace InteropDotNet
+ {
+@@ -55,14 +55,12 @@
+             return functionHandle;
+         }
+ 
+-        private static readonly string FileExtension = SystemManager.GetOperatingSystem() == OperatingSystem.MacOSX ? ".dylib" : ".so";
+-
+         public string FixUpLibraryName(string fileName)
+         {
+             if (!string.IsNullOrEmpty(fileName))
+             {
+-                if (!fileName.EndsWith(FileExtension, StringComparison.OrdinalIgnoreCase))
+-                    fileName += FileExtension;
++                if (!fileName.EndsWith(".so", StringComparison.OrdinalIgnoreCase))
++                    fileName += ".so";
+                 if (!fileName.StartsWith("lib", StringComparison.OrdinalIgnoreCase))
+                     fileName = "lib" + fileName;
+             }
+@@ -71,71 +69,16 @@
+ 
+         const int RTLD_NOW = 2;
+ 
+-        private static bool? _useSystemLibrary2;
++        [DllImport("libdl.so", EntryPoint = "dlopen")]
++        private static extern IntPtr UnixLoadLibrary(String fileName, int flags);
+ 
+-        private static IntPtr UnixLoadLibrary(String fileName, int flags)
+-        {
+-            if (!_useSystemLibrary2.HasValue)
+-            {
+-                try
+-                {
+-                    var result = dlopen2(fileName, flags);
+-                    _useSystemLibrary2 = true;
+-                    return result;
+-                }
+-                catch (DllNotFoundException)
+-                {
+-                    _useSystemLibrary2 = false;
+-                    return dlopen1(fileName, flags);
+-                }
+-            }
++        [DllImport("libdl.so", EntryPoint = "dlclose", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
++        private static extern int UnixFreeLibrary(IntPtr handle);
+ 
+-            return _useSystemLibrary2.Value ? dlopen2(fileName, flags) : dlopen1(fileName, flags);
+-        }
++        [DllImport("libdl.so", EntryPoint = "dlsym", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
++        private static extern IntPtr UnixGetProcAddress(IntPtr handle, String symbol);
+ 
+-        private static int UnixFreeLibrary(IntPtr handle)
+-        {
+-            if (!_useSystemLibrary2.HasValue)
+-                throw new Exception($"Expected ${nameof(UnixLoadLibrary)} to have been called.");
+-            return _useSystemLibrary2.Value ? dlclose2(handle) : dlclose1(handle);
+-        }
+-
+-        private static IntPtr UnixGetProcAddress(IntPtr handle, String symbol)
+-        {
+-            if (!_useSystemLibrary2.HasValue)
+-                throw new Exception($"Expected ${nameof(UnixLoadLibrary)} to have been called.");
+-            return _useSystemLibrary2.Value ? dlsym2(handle, symbol) : dlsym1(handle, symbol);
+-        }
+-
+-        private static IntPtr UnixGetLastError()
+-        {
+-            if (!_useSystemLibrary2.HasValue)
+-                throw new Exception($"Expected ${nameof(UnixLoadLibrary)} to have been called.");
+-            return _useSystemLibrary2.Value ? dlerror2() : dlerror1();
+-        }
+-
+-        [DllImport("libdl", EntryPoint = "dlopen")]
+-        private static extern IntPtr dlopen1(String fileName, int flags);
+-
+-        [DllImport("libdl", EntryPoint = "dlclose", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern int dlclose1(IntPtr handle);
+-
+-        [DllImport("libdl", EntryPoint = "dlsym", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern IntPtr dlsym1(IntPtr handle, String symbol);
+-
+-        [DllImport("libdl", EntryPoint = "dlerror", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern IntPtr dlerror1();
+-
+-        [DllImport("libdl.so.2", EntryPoint = "dlopen")]
+-        private static extern IntPtr dlopen2(String fileName, int flags);
+-
+-        [DllImport("libdl.so.2", EntryPoint = "dlclose", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern int dlclose2(IntPtr handle);
+-
+-        [DllImport("libdl.so.2", EntryPoint = "dlsym", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern IntPtr dlsym2(IntPtr handle, String symbol);
+-
+-        [DllImport("libdl.so.2", EntryPoint = "dlerror", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+-        private static extern IntPtr dlerror2();
++        [DllImport("libdl.so", EntryPoint = "dlerror", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
++        private static extern IntPtr UnixGetLastError();
+     }
+ }--- upstream/Internal/InteropDotNet/WindowsLibraryLoaderLogic.cs
++++ local/Internal/InteropDotNet/WindowsLibraryLoaderLogic.cs
+@@ -3,7 +3,8 @@
+ //  Distributed under the MIT License: http://opensource.org/licenses/MIT
+ using System;
+ using System.Runtime.InteropServices;
+-using Tesseract.Internal;
++using DSP.Khana.Ocr;
++using DSP.Khana.Ocr.Internal;
+ 
+ namespace InteropDotNet
+ {
+@@ -65,7 +66,7 @@
+                 }
+                 else
+                 {
+-                    throw new Tesseract.LoadLibraryException(String.Format(
++                    throw new DSP.Khana.Ocr.LoadLibraryException(String.Format(
+                         "Failed to load native function \"{0}\" from library with handle  {1}.",
+                         functionName, libraryHandle));
+ 
+@@ -75,7 +76,7 @@
+             catch (Exception e)
+             {
+                 var lastError = WindowsGetLastError();
+-                throw new Tesseract.LoadLibraryException(
++                throw new DSP.Khana.Ocr.LoadLibraryException(
+                     String.Format("Failed to load native function \"{0}\" from library with handle  {1}.\r\nLast Error:{1}\r\nCheck inner exception and\\or windows event log.\r\nInner Exception: {2}", functionName, libraryHandle, lastError, e.ToString()),
+                     e);
+             }
+--- upstream/Internal/Logger.cs
++++ local/Internal/Logger.cs
+@@ -5,11 +5,11 @@
+ using System.Diagnostics;
+ using System.Globalization;
+ 
+-namespace Tesseract.Internal
++namespace DSP.Khana.Ocr.Internal
+ {
+     static class Logger
+     {
+-		readonly static TraceSource trace = new TraceSource("Tesseract");
++		readonly static TraceSource trace = new TraceSource("KhanaOcrEngine");
+         
+ 
+         public static void TraceInformation(string format, params object[] args)
+--- upstream/Internal/TessConvert.cs
++++ local/Internal/TessConvert.cs
+@@ -2,7 +2,7 @@
+ using System;
+ using System.Globalization;
+ 
+-namespace Tesseract.Internal
++namespace DSP.Khana.Ocr.Internal
+ {
+ 	/// <summary>
+ 	/// Utility helpers to handle converting variable values.
+--- upstream/Interop/BaseApi.cs
++++ local/Interop/BaseApi.cs
+@@ -3,34 +3,35 @@
+ using System.Collections.Generic;
+ using System.Runtime.InteropServices;
+ using System.Text;
+-using Tesseract.Internal;
+-
+-namespace Tesseract.Interop
++using DSP.Khana.Ocr.Internal;
++using DSP.Khana.Ocr.Engine.v5;
++
++namespace DSP.Khana.Ocr.Interop
+ {
+     /// <summary>
+-    /// The exported tesseract api signatures.
++    /// The exported KhanaOcrEngine api signatures.
+     /// </summary>
+     /// <remarks>
+     /// Please note this is only public for technical reasons (you can't proxy a internal interface).
+     /// It should be considered an internal interface and is NOT part of the public api and may have
+     /// breaking changes between releases.
+     /// </remarks>
+-    public interface ITessApiSignatures
++    public interface IKhanaOcrEngineApiSignatures
+     {
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetComponentImages")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetComponentImages")]
+         IntPtr BaseAPIGetComponentImages(HandleRef handle, PageIteratorLevel level, int text_only, IntPtr pixa, IntPtr blockids);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIAnalyseLayout")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIAnalyseLayout")]
+         IntPtr BaseAPIAnalyseLayout(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIClear")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIClear")]
+         void BaseAPIClear(HandleRef handle);
+ 
+         /// <summary>
+         /// Creates a new BaseAPI instance
+         /// </summary>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPICreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPICreate")]
+         IntPtr BaseApiCreate();
+ 
+         // Base API
+@@ -38,190 +39,174 @@
+         /// Deletes a base api instance.
+         /// </summary>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIDelete")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIDelete")]
+         void BaseApiDelete(HandleRef ptr);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIDetectOrientationScript")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIDetectOrientationScript")]
+         int TessBaseAPIDetectOrientationScript(HandleRef handle, out int orient_deg, out float orient_conf, out IntPtr script_name, out float script_conf);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetBoolVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetBoolVariable")]
+         int BaseApiGetBoolVariable(HandleRef handle, string name, out int value);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetDoubleVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetDoubleVariable")]
+         int BaseApiGetDoubleVariable(HandleRef handle, string name, out double value);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetHOCRText")]
+-        IntPtr BaseApiGetHOCRTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetAltoText")]
+-        IntPtr BaseApiGetAltoTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetTsvText")]
+-        IntPtr BaseApiGetTsvTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetBoxText")]
+-        IntPtr BaseApiGetBoxTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetLSTMBoxText")]
+-        IntPtr BaseApiGetLSTMBoxTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetWordStrBoxText")]
+-        IntPtr BaseApiGetWordStrBoxTextInternal(HandleRef handle, int pageNum);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetUNLVText")]
+-        IntPtr BaseApiGetUNLVTextInternal(HandleRef handle);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetIntVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetHOCRText")]
++        IntPtr BaseAPIGetHOCRTextInternal(HandleRef handle, int pageNum);
++
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetIntVariable")]
+         int BaseApiGetIntVariable(HandleRef handle, string name, out int value);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetIterator")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetIterator")]
+         IntPtr BaseApiGetIterator(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetPageSegMode")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetPageSegMode")]
+         PageSegMode BaseAPIGetPageSegMode(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetStringVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetStringVariable")]
+         IntPtr BaseApiGetStringVariableInternal(HandleRef handle, string name);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetThresholdedImage")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetThresholdedImage")]
+         IntPtr BaseAPIGetThresholdedImage(HandleRef handle);
+ 
+-        // The following were causing issues on Linux/MacOsX when used in .net core
+-        //[RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIProcessPages")]
+-        //int BaseAPIProcessPages(HandleRef handle, string filename, string retry_config, int timeout_millisec, HandleRef renderer);
+-
+-        //[RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIProcessPage")]
+-        //int BaseAPIProcessPage(HandleRef handle, Pix pix, int page_index, string filename, string retry_config, int timeout_millisec, HandleRef renderer);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetInputName")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIProcessPages")]
++        int BaseAPIProcessPages(HandleRef handle, string filename, string retry_config, int timeout_millisec, HandleRef renderer);
++
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIProcessPage")]
++        int BaseAPIProcessPage(HandleRef handle, Pix pix, int page_index, string filename, string retry_config, int timeout_millisec, HandleRef renderer);
++
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetInputName")]
+         void BaseAPISetInputName(HandleRef handle, string name);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetDatapath")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetDatapath")]
+         string BaseAPIGetDatapath(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetOutputName")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetOutputName")]
+         void BaseAPISetOutputName(HandleRef handle, string name);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetUTF8Text")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIGetUTF8Text")]
+         IntPtr BaseAPIGetUTF8TextInternal(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIInit4")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIInit4")]
+         int BaseApiInit(HandleRef handle, string datapath, string language, int mode,
+                                       string[] configs, int configs_size,
+                                       string[] vars_vec, string[] vars_values, UIntPtr vars_vec_size,
+                                       bool set_only_non_debug_params);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIMeanTextConf")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIMeanTextConf")]
+         int BaseAPIMeanTextConf(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIRecognize")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIRecognize")]
+         int BaseApiRecognize(HandleRef handle, HandleRef monitor);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetDebugVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetDebugVariable")]
+         int BaseApiSetDebugVariable(HandleRef handle, string name, IntPtr valPtr);
+ 
+         // image analysis
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetImage2")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetImage2")]
+         void BaseApiSetImage(HandleRef handle, HandleRef pixHandle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetInputName")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetInputName")]
+         void BaseApiSetInputName(HandleRef handle, string value);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetPageSegMode")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetPageSegMode")]
+         void BaseAPISetPageSegMode(HandleRef handle, PageSegMode mode);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetRectangle")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetRectangle")]
+         void BaseApiSetRectangle(HandleRef handle, int left, int top, int width, int height);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetVariable")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPISetVariable")]
+         int BaseApiSetVariable(HandleRef handle, string name, IntPtr valPtr);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteIntArray")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteBlockList")]
++        void DeleteBlockList(IntPtr arr);
++
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteIntArray")]
+         void DeleteIntArray(IntPtr arr);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteText")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteText")]
+         void DeleteText(IntPtr textPtr);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteTextArray")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteTextArray")]
+         void DeleteTextArray(IntPtr arr);
+ 
+         // Helper functions
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessVersion")]
+-        IntPtr GetVersion();
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessVersion")]
++        string GetVersion();
+ 
+         // result iterator
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBaseline")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBaseline")]
+         int PageIteratorBaseline(HandleRef handle, PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBegin")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBegin")]
+         void PageIteratorBegin(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBlockType")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBlockType")]
+         PolyBlockType PageIteratorBlockType(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBoundingBox")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorBoundingBox")]
+         int PageIteratorBoundingBox(HandleRef handle, PageIteratorLevel level, out int left, out int top, out int right, out int bottom);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorCopy")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorCopy")]
+         IntPtr PageIteratorCopy(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorDelete")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorDelete")]
+         void PageIteratorDelete(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorGetBinaryImage")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorGetBinaryImage")]
+         IntPtr PageIteratorGetBinaryImage(HandleRef handle, PageIteratorLevel level);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorGetImage")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorGetImage")]
+         IntPtr PageIteratorGetImage(HandleRef handle, PageIteratorLevel level, int padding, HandleRef originalImage, out int left, out int top);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtBeginningOf")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtBeginningOf")]
+         int PageIteratorIsAtBeginningOf(HandleRef handle, PageIteratorLevel level);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtFinalElement")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtFinalElement")]
+         int PageIteratorIsAtFinalElement(HandleRef handle, PageIteratorLevel level, PageIteratorLevel element);
+ 
+         // page iterator
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorNext")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorNext")]
+         int PageIteratorNext(HandleRef handle, PageIteratorLevel level);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorOrientation")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorOrientation")]
+         void PageIteratorOrientation(HandleRef handle, out Orientation orientation, out WritingDirection writing_direction, out TextLineOrder textLineOrder, out float deskew_angle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorCopy")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorCopy")]
+         IntPtr ResultIteratorCopy(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorDelete")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorDelete")]
+         void ResultIteratorDelete(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorConfidence")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorConfidence")]
+         float ResultIteratorGetConfidence(HandleRef handle, PageIteratorLevel level);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordFontAttributes")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordFontAttributes")]
+         IntPtr ResultIteratorWordFontAttributes(HandleRef handle, out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace, out bool isSerif, out bool isSmallCaps, out int pointSize, out int fontId);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordIsFromDictionary")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordIsFromDictionary")]
+         bool ResultIteratorWordIsFromDictionary(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordIsNumeric")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordIsNumeric")]
+         bool ResultIteratorWordIsNumeric(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordRecognitionLanguage")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorWordRecognitionLanguage")]
+         IntPtr ResultIteratorWordRecognitionLanguageInternal(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsSuperscript")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsSuperscript")]
+         bool ResultIteratorSymbolIsSuperscript(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsSubscript")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsSubscript")]
+         bool ResultIteratorSymbolIsSubscript(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsDropcap")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorSymbolIsDropcap")]
+         bool ResultIteratorSymbolIsDropcap(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetPageIterator")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetPageIterator")]
+         IntPtr ResultIteratorGetPageIterator(HandleRef handle);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetUTF8Text")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetUTF8Text")]
+         IntPtr ResultIteratorGetUTF8TextInternal(HandleRef handle, PageIteratorLevel level);
+ 
+         #region Choice Iterator
+@@ -231,14 +216,14 @@
+         /// </summary>
+         /// <param name="handle"></param>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetChoiceIterator")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetChoiceIterator")]
+         IntPtr ResultIteratorGetChoiceIterator(HandleRef handle);
+ 
+         /// <summary>
+         /// Native API call to TessChoiceIteratorDelete
+         /// </summary>
+         /// <param name="handle"></param>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorDelete")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorDelete")]
+         void ChoiceIteratorDelete(HandleRef handle);
+ 
+         /// <summary>
+@@ -246,7 +231,7 @@
+         /// </summary>
+         /// <param name="handle"></param>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorNext")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorNext")]
+         int ChoiceIteratorNext(HandleRef handle);
+ 
+         /// <summary>
+@@ -254,7 +239,7 @@
+         /// </summary>
+         /// <param name="handle"></param>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorGetUTF8Text")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorGetUTF8Text")]
+         IntPtr ChoiceIteratorGetUTF8TextInternal(HandleRef handle);
+ 
+         /// <summary>
+@@ -262,77 +247,65 @@
+         /// </summary>
+         /// <param name="handle"></param>
+         /// <returns></returns>
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorConfidence")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessChoiceIteratorConfidence")]
+         float ChoiceIteratorGetConfidence(HandleRef handle);
+ 
+         #endregion Choice Iterator
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIPrintVariablesToFile")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBaseAPIPrintVariablesToFile")]
+         int BaseApiPrintVariablesToFile(HandleRef handle, string filename);
+ 
+         #region Renderer API
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessTextRendererCreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessTextRendererCreate")]
+         IntPtr TextRendererCreate(string outputbase);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessAltoRendererCreate")]
+-        IntPtr AltoRendererCreate(string outputbase);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessTsvRendererCreate")]
+-        IntPtr TsvRendererCreate(string outputbase);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessHOcrRendererCreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessHOcrRendererCreate")]
+         IntPtr HOcrRendererCreate(string outputbase);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessHOcrRendererCreate2")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessHOcrRendererCreate2")]
+         IntPtr HOcrRendererCreate2(string outputbase, int font_info);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPDFRendererCreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPDFRendererCreate")]
+         IntPtr PDFRendererCreate(string outputbase, IntPtr datadir, int textonly);
+         
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessUnlvRendererCreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessUnlvRendererCreate")]
+         IntPtr UnlvRendererCreate(string outputbase);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBoxTextRendererCreate")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessBoxTextRendererCreate")]
+         IntPtr BoxTextRendererCreate(string outputbase);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessLSTMBoxRendererCreate")]
+-        IntPtr LSTMBoxRendererCreate(string outputbase);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessWordStrBoxRendererCreate")]
+-        IntPtr WordStrBoxRendererCreate(string outputbase);
+-
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteResultRenderer")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessDeleteResultRenderer")]
+         void DeleteResultRenderer(HandleRef renderer);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererInsert")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererInsert")]
+         void ResultRendererInsert(HandleRef renderer, HandleRef next);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererNext")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererNext")]
+         IntPtr ResultRendererNext(HandleRef renderer);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererBeginDocument")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererBeginDocument")]
+         int ResultRendererBeginDocument(HandleRef renderer, IntPtr titlePtr);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererAddImage")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererAddImage")]
+         int ResultRendererAddImage(HandleRef renderer, HandleRef api);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererEndDocument")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererEndDocument")]
+         int ResultRendererEndDocument(HandleRef renderer);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererExtention")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererExtention")]
+         IntPtr ResultRendererExtention(HandleRef renderer);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererTitle")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererTitle")]
+         IntPtr ResultRendererTitle(HandleRef renderer);
+ 
+-        [RuntimeDllImport(Constants.TesseractDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererImageNum")]
++        [RuntimeDllImport(Constants.KhanaOcrEngineDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultRendererImageNum")]
+         int ResultRendererImageNum(HandleRef renderer);
+ 
+         #endregion Renderer API
+     }
+ 
+-    internal static class TessApi
++    internal static class KhanaOcrEngineApi
+     {
+         //XHTML Begin Tag:
+         public const string xhtmlBeginTag =
+@@ -343,7 +316,7 @@
+             + "lang=\"en\">\n <head>\n  <title></title>\n"
+             + "<meta http-equiv=\"Content-Type\" content=\"text/html;"
+             + "charset=utf-8\" />\n"
+-            + "  <meta name='ocr-system' content='tesseract' />\n"
++            + "  <meta name='ocr-system' content='KhanaOcrEngine' />\n"
+             + "  <meta name='ocr-capabilities' content='ocr_page ocr_carea ocr_par"
+             + " ocr_line ocrx_word"
+             + "'/>\n"
+@@ -357,14 +330,14 @@
+             + " \"http://www.w3.org/TR/html4/loose.dtd\">\n"
+             + "<html>\n<head>\n<title></title>\n"
+             + "<meta http-equiv=\"Content-Type\" content=\"text/html;"
+-            + "charset=utf-8\" />\n<meta name='ocr-system' content='tesseract'/>\n"
++            + "charset=utf-8\" />\n<meta name='ocr-system' content='KhanaOcrEngine'/>\n"
+             + "</head>\n<body>\n";
+ 
+         public const string htmlEndTag = "</body>\n</html>\n";
+ 
+-        private static ITessApiSignatures native;
+-
+-        public static ITessApiSignatures Native
++        private static IKhanaOcrEngineApiSignatures native;
++
++        public static IKhanaOcrEngineApiSignatures Native
+         {
+             get
+             {
+@@ -374,24 +347,12 @@
+             }
+         }
+ 
+-        public static string BaseApiGetVersion()
+-        {
+-            IntPtr versionHandle = Native.GetVersion();
+-            if (versionHandle != IntPtr.Zero)
+-            {
+-                var result = MarshalHelper.PtrToString(versionHandle, Encoding.UTF8);
+-                return result;
+-            }
+-
+-            return null;
+-        }
+-
+         public static string BaseAPIGetHOCRText(HandleRef handle, int pageNum)
+         {
+-            IntPtr txtHandle = Native.BaseApiGetHOCRTextInternal(handle, pageNum);
++            IntPtr txtHandle = Native.BaseAPIGetHOCRTextInternal(handle, pageNum);
+             if (txtHandle != IntPtr.Zero) {
+                 var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
++                KhanaOcrEngineApi.Native.DeleteText(txtHandle);
+                 return htmlBeginTag + result + htmlEndTag;
+             } else {
+                 return null;
+@@ -401,96 +362,12 @@
+         //Just Copied:
+         public static string BaseAPIGetHOCRText2(HandleRef handle, int pageNum)
+         {
+-            IntPtr txtHandle = Native.BaseApiGetHOCRTextInternal(handle, pageNum);
++            IntPtr txtHandle = Native.BaseAPIGetHOCRTextInternal(handle, pageNum);
+             if (txtHandle != IntPtr.Zero) {
+                 var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
++                KhanaOcrEngineApi.Native.DeleteText(txtHandle);
+                 return xhtmlBeginTag + result + xhtmlEndTag;
+             } else {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetAltoText(HandleRef handle, int pageNum)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetAltoTextInternal(handle, pageNum);
+-            if (txtHandle != IntPtr.Zero) {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            } else {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetTsvText(HandleRef handle, int pageNum)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetTsvTextInternal(handle, pageNum);
+-            if (txtHandle != IntPtr.Zero) {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            } else {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetBoxText(HandleRef handle, int pageNum)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetBoxTextInternal(handle, pageNum);
+-            if (txtHandle != IntPtr.Zero)
+-            {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            }
+-            else
+-            {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetLSTMBoxText(HandleRef handle, int pageNum)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetLSTMBoxTextInternal(handle, pageNum);
+-            if (txtHandle != IntPtr.Zero)
+-            {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            }
+-            else
+-            {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetWordStrBoxText(HandleRef handle, int pageNum)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetWordStrBoxTextInternal(handle, pageNum);
+-            if (txtHandle != IntPtr.Zero)
+-            {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            }
+-            else
+-            {
+-                return null;
+-            }
+-        }
+-
+-        public static string BaseAPIGetUNLVText(HandleRef handle)
+-        {
+-            IntPtr txtHandle = Native.BaseApiGetUNLVTextInternal(handle);
+-            if (txtHandle != IntPtr.Zero)
+-            {
+-                var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
+-                return result;
+-            }
+-            else
+-            {
+                 return null;
+             }
+         }
+@@ -510,20 +387,40 @@
+             IntPtr txtHandle = Native.BaseAPIGetUTF8TextInternal(handle);
+             if (txtHandle != IntPtr.Zero) {
+                 var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
++                KhanaOcrEngineApi.Native.DeleteText(txtHandle);
+                 return result;
+             } else {
+                 return null;
+             }
+         }
+ 
+-        public static int BaseApiInit(HandleRef handle, string datapath, string language, int mode, IEnumerable<string> configFiles, IDictionary<string, object> initialValues, bool setOnlyNonDebugParams)
+-        {
++        public static int BaseApiInit(LanguageModel languageModel, HandleRef handle, string datapath, string language, int mode, IEnumerable<string> configFiles, IDictionary<string, object> initialValues, bool setOnlyNonDebugParams)
++        {
++
+             Guard.Require("handle", handle.Handle != IntPtr.Zero, "Handle for BaseApi, created through BaseApiCreate is required.");
+             Guard.RequireNotNullOrEmpty("language", language);
+             Guard.RequireNotNull("configFiles", configFiles);
+             Guard.RequireNotNull("initialValues", initialValues);
+-
++#if !DESKTOP_WITHOUT_LICENSING
++            Guard.Require("License",languageModel.IsValid);
++            //Nigje_lan
++            if (!(languageModel.AppName == languageModel.LicenseAppName))
++            {
++                Guard.Require("License", false);
++            }
++            if (!(languageModel.IsValid && languageModel.UID == languageModel.AppKey))
++            {
++                Guard.Require("License", false);
++            }
++            if (!languageModel.Language.ToLower().Contains(language.ToLower()))
++            {
++                Guard.Require("License", false);
++            }
++            if (languageModel.ExpireDateTime < DateTime.Now)
++            {
++                Guard.Require("License", false);
++            }
++#endif
+             string[] configFilesArray = new List<string>(configFiles).ToArray();
+ 
+             string[] varNames = new string[initialValues.Count];
+@@ -581,13 +478,13 @@
+         {
+             if (native == null) {
+                 LeptonicaApi.Initialize();
+-                native = InteropRuntimeImplementer.CreateInstance<ITessApiSignatures>();
++                native = InteropRuntimeImplementer.CreateInstance<IKhanaOcrEngineApiSignatures>();
+             }
+         }
+ 
+         public static string ResultIteratorWordRecognitionLanguage(HandleRef handle)
+         {
+-            // per docs (ltrresultiterator.h:118 as of 4897796 in github:tesseract-ocr/tesseract)
++            
+             // this return value should *NOT* be deleted.
+             IntPtr txtHandle =
+                 Native.ResultIteratorWordRecognitionLanguageInternal(handle);
+@@ -602,7 +499,7 @@
+             IntPtr txtHandle = Native.ResultIteratorGetUTF8TextInternal(handle, level);
+             if (txtHandle != IntPtr.Zero) {
+                 var result = MarshalHelper.PtrToString(txtHandle, Encoding.UTF8);
+-                TessApi.Native.DeleteText(txtHandle);
++                KhanaOcrEngineApi.Native.DeleteText(txtHandle);
+                 return result;
+             } else {
+                 return null;
+--- upstream/Interop/Constants.cs
++++ local/Interop/Constants.cs
+@@ -1,16 +1,16 @@
+ using System;
+ 
+-namespace Tesseract.Interop
++namespace DSP.Khana.Ocr.Interop
+ {
+     /// <summary>
+     /// Description of Constants.
+     /// </summary>
+     internal static class Constants
+     {
+-        public const string LeptonicaDllName = "leptonica-1.82.0";
+-        public const string TesseractDllName = "tesseract50";
++        public const string LeptonicaDllName = "liblept1780";
++        public const string KhanaOcrEngineDllName = "BinaOcrEngineV5";
+         
+-        // tesseract uses an int to represent true false values.
++        // KhanaOcrEngine uses an int to represent true false values.
+         public const int TRUE = 1;
+         public const int FALSE = 0;
+     }
+--- upstream/Interop/HostProcessInfo.cs
++++ local/Interop/HostProcessInfo.cs
+@@ -1,6 +1,6 @@
+ using System;
+ 
+-namespace Tesseract.Interop
++namespace DSP.Khana.Ocr.Interop
+ {
+ 	/// <summary>
+ 	/// Provides information about the hosting process.
+--- upstream/Interop/LeptonicaApi.cs
++++ local/Interop/LeptonicaApi.cs
+@@ -4,7 +4,7 @@
+ using System.Text;
+ using InteropDotNet;
+ 
+-namespace Tesseract.Interop
++namespace DSP.Khana.Ocr.Interop
+ {
+     /// <summary>
+     /// The exported leptonica api signatures.
+@@ -109,15 +109,9 @@
+         [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixRead")]
+         IntPtr pixRead(string filename);
+ 
+-        [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixReadMem")]
+-        unsafe IntPtr pixReadMem(byte* data, int length);
+-
+         [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixReadMemTiff")]
+         unsafe IntPtr pixReadMemTiff(byte* data, int length, int page);
+ 
+-        [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixReadFromMultipageTiff")]
+-        IntPtr pixReadFromMultipageTiff(string filename, ref int offset);
+-
+         [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixWrite")]
+         int pixWrite(string filename, HandleRef handle, ImageFormat format);
+ 
+@@ -137,9 +131,6 @@
+ 
+         [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixConvertRGBToGray")]
+         IntPtr pixConvertRGBToGray(HandleRef pix, float rwt, float gwt, float bwt);
+-
+-        [RuntimeDllImport(Constants.LeptonicaDllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pixConvertTo8")]
+-        IntPtr pixConvertTo8(HandleRef pix, int cmapflag);
+ 
+ 
+         // image analysis and manipulation functions
+--- upstream/Interop/MarshalHelper.cs
++++ local/Interop/MarshalHelper.cs
+@@ -3,7 +3,7 @@
+ using System.Runtime.InteropServices;
+ using System.Text;
+ 
+-namespace Tesseract.Interop
++namespace DSP.Khana.Ocr.Interop
+ {
+     unsafe static class MarshalHelper
+     {
+--- upstream/IResultRenderer.cs
++++ local/IResultRenderer.cs
+@@ -1,8 +1,8 @@
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public interface IResultRenderer : IDisposable
++    internal interface IResultRenderer : IDisposable
+     {
+         /// <summary>
+         /// Begins a new document with the specified <paramref name="title"/>.
+--- upstream/LeptonicaException.cs
++++ local/LeptonicaException.cs
+@@ -2,10 +2,10 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     [Serializable]
+-    public class LeptonicaException : Exception
++    internal class LeptonicaException : Exception
+     {
+         public LeptonicaException() { }
+         public LeptonicaException(string message) : base(message) { }
+--- upstream/LoadLibraryException.cs
++++ local/LoadLibraryException.cs
+@@ -2,10 +2,10 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     [Serializable]
+-    public class LoadLibraryException : SystemException
++    internal class LoadLibraryException : SystemException
+     {
+         public LoadLibraryException() { }
+         public LoadLibraryException(string message) : base(message) { }
+--- upstream/MathHelper.cs
++++ local/MathHelper.cs
+@@ -2,9 +2,9 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public static class MathHelper
++    internal static class MathHelper
+     {
+         /// <summary>
+         /// Convert a degrees to radians.
+--- upstream/Orientation.cs
++++ local/Orientation.cs
+@@ -2,24 +2,24 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Represents orientation that the page would need to be rotated so that .
+-	/// </summary>
+-	/// <remarks>
+-	/// Orientation is defined as to what side of the page would need to correspond to the 'up' direction such that the characters will
+-	/// be read able. Another way of looking at this what direction you need to rotate you head so that "up" aligns with Orientation, 
+-	/// then the characters will appear "right side up" and readable.
+-	/// 
+-	/// In short:
+-	/// <list type="bullet">
+-	/// 	<item>PageUp - Page is correctly alligned with up and no rotation is needed.</item>
+-	/// 	<item>PageRight - Page needs to be rotated so the right hand side is up, 90 degress counter clockwise, to be readable.</item>
+-	/// 	<item>PageDown - Page needs to be rotated so the bottom side is up, 180 degress counter clockwise, to be readable.</item>
+-	/// 	<item>PageLeft - Page needs to be rotated so the left hand side is up, 90 degress clockwise, to be readable.</item>
+-	/// </list>
+-	/// </remarks>
++    /// <summary>
++    /// Represents orientation that the page would need to be rotated so that .
++    /// </summary>
++    /// <remarks>
++    /// Orientation is defined as to what side of the page would need to correspond to the 'up' direction such that the characters will
++    /// be read able. Another way of looking at this what direction you need to rotate you head so that "up" aligns with Orientation, 
++    /// then the characters will appear "right side up" and readable.
++    /// 
++    /// In short:
++    /// <list type="bullet">
++    /// 	<item>PageUp - Page is correctly alligned with up and no rotation is needed.</item>
++    /// 	<item>PageRight - Page needs to be rotated so the right hand side is up, 90 degress counter clockwise, to be readable.</item>
++    /// 	<item>PageDown - Page needs to be rotated so the bottom side is up, 180 degress counter clockwise, to be readable.</item>
++    /// 	<item>PageLeft - Page needs to be rotated so the left hand side is up, 90 degress clockwise, to be readable.</item>
++    /// </list>
++    /// </remarks>
+     public enum Orientation
+     {
+     	/// <summary>
+--- upstream/Page.cs
++++ local/Page.cs
+@@ -6,19 +6,19 @@
+ using System.Runtime.CompilerServices;
+ using System.Runtime.InteropServices;
+ using System.Text;
+-using Tesseract.Internal;
+-using Tesseract.Interop;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Internal;
++using DSP.Khana.Ocr.Interop;
++
++namespace DSP.Khana.Ocr
+ {
+-    public sealed class Page : DisposableBase
++    internal sealed class Page : DisposableBase
+     {
+-        private static readonly TraceSource trace = new TraceSource("Tesseract");
++        private static readonly TraceSource trace = new TraceSource("KhanaOcrEngine");
+ 
+         private bool runRecognitionPhase;
+         private Rect regionOfInterest;
+ 
+-        public TesseractEngine Engine { get; private set; }
++        public KhanaOcrEngine Engine { get; private set; }
+ 
+         /// <summary>
+         /// Gets the <see cref="Pix"/> that is being ocr'd.
+@@ -38,7 +38,7 @@
+         /// </summary>
+         public PageSegMode PageSegmentMode { get; private set; }
+ 
+-        internal Page(TesseractEngine engine, Pix image, string imageName, Rect regionOfInterest, PageSegMode pageSegmentMode)
++        internal Page(KhanaOcrEngine engine, Pix image, string imageName, Rect regionOfInterest, PageSegMode pageSegmentMode)
+         {
+             Engine = engine;
+             Image = image;
+@@ -65,7 +65,7 @@
+                     regionOfInterest = value;
+ 
+                     // update region of interest in image
+-                    Interop.TessApi.Native.BaseApiSetRectangle(Engine.Handle, regionOfInterest.X1, regionOfInterest.Y1, regionOfInterest.Width, regionOfInterest.Height);
++                    Interop.KhanaOcrEngineApi.Native.BaseApiSetRectangle(Engine.Handle, regionOfInterest.X1, regionOfInterest.Y1, regionOfInterest.Width, regionOfInterest.Height);
+ 
+                     // request rerun of recognition on the next call that requires recognition
+                     runRecognitionPhase = false;
+@@ -81,9 +81,9 @@
+         {
+             Recognize();
+ 
+-            var pixHandle = Interop.TessApi.Native.BaseAPIGetThresholdedImage(Engine.Handle);
++            var pixHandle = Interop.KhanaOcrEngineApi.Native.BaseAPIGetThresholdedImage(Engine.Handle);
+             if (pixHandle == IntPtr.Zero) {
+-                throw new TesseractException("Failed to get thresholded image.");
++                throw new KhanaOcrEngineException("Failed to get thresholded image.");
+             }
+ 
+             return Pix.Create(pixHandle);
+@@ -97,7 +97,7 @@
+         {
+             Guard.Verify(PageSegmentMode != PageSegMode.OsdOnly, "Cannot analyse image layout when using OSD only page segmentation, please use DetectBestOrientation instead.");
+ 
+-            var resultIteratorHandle = Interop.TessApi.Native.BaseAPIAnalyseLayout(Engine.Handle);
++            var resultIteratorHandle = Interop.KhanaOcrEngineApi.Native.BaseAPIAnalyseLayout(Engine.Handle);
+             return new PageIterator(this, resultIteratorHandle);
+         }
+ 
+@@ -108,7 +108,7 @@
+         public ResultIterator GetIterator()
+         {
+             Recognize();
+-            var resultIteratorHandle = Interop.TessApi.Native.BaseApiGetIterator(Engine.Handle);
++            var resultIteratorHandle = Interop.KhanaOcrEngineApi.Native.BaseApiGetIterator(Engine.Handle);
+             return new ResultIterator(this, resultIteratorHandle);
+         }
+ 
+@@ -119,95 +119,24 @@
+         public string GetText()
+         {
+             Recognize();
+-            return Interop.TessApi.BaseAPIGetUTF8Text(Engine.Handle);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as an HOCR text.
++            return Interop.KhanaOcrEngineApi.BaseAPIGetUTF8Text(Engine.Handle);
++        }
++
++        /// <summary>
++        /// Gets the page's content as a HOCR text.
+         /// </summary>
+         /// <param name="pageNum">The page number (zero based).</param>
+         /// <param name="useXHtml">True to use XHTML Output, False to HTML Output</param>
+-        /// <returns>The OCR'd output as an HOCR text string.</returns>
++        /// <returns>The OCR'd output as a HOCR text string.</returns>
+         public string GetHOCRText(int pageNum, bool useXHtml = false)
+         {
+             //Why Not Use 'nameof(pageNum)' instead of '"pageNum"'
+             Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+             Recognize();
+             if(useXHtml)
+-                return Interop.TessApi.BaseAPIGetHOCRText2(Engine.Handle, pageNum);
++                return Interop.KhanaOcrEngineApi.BaseAPIGetHOCRText2(Engine.Handle, pageNum);
+             else
+-                return Interop.TessApi.BaseAPIGetHOCRText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as an Alto text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as an Alto text string.</returns>
+-        public string GetAltoText(int pageNum)
+-        {
+-            Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetAltoText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as a Tsv text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as a Tsv text string.</returns>
+-        public string GetTsvText(int pageNum)
+-        {
+-            Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetTsvText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as a Box text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as a Box text string.</returns>
+-        public string GetBoxText(int pageNum)
+-        {
+-            Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetBoxText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as a LSTMBox text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as a LSTMBox text string.</returns>
+-        public string GetLSTMBoxText(int pageNum)
+-        {
+-            Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetLSTMBoxText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as a WordStrBox text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as a WordStrBox text string.</returns>
+-        public string GetWordStrBoxText(int pageNum)
+-        {
+-            Guard.Require("pageNum", pageNum >= 0, "Page number must be greater than or equal to zero (0).");
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetWordStrBoxText(Engine.Handle, pageNum);
+-        }
+-
+-        /// <summary>
+-        /// Gets the page's content as an UNLV text.
+-        /// </summary>
+-        /// <param name="pageNum">The page number (zero based).</param>
+-        /// <returns>The OCR'd output as an UNLV text string.</returns>
+-        public string GetUNLVText()
+-        {
+-            Recognize();
+-            return Interop.TessApi.BaseAPIGetUNLVText(Engine.Handle);
++                return Interop.KhanaOcrEngineApi.BaseAPIGetHOCRText(Engine.Handle, pageNum);
+         }
+ 
+         /// <summary>
+@@ -217,7 +146,7 @@
+         public float GetMeanConfidence()
+         {
+             Recognize();
+-            return Interop.TessApi.Native.BaseAPIMeanTextConf(Engine.Handle) / 100.0f;
++            return Interop.KhanaOcrEngineApi.Native.BaseAPIMeanTextConf(Engine.Handle) / 100.0f;
+         }
+ 
+         /// <summary>
+@@ -227,7 +156,7 @@
+         /// <returns></returns>
+         public List<Rectangle> GetSegmentedRegions(PageIteratorLevel pageIteratorLevel)
+         {
+-            var boxArray = Interop.TessApi.Native.BaseAPIGetComponentImages(Engine.Handle, pageIteratorLevel, Interop.Constants.TRUE, IntPtr.Zero, IntPtr.Zero);
++            var boxArray = Interop.KhanaOcrEngineApi.Native.BaseAPIGetComponentImages(Engine.Handle, pageIteratorLevel, Interop.Constants.TRUE, IntPtr.Zero, IntPtr.Zero);
+             int boxCount = Interop.LeptonicaApi.Native.boxaGetCount(new HandleRef(this, boxArray));
+ 
+             List<Rectangle> boxList = new List<Rectangle>();
+@@ -320,14 +249,14 @@
+             IntPtr script_nameHandle;
+             float script_conf;
+ 
+-            if (Interop.TessApi.Native.TessBaseAPIDetectOrientationScript(Engine.Handle, out orient_deg, out orient_conf, out script_nameHandle, out script_conf) != 0)
++            if (Interop.KhanaOcrEngineApi.Native.TessBaseAPIDetectOrientationScript(Engine.Handle, out orient_deg, out orient_conf, out script_nameHandle, out script_conf) != 0)
+             {
+                 orientation = orient_deg;
+                 confidence = orient_conf;
+                 if (script_nameHandle != IntPtr.Zero)
+                 {
+                     scriptName = MarshalHelper.PtrToString(script_nameHandle, Encoding.ASCII);
+-                    // Don't delete script_nameHandle as it points to internal memory managed by Tesseract.
++                    // Don't delete script_nameHandle as it points to internal memory managed by KhanaOcrEngine.
+                 } else
+                 {
+                     scriptName = null;
+@@ -336,7 +265,7 @@
+             }
+             else
+             {
+-                throw new TesseractException("Failed to detect image orientation.");
++                throw new KhanaOcrEngineException("Failed to detect image orientation.");
+             }
+         }
+ 
+@@ -344,7 +273,7 @@
+         {
+             Guard.Verify(PageSegmentMode != PageSegMode.OsdOnly, "Cannot OCR image when using OSD only page segmentation, please use DetectBestOrientation instead.");
+             if (!runRecognitionPhase) {
+-                if (Interop.TessApi.Native.BaseApiRecognize(Engine.Handle, new HandleRef(this, IntPtr.Zero)) != 0) {
++                if (Interop.KhanaOcrEngineApi.Native.BaseApiRecognize(Engine.Handle, new HandleRef(this, IntPtr.Zero)) != 0) {
+                     throw new InvalidOperationException("Recognition of image failed.");
+                 }
+ 
+@@ -369,7 +298,7 @@
+         protected override void Dispose(bool disposing)
+         {
+             if (disposing) {
+-                Interop.TessApi.Native.BaseAPIClear(Engine.Handle);
++                Interop.KhanaOcrEngineApi.Native.BaseAPIClear(Engine.Handle);
+             }
+         }
+     }
+--- upstream/PageIterator.cs
++++ local/PageIterator.cs
+@@ -3,16 +3,16 @@
+ using System.Runtime.InteropServices;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+-    /// Represents an object that can iterate over tesseract's page structure.
++    /// Represents an object that can iterate over KhanaOcrEngine's page structure.
+     /// </summary>
+     /// <remarks>
+-    /// The iterator points to tesseract's internal page structure and is only valid while the Engine instance that created it exists
++    /// The iterator points to KhanaOcrEngine's internal page structure and is only valid while the Engine instance that created it exists
+     /// and has not been subjected to a call to Recognize since the iterator was created.
+     /// </remarks>
+-    public class PageIterator : DisposableBase
++    internal class PageIterator : DisposableBase
+     {
+         protected readonly Page page;
+         protected readonly HandleRef handle;
+@@ -30,7 +30,7 @@
+         {
+             VerifyNotDisposed();
+             if (handle.Handle != IntPtr.Zero) {
+-                Interop.TessApi.Native.PageIteratorBegin(handle);
++                Interop.KhanaOcrEngineApi.Native.PageIteratorBegin(handle);
+             }
+         }
+ 
+@@ -47,7 +47,7 @@
+             VerifyNotDisposed();
+             if (handle.Handle == IntPtr.Zero)
+                 return false;
+-            return Interop.TessApi.Native.PageIteratorNext(handle, level) != 0;
++            return Interop.KhanaOcrEngineApi.Native.PageIteratorNext(handle, level) != 0;
+         }
+ 
+         /// <summary>
+@@ -82,7 +82,7 @@
+ 
+             if (handle.Handle == IntPtr.Zero)
+                 return false;
+-            return Interop.TessApi.Native.PageIteratorIsAtBeginningOf(handle, level) != 0;
++            return Interop.KhanaOcrEngineApi.Native.PageIteratorIsAtBeginningOf(handle, level) != 0;
+         }
+ 
+         /// <summary>
+@@ -97,7 +97,7 @@
+ 
+             if (handle.Handle == IntPtr.Zero)
+                 return false;
+-            return Interop.TessApi.Native.PageIteratorIsAtFinalElement(handle, level, element) != 0;
++            return Interop.KhanaOcrEngineApi.Native.PageIteratorIsAtFinalElement(handle, level, element) != 0;
+         }
+ 
+         public PolyBlockType BlockType
+@@ -108,7 +108,7 @@
+ 
+                 if (handle.Handle == IntPtr.Zero)
+                     return PolyBlockType.Unknown;
+-                return Interop.TessApi.Native.PageIteratorBlockType(handle);
++                return Interop.KhanaOcrEngineApi.Native.PageIteratorBlockType(handle);
+             }
+         }
+ 
+@@ -119,7 +119,7 @@
+                 return null;
+             }
+ 
+-            return Pix.Create(Interop.TessApi.Native.PageIteratorGetBinaryImage(handle, level));
++            return Pix.Create(Interop.KhanaOcrEngineApi.Native.PageIteratorGetBinaryImage(handle, level));
+         }
+ 
+         public Pix GetImage(PageIteratorLevel level, int padding, out int x, out int y)
+@@ -132,7 +132,7 @@
+                 return null;
+             }
+ 
+-            return Pix.Create(Interop.TessApi.Native.PageIteratorGetImage(handle, level, padding, page.Image.Handle, out x, out y));
++            return Pix.Create(Interop.KhanaOcrEngineApi.Native.PageIteratorGetImage(handle, level, padding, page.Image.Handle, out x, out y));
+         }
+ 
+         /// <summary>
+@@ -145,7 +145,7 @@
+         {
+             VerifyNotDisposed();
+             int x1, y1, x2, y2;
+-            if (handle.Handle != IntPtr.Zero && Interop.TessApi.Native.PageIteratorBoundingBox(handle, level, out x1, out y1, out x2, out y2) != 0)
++            if (handle.Handle != IntPtr.Zero && Interop.KhanaOcrEngineApi.Native.PageIteratorBoundingBox(handle, level, out x1, out y1, out x2, out y2) != 0)
+             {
+                 bounds = Rect.FromCoords(x1, y1, x2, y2);
+                 return true;
+@@ -168,7 +168,7 @@
+         {
+             VerifyNotDisposed();
+             int x1, y1, x2, y2;
+-            if (handle.Handle != IntPtr.Zero && Interop.TessApi.Native.PageIteratorBaseline(handle, level, out x1, out y1, out x2, out y2) != 0)
++            if (handle.Handle != IntPtr.Zero && Interop.KhanaOcrEngineApi.Native.PageIteratorBaseline(handle, level, out x1, out y1, out x2, out y2) != 0)
+             {
+                 bounds = Rect.FromCoords(x1, y1, x2, y2);
+                 return true;
+@@ -192,7 +192,7 @@
+             WritingDirection writing_direction;
+             TextLineOrder textLineOrder;
+             float deskew_angle;
+-            Interop.TessApi.Native.PageIteratorOrientation(handle, out orientation, out writing_direction, out textLineOrder, out deskew_angle);
++            Interop.KhanaOcrEngineApi.Native.PageIteratorOrientation(handle, out orientation, out writing_direction, out textLineOrder, out deskew_angle);
+ 
+             return new ElementProperties(orientation, textLineOrder, writing_direction, deskew_angle);
+         }
+@@ -201,7 +201,7 @@
+         protected override void Dispose(bool disposing)
+         {
+             if (handle.Handle != IntPtr.Zero) {
+-                Interop.TessApi.Native.PageIteratorDelete(handle);
++                Interop.KhanaOcrEngineApi.Native.PageIteratorDelete(handle);
+             }
+         }
+     }
+--- upstream/PageIteratorLevel.cs
++++ local/PageIteratorLevel.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     public enum PageIteratorLevel : int
+     {
+--- upstream/PageSegMode.cs
++++ local/PageSegMode.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Represents the possible page layou analysis modes.
+@@ -12,75 +12,75 @@
+         /// <summary>
+         /// Orientation and script detection (OSD) only.
+         /// </summary>
+-        OsdOnly = 0,
++        OsdOnly,
+ 
+         /// <summary>
+         /// Automatic page sementation with orientantion and script detection (OSD).
+         /// </summary>
+-        AutoOsd = 1,
++        AutoOsd,
+ 
+         /// <summary>
+         /// Automatic page segmentation, but no OSD, or OCR.
+         /// </summary>
+-        AutoOnly = 2,
++        AutoOnly,
+ 
+         /// <summary>
+         /// Fully automatic page segmentation, but no OSD.
+         /// </summary>
+-        Auto = 3,
++        Auto,
+ 
+         /// <summary>
+         /// Assume a single column of text of variable sizes.
+         /// </summary>
+-        SingleColumn = 4,
++        SingleColumn,
+ 
+         /// <summary>
+         /// Assume a single uniform block of vertically aligned text.
+         /// </summary>
+-        SingleBlockVertText = 5,
++        SingleBlockVertText,
+ 
+         /// <summary>
+         /// Assume a single uniform block of text.
+         /// </summary>
+-        SingleBlock = 6,
++        SingleBlock,
+ 
+         /// <summary>
+         /// Treat the image as a single text line.
+         /// </summary>
+-        SingleLine = 7,
++        SingleLine,
+ 
+         /// <summary>
+         /// Treat the image as a single word.
+         /// </summary>
+-        SingleWord = 8,
++        SingleWord,
+ 
+         /// <summary>
+         /// Treat the image as a single word in a circle.
+         /// </summary>
+-        CircleWord = 9,
++        CircleWord,
+ 
+         /// <summary>
+         /// Treat the image as a single character.
+         /// </summary>
+-        SingleChar = 10,
++        SingleChar,
+ 
+         /// <summary>
+-        SparseText = 11,
++        SparseText,
+ 
+         /// <summary>
+         /// Sparse text with orientation and script detection.
+         /// </summary>
+-        SparseTextOsd = 12,
+-        
++        SparseTextOsd,
++
+         /// <summary>
+-        /// Treat the image as a single text line, bypassing hacks that are
+-        /// specific to Tesseract.
++        /// Treat the image as a single text line, bypassing hacks that are KhanaOcrEngine-specific.
+         /// </summary>
+-        RawLine = 13,
++        RawLine,
+ 
+         /// <summary>        
+         /// Number of enum entries.
+         /// </summary>
+-        Count
++        Count,
++
+     }
+ }
+--- upstream/Pix.cs
++++ local/Pix.cs
+@@ -2,9 +2,9 @@
+ using System.Collections.Generic;
+ using System.IO;
+ using System.Runtime.InteropServices;
+-using Tesseract.Internal;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Internal;
++
++namespace DSP.Khana.Ocr
+ {
+     public unsafe sealed class Pix : DisposableBase, IEquatable<Pix>
+     {
+@@ -49,7 +49,7 @@
+         private HandleRef handle;
+ 
+         #endregion Fields
+-        
++
+         #region Create\Load methods
+ 
+         /// <summary>
+@@ -106,20 +106,6 @@
+             return Create(pixHandle);
+         }
+ 
+-        public static Pix LoadFromMemory(byte[] bytes)
+-        {
+-	        IntPtr handle;
+-	        fixed (byte* ptr = bytes)
+-	        {
+-		        handle = Interop.LeptonicaApi.Native.pixReadMem(ptr, bytes.Length);
+-	        }
+-	        if (handle == IntPtr.Zero)
+-	        {
+-		        throw new IOException("Failed to load image from memory.");
+-	        }
+-	        return Create(handle);
+-		}
+-
+         public static Pix LoadTiffFromMemory(byte[] bytes)
+         {
+             IntPtr handle;
+@@ -130,18 +116,6 @@
+             if (handle == IntPtr.Zero)
+             {
+                 throw new IOException("Failed to load image from memory.");
+-            }
+-            return Create(handle);
+-        }
+-
+-        public static Pix pixReadFromMultipageTiff(string filename, ref int offset)
+-        {
+-            IntPtr handle;
+-            handle = Interop.LeptonicaApi.Native.pixReadFromMultipageTiff(filename, ref offset);
+-
+-            if (handle == IntPtr.Zero)
+-            {
+-                throw new IOException(String.Format("Failed to load image from multi-page Tiff at offset {0}.", offset));
+             }
+             return Create(handle);
+         }
+@@ -232,7 +206,7 @@
+             int same;
+             if(Interop.LeptonicaApi.Native.pixEqual(Handle, other.Handle, out same) != 0)
+             {
+-                throw new TesseractException("Failed to compare pix");
++                throw new KhanaOcrEngineException("Failed to compare pix");
+             }
+             return same != 0;
+         }
+@@ -325,7 +299,7 @@
+                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
+             }
+ 
+-            if (result == 1) throw new TesseractException("Failed to binarize image.");
++            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+ 
+             return new Pix(ppixd);
+         }
+@@ -389,7 +363,7 @@
+                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
+             }
+ 
+-            if (result == 1) throw new TesseractException("Failed to binarize image.");
++            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+ 
+             return new Pix(ppixd);
+         }
+@@ -431,7 +405,7 @@
+                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
+             }
+ 
+-            if (result == 1) throw new TesseractException("Failed to binarize image.");
++            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+ 
+             return new Pix(ppixd);
+         }
+@@ -451,7 +425,7 @@
+             Guard.Require("bwt", bwt >= 0, "All weights must be greater than or equal to zero; blue was not.");
+ 
+             var resultPixHandle = Interop.LeptonicaApi.Native.pixConvertRGBToGray(handle, rwt, gwt, bwt);
+-            if (resultPixHandle == IntPtr.Zero) throw new TesseractException("Failed to convert to grayscale.");
++            if (resultPixHandle == IntPtr.Zero) throw new KhanaOcrEngineException("Failed to convert to grayscale.");
+             return new Pix(resultPixHandle);
+         }
+         /// <summary>
+@@ -512,7 +486,7 @@
+                 Interop.LeptonicaApi.Native.pixCombineMasked(new HandleRef(this, pix8), new HandleRef(this, pix9), new HandleRef(this, pix7));
+                 if (pix8 == IntPtr.Zero)
+                 {
+-                    throw new TesseractException("Failed to remove lines from image.");
++                    throw new KhanaOcrEngineException("Failed to remove lines from image.");
+                 }
+ 
+                 return new Pix(pix8);
+@@ -622,7 +596,7 @@
+ 
+             if (pix6 == IntPtr.Zero)
+             {
+-                throw new TesseractException("Failed to despeckle image.");
++                throw new KhanaOcrEngineException("Failed to despeckle image.");
+             }
+ 
+             return new Pix(pix6);
+@@ -691,7 +665,7 @@
+         {
+             float pAngle, pConf;
+             var resultPixHandle = Interop.LeptonicaApi.Native.pixDeskewGeneral(handle, sweep.Reduction, sweep.Range, sweep.Delta, redSearch, thresh, out pAngle, out pConf);
+-            if (resultPixHandle == IntPtr.Zero) throw new TesseractException("Failed to deskew image.");
++            if (resultPixHandle == IntPtr.Zero) throw new KhanaOcrEngineException("Failed to deskew image.");
+             scew = new Scew(pAngle, pConf);
+             return new Pix(resultPixHandle);
+         }
+@@ -762,35 +736,6 @@
+             if (resultHandle == IntPtr.Zero)
+             {
+                 throw new LeptonicaException("Failed to rotate image.");
+-            }
+-            return new Pix(resultHandle);
+-        }
+-        /// <summary>
+-        /// Inverts pix.
+-        /// </summary>
+-        /// <returns></returns>
+-        public Pix Invert()
+-        {
+-            IntPtr resultHandle = Interop.LeptonicaApi.Native.pixInvert(new HandleRef(this, IntPtr.Zero), handle);
+-
+-            if (resultHandle == IntPtr.Zero)
+-            {
+-                throw new LeptonicaException("Failed to invert image.");
+-            }
+-            return new Pix(resultHandle);
+-        }
+-        /// <summary>
+-        /// Top-level conversion to 8 bpp.
+-        /// </summary>
+-        /// <param name="cmapflag"></param>
+-        /// <returns></returns>
+-        public Pix ConvertTo8(int cmapflag)
+-        {
+-            IntPtr resultHandle = Interop.LeptonicaApi.Native.pixConvertTo8(handle, cmapflag);
+-
+-            if (resultHandle == IntPtr.Zero)
+-            {
+-                throw new LeptonicaException("Failed to convert image to 8 bpp.");
+             }
+             return new Pix(resultHandle);
+         }
+--- upstream/PixArray.cs
++++ local/PixArray.cs
+@@ -4,14 +4,14 @@
+ using System.Collections.Generic;
+ using System.IO;
+ using System.Runtime.InteropServices;
+-using Tesseract.Internal;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Internal;
++
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Represents an array of <see cref="Pix"/>.
+-	/// </summary>
+-	public class PixArray : DisposableBase, IEnumerable<Pix>
++    /// <summary>
++    /// Represents an array of <see cref="Pix"/>.
++    /// </summary>
++    internal class PixArray : DisposableBase, IEnumerable<Pix>
+ 	{
+ 		#region Static Constructors
+ 		
+--- upstream/PixArrayAccessType.cs
++++ local/PixArrayAccessType.cs
+@@ -1,12 +1,12 @@
+ 
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Determines how <see cref="Pix"/> of a <see cref="PixArray"/> structure are accessed.
+-	/// </summary>
+-	public enum PixArrayAccessType : int
++    /// <summary>
++    /// Determines how <see cref="Pix"/> of a <see cref="PixArray"/> structure are accessed.
++    /// </summary>
++    public enum PixArrayAccessType : int
+ 	{
+ 		/// <summary>
+ 		/// Stuff it in; no copy, clone or copy-clone.
+--- upstream/PixColor.cs
++++ local/PixColor.cs
+@@ -3,10 +3,10 @@
+ using System.Runtime.InteropServices;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     [StructLayout(LayoutKind.Sequential, Pack=1)]
+-	public struct PixColor : IEquatable<PixColor>
++    public struct PixColor : IEquatable<PixColor>
+     {
+         private byte red;
+         private byte blue;
+--- upstream/PixColormap.cs
++++ local/PixColormap.cs
+@@ -3,7 +3,7 @@
+ using System.Runtime.InteropServices;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Represents a colormap.
+--- upstream/PixConverter.cs
++++ local/PixConverter.cs
+@@ -1,16 +1,16 @@
+-#if SYSTEM_DRAWING_SUPPORT
++#if NETFULL
+ 
+ using System;
+ using System.Collections.Generic;
+ using System.Drawing;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Handles converting between different image formats supported by DotNet.
+     /// </summary>
+-    public static class PixConverter
++    internal static class PixConverter
+     {
+         private static readonly BitmapToPixConverter bitmapConverter = new BitmapToPixConverter();
+         private static readonly PixToBitmapConverter pixConverter = new PixToBitmapConverter();
+--- upstream/PixData.cs
++++ local/PixData.cs
+@@ -1,16 +1,16 @@
+ using System;
+ using System.Runtime.CompilerServices;
+ using System.Runtime.InteropServices;
+-using Tesseract.Interop;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Interop;
++
++namespace DSP.Khana.Ocr
+ {
+-	public unsafe class PixData
++    public unsafe class PixData
+ 	{
+ 		public Pix Pix { get; private set; }
+ 
+ 		
+-		internal PixData(Pix pix)
++		public PixData(Pix pix)
+ 		{		
+             Pix = pix;
+             Data = Interop.LeptonicaApi.Native.pixGetData(Pix.Handle);
+--- upstream/PixToBitmapConverter.cs
++++ local/PixToBitmapConverter.cs
+@@ -1,13 +1,15 @@
+-#if SYSTEM_DRAWING_SUPPORT
++#if NETFULL
+ 
+ using System;
++using System.Collections.Generic;
+ using System.Drawing;
+ using System.Drawing.Imaging;
++using System.Text;
+ using SD = System.Drawing;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public class PixToBitmapConverter
++    internal class PixToBitmapConverter
+     {
+         public Bitmap Convert(Pix pix, bool includeAlpha = false)
+         {
+@@ -138,7 +140,7 @@
+             if (colormap != null && colormap.Count <= maxColors) {
+                 var colormapCount = colormap.Count;
+                 for (int i = 0; i < colormapCount; i++) {
+-                    pallete.Entries[i] = colormap[i].ToColor();
++                    pallete.Entries[i] = (SD.Color)colormap[i];
+                 }
+             } else {
+                 for (int i = 0; i < maxColors; i++) {
+--- upstream/PolyBlockType.cs
++++ local/PolyBlockType.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     public enum PolyBlockType : int
+     {
+--- upstream/Properties/AssemblyInfo.cs
++++ local/Properties/AssemblyInfo.cs
+@@ -14,6 +14,8 @@
+ [assembly: ComVisible(false)]
+ 
+ // Ensure internals are visible to the test assembly so we can test them too.
+-[assembly: InternalsVisibleTo("Tesseract.Net48Tests")]
+-[assembly: InternalsVisibleTo("Tesseract.NetCore31Tests")]
++[assembly: InternalsVisibleTo("DSP.Khana.Ocr.Net45Tests")]
++[assembly: InternalsVisibleTo("DSP.Khana.Ocr.NetCore2Tests")]
+ 
++
++[assembly: InternalsVisibleTo("DSP.Khana.Ocr.SmokeTests")]
+--- upstream/Rect.cs
++++ local/Rect.cs
+@@ -3,9 +3,9 @@
+ using System.Runtime.Serialization;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public struct Rect : IEquatable<Rect>
++    internal struct Rect : IEquatable<Rect>
+     {
+         public static readonly Rect Empty = new Rect();
+ 
+--- upstream/ResultIterator.cs
++++ local/ResultIterator.cs
+@@ -2,11 +2,11 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-using Tesseract.Interop;
++using DSP.Khana.Ocr.Interop;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public sealed class ResultIterator : PageIterator
++    internal sealed class ResultIterator : PageIterator
+     {
+         internal ResultIterator(Page page, IntPtr handle)
+             : base(page, handle)
+@@ -19,7 +19,7 @@
+             if (handle.Handle == IntPtr.Zero)
+                 return 0f;
+ 
+-            return Interop.TessApi.Native.ResultIteratorGetConfidence(handle, level);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorGetConfidence(handle, level);
+         }
+ 
+         public string GetText(PageIteratorLevel level)
+@@ -29,7 +29,7 @@
+                 return String.Empty;
+             }
+ 
+-            return Interop.TessApi.ResultIteratorGetUTF8Text(handle, level);
++            return Interop.KhanaOcrEngineApi.ResultIteratorGetUTF8Text(handle, level);
+         }
+         
+         private Dictionary<int, FontInfo> _fontInfoCache = new Dictionary<int, FontInfo>();
+@@ -42,10 +42,10 @@
+             bool isBold, isItalic, isUnderlined, isMonospace, isSerif, isSmallCaps;
+             int pointSize, fontId;
+ 
+-            // per docs (ltrresultiterator.h:104 as of 4897796 in github:tesseract-ocr/tesseract)
++           
+             // this return value points to an internal table and should not be deleted.
+             IntPtr nameHandle =
+-                Interop.TessApi.Native.ResultIteratorWordFontAttributes(
++                Interop.KhanaOcrEngineApi.Native.ResultIteratorWordFontAttributes(
+                     handle,
+                     out isBold, out isItalic, out isUnderlined,
+                     out isMonospace, out isSerif, out isSmallCaps,
+@@ -73,7 +73,7 @@
+                 return null;
+             }
+ 
+-            return Interop.TessApi.ResultIteratorWordRecognitionLanguage(handle);
++            return Interop.KhanaOcrEngineApi.ResultIteratorWordRecognitionLanguage(handle);
+         }
+ 
+         public bool GetWordIsFromDictionary()
+@@ -83,7 +83,7 @@
+                 return false;
+             }
+ 
+-            return Interop.TessApi.Native.ResultIteratorWordIsFromDictionary(handle);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorWordIsFromDictionary(handle);
+         }
+ 
+         public bool GetWordIsNumeric()
+@@ -93,7 +93,7 @@
+                 return false;
+             }
+ 
+-            return Interop.TessApi.Native.ResultIteratorWordIsNumeric(handle);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorWordIsNumeric(handle);
+         }
+ 
+         public bool GetSymbolIsSuperscript()
+@@ -103,7 +103,7 @@
+                 return false;
+             }
+ 
+-            return Interop.TessApi.Native.ResultIteratorSymbolIsSuperscript(handle);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsSuperscript(handle);
+         }
+ 
+         public bool GetSymbolIsSubscript()
+@@ -113,7 +113,7 @@
+                 return false;
+             }
+ 
+-            return Interop.TessApi.Native.ResultIteratorSymbolIsSubscript(handle);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsSubscript(handle);
+         }
+ 
+         public bool GetSymbolIsDropcap()
+@@ -123,7 +123,7 @@
+                 return false;
+             }
+ 
+-            return Interop.TessApi.Native.ResultIteratorSymbolIsDropcap(handle);
++            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsDropcap(handle);
+         }
+ 
+         /// <summary>
+@@ -133,7 +133,7 @@
+         /// <returns>an instance of a Choice Iterator</returns>
+         public ChoiceIterator GetChoiceIterator()
+         {
+-            var choiceIteratorHandle = Interop.TessApi.Native.ResultIteratorGetChoiceIterator(this.handle);
++            var choiceIteratorHandle = Interop.KhanaOcrEngineApi.Native.ResultIteratorGetChoiceIterator(this.handle);
+             if (choiceIteratorHandle == IntPtr.Zero)
+                 return null;
+             return new ChoiceIterator(choiceIteratorHandle);
+--- upstream/ResultRenderer.cs
++++ local/ResultRenderer.cs
+@@ -1,16 +1,16 @@
+ using System;
+ using System.Collections.Generic;
+ using System.Runtime.InteropServices;
+-using Tesseract.Internal;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Internal;
++
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+-    /// Rendered formats supported by Tesseract.
++    /// Rendered formats supported by KhanaOcrEngine.
+     /// </summary>
+-    public enum RenderedFormat
+-    {
+-        TEXT, HOCR, PDF, PDF_TEXTONLY, UNLV, BOX, ALTO, TSV, LSTMBOX, WORDSTRBOX
++    internal enum RenderedFormat
++    {
++        TEXT, HOCR, PDF, UNLV, BOX
+     }
+ 
+     /// <summary>
+@@ -21,7 +21,7 @@
+     /// renderer hierarchy. This gets around a number of difficult issues such
+     /// as keeping track of what the next renderer is and how to manage the memory.
+     /// </remarks>
+-    public abstract class ResultRenderer : DisposableBase, IResultRenderer
++    internal abstract class ResultRenderer : DisposableBase, IResultRenderer
+     {
+         #region Factory Methods
+ 
+@@ -32,55 +32,73 @@
+         /// <param name="dataPath">The directory containing the pdf font data, normally same as your tessdata directory.</param>
+         /// <param name="outputFormats"></param>
+         /// <returns></returns>
+-        public static IEnumerable<IResultRenderer> CreateRenderers(string outputbase, string dataPath, List<RenderedFormat> outputFormats)
+-        {
+-            List<IResultRenderer> renderers = new List<IResultRenderer>();
++        public static IResultRenderer CreateRenderers(string outputbase, string dataPath, List<RenderedFormat> outputFormats)
++        {
++            IResultRenderer renderer = null;
+ 
+             foreach (RenderedFormat format in outputFormats)
+             {
+-                IResultRenderer renderer = null;
+-
+                 switch (format)
+                 {
+                     case RenderedFormat.TEXT:
+-                        renderer = CreateTextRenderer(outputbase);
++                        if (renderer == null)
++                        {
++                            renderer = CreateTextRenderer(outputbase);
++                        }
++                        else
++                        {
++                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new TextResultRenderer(outputbase).Handle);
++                        }
+                         break;
+                     case RenderedFormat.HOCR:
+-                        renderer = CreateHOcrRenderer(outputbase);
++                        if (renderer == null)
++                        {
++                            renderer = CreateHOcrRenderer(outputbase);
++                        }
++                        else
++                        {
++                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new HOcrResultRenderer(outputbase).Handle);
++                        }
+                         break;
+                     case RenderedFormat.PDF:
+-                    case RenderedFormat.PDF_TEXTONLY:
+-                        bool textonly = (format == RenderedFormat.PDF_TEXTONLY);
+-                        renderer = CreatePdfRenderer(outputbase, dataPath, textonly);
++                        if (renderer == null)
++                        {
++                            renderer = CreatePdfRenderer(outputbase, dataPath, false);
++                        }
++                        else
++                        {
++                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new PdfResultRenderer(outputbase, dataPath, false).Handle);
++                        }
+                         break;
+                     case RenderedFormat.BOX:
+-                        renderer = CreateBoxRenderer(outputbase);
++                        if (renderer == null)
++                        {
++                            renderer = CreateBoxRenderer(outputbase);
++                        }
++                        else
++                        {
++                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new BoxResultRenderer(outputbase).Handle);
++                        }
+                         break;
+                     case RenderedFormat.UNLV:
+-                        renderer = CreateUnlvRenderer(outputbase);
+-                        break;
+-                    case RenderedFormat.ALTO:
+-                        renderer = CreateAltoRenderer(outputbase);
+-                        break;
+-                    case RenderedFormat.TSV:
+-                        renderer = CreateTsvRenderer(outputbase);
+-                        break;
+-                    case RenderedFormat.LSTMBOX:
+-                        renderer = CreateLSTMBoxRenderer(outputbase);
+-                        break;
+-                    case RenderedFormat.WORDSTRBOX:
+-                        renderer = CreateWordStrBoxRenderer(outputbase);
+-                        break;
+-                }
+-                renderers.Add(renderer);
+-            }
+-
+-            return renderers;
++                        if (renderer == null)
++                        {
++                            renderer = CreateUnlvRenderer(outputbase);
++                        }
++                        else
++                        {
++                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new UnlvResultRenderer(outputbase).Handle);
++                        }
++                        break;
++                }
++            }
++
++            return renderer;
+         }
+ 
+         /// <summary>
+         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a searchable
+-        /// pdf file from tesseract's output.
++        /// pdf file from KhanaOcrEngine's output.
+         /// </summary>
+         /// <param name="outputFilename">The filename of the pdf file to be generated without the file extension.</param>
+         /// <param name="fontDirectory">The directory containing the pdf font data, normally same as your tessdata directory.</param>
+@@ -93,7 +111,7 @@
+ 
+         /// <summary>
+         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates UTF-8 encoded text
+-        /// file from tesseract's output.
++        /// file from KhanaOcrEngine's output.
+         /// </summary>
+         /// <param name="outputFilename">The path to the text file to be generated without the file extension.</param>
+         /// <returns></returns>
+@@ -104,19 +122,19 @@
+ 
+         /// <summary>
+         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a HOCR
+-        /// file from tesseract's output.
++        /// file from KhanaOcrEngine's output.
+         /// </summary>
+         /// <param name="outputFilename">The path to the hocr file to be generated without the file extension.</param>
+         /// <param name="fontInfo">Determines if the generated HOCR file includes font information or not.</param>
+         /// <returns></returns>
+-        public static IResultRenderer CreateHOcrRenderer(string outputFilename, bool fontInfo = false)
++        internal static IResultRenderer CreateHOcrRenderer(string outputFilename, bool fontInfo = false)
+         {
+             return new HOcrResultRenderer(outputFilename, fontInfo);
+         }
+ 
+         /// <summary>
+         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a unlv
+-        /// file from tesseract's output.
++        /// file from KhanaOcrEngine's output.
+         /// </summary>
+         /// <param name="outputFilename">The path to the unlv file to be created without the file extension.</param>
+         /// <returns></returns>
+@@ -126,51 +144,7 @@
+         }
+ 
+         /// <summary>
+-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates an Alto
+-        /// file from tesseract's output.
+-        /// </summary>
+-        /// <param name="outputFilename">The path to the Alto file to be created without the file extension.</param>
+-        /// <returns></returns>
+-        public static IResultRenderer CreateAltoRenderer(string outputFilename)
+-        {
+-            return new AltoResultRenderer(outputFilename);
+-        }
+-
+-        /// <summary>
+-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a Tsv
+-        /// file from tesseract's output.
+-        /// </summary>
+-        /// <param name="outputFilename">The path to the Tsv file to be created without the file extension.</param>
+-        /// <returns></returns>
+-        public static IResultRenderer CreateTsvRenderer(string outputFilename)
+-        {
+-            return new TsvResultRenderer(outputFilename);
+-        }
+-
+-        /// <summary>
+-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a unlv
+-        /// file from tesseract's output.
+-        /// </summary>
+-        /// <param name="outputFilename">The path to the unlv file to be created without the file extension.</param>
+-        /// <returns></returns>
+-        public static IResultRenderer CreateLSTMBoxRenderer(string outputFilename)
+-        {
+-            return new LSTMBoxResultRenderer(outputFilename);
+-        }
+-
+-        /// <summary>
+-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a unlv
+-        /// file from tesseract's output.
+-        /// </summary>
+-        /// <param name="outputFilename">The path to the unlv file to be created without the file extension.</param>
+-        /// <returns></returns>
+-        public static IResultRenderer CreateWordStrBoxRenderer(string outputFilename)
+-        {
+-            return new WordStrBoxResultRenderer(outputFilename);
+-        }
+-
+-        /// <summary>
+-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a box text file from tesseract's output.
++        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a box text file from KhanaOcrEngine's output.
+         /// </summary>
+         /// <param name="outputFilename">The path to the box file to be created without the file extension.</param>
+         /// <returns></returns>
+@@ -204,7 +178,7 @@
+                         Guard.Verify(_renderer._currentDocumentHandle == this, "Expected the Result Render's active document to be this document.");
+ 
+                         // End the renderer
+-                        Interop.TessApi.Native.ResultRendererEndDocument(_renderer._handle);
++                        Interop.KhanaOcrEngineApi.Native.ResultRendererEndDocument(_renderer._handle);
+                         _renderer._currentDocumentHandle = null;
+                     }
+                 }
+@@ -255,7 +229,7 @@
+             // implicitly if required. This is why I've only made Page.Recognise internal not public.
+             page.Recognize();
+ 
+-            return Interop.TessApi.Native.ResultRendererAddImage(Handle, page.Engine.Handle) != 0;
++            return Interop.KhanaOcrEngineApi.Native.ResultRendererAddImage(Handle, page.Engine.Handle) != 0;
+         }
+ 
+         /// <summary>
+@@ -270,7 +244,7 @@
+             Guard.Verify(_currentDocumentHandle == null, "Cannot begin document \"{0}\" as another document is currently being processed which must be dispose off first.", title);
+ 
+             IntPtr titlePtr = Marshal.StringToHGlobalAnsi(title);
+-            if (Interop.TessApi.Native.ResultRendererBeginDocument(Handle, titlePtr) == 0)
++            if (Interop.KhanaOcrEngineApi.Native.ResultRendererBeginDocument(Handle, titlePtr) == 0)
+             {
+                 // release the pointer first before throwing an error.
+                 Marshal.FreeHGlobal(titlePtr);
+@@ -293,7 +267,7 @@
+             {
+                 VerifyNotDisposed();
+ 
+-                return Interop.TessApi.Native.ResultRendererImageNum(Handle);
++                return Interop.KhanaOcrEngineApi.Native.ResultRendererImageNum(Handle);
+             }
+         }
+ 
+@@ -315,93 +289,57 @@
+             {
+                 if (_handle.Handle != IntPtr.Zero)
+                 {
+-                    Interop.TessApi.Native.DeleteResultRenderer(_handle);
++                    Interop.KhanaOcrEngineApi.Native.DeleteResultRenderer(_handle);
+                     _handle = new HandleRef(this, IntPtr.Zero);
+                 }
+             }
+         }
+     }
+ 
+-    public sealed class TextResultRenderer : ResultRenderer
++    internal sealed class TextResultRenderer : ResultRenderer
+     {
+         public TextResultRenderer(string outputFilename)
+         {
+-            var rendererHandle = Interop.TessApi.Native.TextRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class HOcrResultRenderer : ResultRenderer
++            var rendererHandle = Interop.KhanaOcrEngineApi.Native.TextRendererCreate(outputFilename);
++            Initialise(rendererHandle);
++        }
++    }
++
++    internal sealed class HOcrResultRenderer : ResultRenderer
+     {
+         public HOcrResultRenderer(string outputFilename, bool fontInfo = false)
+         {
+-            var rendererHandle = Interop.TessApi.Native.HOcrRendererCreate2(outputFilename, fontInfo ? 1 : 0);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class UnlvResultRenderer : ResultRenderer
++            var rendererHandle = Interop.KhanaOcrEngineApi.Native.HOcrRendererCreate2(outputFilename, fontInfo ? 1 : 0);
++            Initialise(rendererHandle);
++        }
++    }
++
++    internal sealed class UnlvResultRenderer : ResultRenderer
+     {
+         public UnlvResultRenderer(string outputFilename)
+         {
+-            var rendererHandle = Interop.TessApi.Native.UnlvRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class AltoResultRenderer : ResultRenderer
+-    {
+-        public AltoResultRenderer(string outputFilename)
+-        {
+-            var rendererHandle = Interop.TessApi.Native.AltoRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class TsvResultRenderer : ResultRenderer
+-    {
+-        public TsvResultRenderer(string outputFilename)
+-        {
+-            var rendererHandle = Interop.TessApi.Native.TsvRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class LSTMBoxResultRenderer : ResultRenderer
+-    {
+-        public LSTMBoxResultRenderer(string outputFilename)
+-        {
+-            var rendererHandle = Interop.TessApi.Native.LSTMBoxRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class WordStrBoxResultRenderer : ResultRenderer
+-    {
+-        public WordStrBoxResultRenderer(string outputFilename)
+-        {
+-            var rendererHandle = Interop.TessApi.Native.WordStrBoxRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class BoxResultRenderer : ResultRenderer
++            var rendererHandle = Interop.KhanaOcrEngineApi.Native.UnlvRendererCreate(outputFilename);
++            Initialise(rendererHandle);
++        }
++    }
++
++    internal sealed class BoxResultRenderer : ResultRenderer
+     {
+         public BoxResultRenderer(string outputFilename)
+         {
+-            var rendererHandle = Interop.TessApi.Native.BoxTextRendererCreate(outputFilename);
+-            Initialise(rendererHandle);
+-        }
+-    }
+-
+-    public sealed class PdfResultRenderer : ResultRenderer
++            var rendererHandle = Interop.KhanaOcrEngineApi.Native.BoxTextRendererCreate(outputFilename);
++            Initialise(rendererHandle);
++        }
++    }
++
++    internal sealed class PdfResultRenderer : ResultRenderer
+     {
+         private IntPtr _fontDirectoryHandle;
+ 
+         public PdfResultRenderer(string outputFilename, string fontDirectory, bool textonly)
+         {
+             var fontDirectoryHandle = Marshal.StringToHGlobalAnsi(fontDirectory);
+-            var rendererHandle = Interop.TessApi.Native.PDFRendererCreate(outputFilename, fontDirectoryHandle, textonly ? 1 : 0);
++            var rendererHandle = Interop.KhanaOcrEngineApi.Native.PDFRendererCreate(outputFilename, fontDirectoryHandle, textonly ? 1 : 0);
+ 
+             Initialise(rendererHandle);
+         }
+--- upstream/RotationFill.cs
++++ local/RotationFill.cs
+@@ -1,12 +1,12 @@
+ 
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// What colour pixels should be used for the outside?
+-	/// </summary>
+-	public enum RotationFill : int
++    /// <summary>
++    /// What colour pixels should be used for the outside?
++    /// </summary>
++    public enum RotationFill : int
+ 	{
+ 		/// <summary>
+ 		/// Bring in white pixels from the outside.
+--- upstream/RotationMethod.cs
++++ local/RotationMethod.cs
+@@ -1,12 +1,12 @@
+ 
+ using System;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// Represents the method used to rotate an image.
+-	/// </summary>
+-	public enum RotationMethod : int
++    /// <summary>
++    /// Represents the method used to rotate an image.
++    /// </summary>
++    public enum RotationMethod : int
+ 	{
+ 		/// <summary>
+ 		/// Use area map rotation, if possible.
+--- upstream/Scew.cs
++++ local/Scew.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     public struct Scew
+     {
+--- upstream/ScewSweep.cs
++++ local/ScewSweep.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+     /// Represents the parameters for a sweep search used by scew algorithms.
+--- upstream/Sel.cs
++++ local/Sel.cs
+@@ -2,7 +2,7 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+     public enum SelType : int
+     {
+--- upstream/TesseractEngine.cs
++++ local/TesseractEngine.cs
+@@ -1,53 +1,98 @@
+ using System;
+ using System.Collections.Generic;
+ using System.Diagnostics;
++using System.Drawing;
+ using System.Globalization;
+ using System.Runtime.InteropServices;
+ using System.Security;
+-using Tesseract.Internal;
+-using Tesseract.Interop;
+-
+-namespace Tesseract
++using DSP.Khana.Ocr.Internal;
++using DSP.Khana.Ocr.Engine.v5;
++using System.Runtime.CompilerServices;
++
++[assembly: InternalsVisibleTo("Bina.Ocr.Wapper")]
++namespace DSP.Khana.Ocr
+ {
+     /// <summary>
+-    /// The tesseract OCR engine.
++    /// The KhanaOcrEngine .
+     /// </summary>
+-    public class TesseractEngine : DisposableBase
++    
++    internal class KhanaOcrEngine : DisposableBase
+     {
+-        private static readonly TraceSource trace = new TraceSource("Tesseract");
+-
++        private const string KhanaOcrEngineVersion = "5.00.00";
++        private static readonly TraceSource trace = new TraceSource("KhanaOcrEngine");
++        public static string DllDirectory="";
+         private HandleRef handle;
+ 
+         private int processCount = 0;
+ 
+         /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> using the <see cref="EngineMode.Default"/> mode.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> using the <see cref="EngineMode.Default"/> mode.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++       
++        /// </para>
++        /// </remarks>
++       
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, string dllDirectory = "")
++            : this(languageModel, datapath, language, EngineMode.Default, new string[0], new Dictionary<string, object>(), false,dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="configFile"/>
++        /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++       
++        /// </para>
++        /// <para>
++        /// Note: That the config files MUST be encoded without the BOM using unix end of line characters.
++        /// </para>
++        /// </remarks>
++      
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, string configFile, string dllDirectory = "")
++            : this( languageModel, datapath, language, EngineMode.Default, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false, dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="configFiles"/>
++        /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++
++        /// </para>
++        /// </remarks>
++      
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, IEnumerable<string> configFiles, string dllDirectory = "")
++            : this( languageModel, datapath, language, EngineMode.Default, configFiles, new Dictionary<string, object>(), false,dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
+         /// </para>
+         /// </remarks>
+         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+         /// <param name="language">The language to load, for example 'eng' for English.</param>
+-        public TesseractEngine(string datapath, string language)
+-            : this(datapath, language, EngineMode.Default, new string[0], new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="configFile"/>
+-        /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
++        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string dllDirectory = "")
++            : this( languageModel, datapath, language, engineMode, new string[0], new Dictionary<string, object>(), false,dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFile"/>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++       
+         /// </para>
+         /// <para>
+         /// Note: That the config files MUST be encoded without the BOM using unix end of line characters.
+@@ -55,132 +100,73 @@
+         /// </remarks>
+         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+         /// <param name="language">The language to load, for example 'eng' for English.</param>
++        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
+         /// <param name="configFile">
+-        /// An optional tesseract configuration file that is encoded using UTF8 without BOM
++        /// An optional KhanaOcrEngine configuration file that is encoded using UTF8 without BOM
+         /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
+         /// </param>
+-        public TesseractEngine(string datapath, string language, string configFile)
+-            : this(datapath, language, EngineMode.Default, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="configFiles"/>
+-        /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string configFile, string dllDirectory = "")
++            : this( languageModel, datapath, language, engineMode, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false,dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++       
+         /// </para>
+         /// </remarks>
+         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+         /// <param name="language">The language to load, for example 'eng' for English.</param>
++        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
+         /// <param name="configFiles">
+-        /// An optional sequence of tesseract configuration files to load, encoded using UTF8 without BOM
++        /// An optional sequence of KhanaOcrEngine configuration files to load, encoded using UTF8 without BOM
+         /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
+         /// </param>
+-        public TesseractEngine(string datapath, string language, IEnumerable<string> configFiles)
+-            : this(datapath, language, EngineMode.Default, configFiles, new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
+-        /// </para>
+-        /// </remarks>
+-        /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+-        /// <param name="language">The language to load, for example 'eng' for English.</param>
+-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the tesseract engine.</param>
+-        public TesseractEngine(string datapath, string language, EngineMode engineMode)
+-            : this(datapath, language, engineMode, new string[0], new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFile"/>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
+-        /// </para>
+-        /// <para>
+-        /// Note: That the config files MUST be encoded without the BOM using unix end of line characters.
+-        /// </para>
+-        /// </remarks>
+-        /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+-        /// <param name="language">The language to load, for example 'eng' for English.</param>
+-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the tesseract engine.</param>
+-        /// <param name="configFile">
+-        /// An optional tesseract configuration file that is encoded using UTF8 without BOM
+-        /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
+-        /// </param>
+-        public TesseractEngine(string datapath, string language, EngineMode engineMode, string configFile)
+-            : this(datapath, language, engineMode, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
+-        /// </para>
+-        /// </remarks>
+-        /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+-        /// <param name="language">The language to load, for example 'eng' for English.</param>
+-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the tesseract engine.</param>
+-        /// <param name="configFiles">
+-        /// An optional sequence of tesseract configuration files to load, encoded using UTF8 without BOM
+-        /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
+-        /// </param>
+-        public TesseractEngine(string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles)
+-            : this(datapath, language, engineMode, configFiles, new Dictionary<string, object>(), false)
+-        {
+-        }
+-
+-        /// <summary>
+-        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
+-        /// </summary>
+-        /// <remarks>
+-        /// <para>
+-        /// The <paramref name="datapath"/> parameter should point to the directory that contains the 'tessdata' folder
+-        /// for example if your tesseract language data is installed in <c>C:\Tesseract\tessdata</c> the value of datapath should
+-        /// be <c>C:\Tesseract</c>. Note that tesseract will use the value of the <c>TESSDATA_PREFIX</c> environment variable if defined,
+-        /// effectively ignoring the value of <paramref name="datapath"/> parameter.
+-        /// </para>
+-        /// </remarks>
+-        /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
+-        /// <param name="language">The language to load, for example 'eng' for English.</param>
+-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the tesseract engine.</param>
+-        /// <param name="configFiles">
+-        /// An optional sequence of tesseract configuration files to load, encoded using UTF8 without BOM
+-        /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
+-        /// </param>
+-        public TesseractEngine(string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialOptions, bool setOnlyNonDebugVariables)
+-        {
++        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, string dllDirectory = "")
++            : this(languageModel, datapath, language, engineMode, configFiles, new Dictionary<string, object>(), false,dllDirectory)
++        {
++        }
++
++        /// <summary>
++        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
++        /// </summary>
++        /// <remarks>
++        /// <para>
++       
++        /// </para>
++        /// </remarks>
++   
++        public KhanaOcrEngine(LanguageModel languageModel,string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialOptions, bool setOnlyNonDebugVariables, string dllDirectory = "")
++        {
++            DllDirectory = dllDirectory;
+             Guard.RequireNotNullOrEmpty("language", language);
+ 
+             DefaultPageSegMode = PageSegMode.Auto;
+-            handle = new HandleRef(this, Interop.TessApi.Native.BaseApiCreate());
+-
+-            Initialise(datapath, language, engineMode, configFiles, initialOptions, setOnlyNonDebugVariables);
++            handle = new HandleRef(this, Interop.KhanaOcrEngineApi.Native.BaseApiCreate());
++#if !DESKTOP_WITHOUT_LICENSING
++            Guard.Require("License", languageModel.IsValid);
++            //Nigje_lan
++            if (!( languageModel.AppName == languageModel.LicenseAppName))
++            {
++                Guard.Require("License", false);
++            }
++            if (!(languageModel.IsValid && languageModel.UID == languageModel.AppKey))
++            {
++                Guard.Require("License", false);
++            }
++            if (!languageModel.Language.ToLower().Contains(language.ToLower()))
++            {
++                Guard.Require("License", false);
++            }
++            if (languageModel.ExpireDateTime < DateTime.Now)
++            {
++                Guard.Require("License", false);
++            }
++#endif
++            Initialise(languageModel,datapath, language, engineMode, configFiles, initialOptions, setOnlyNonDebugVariables);
+         }
+ 
+         public string Version
+@@ -189,7 +175,9 @@
+             {
+                 // Get version doesn't work for x64, might be compilation related for now just
+                 // return constant so we don't crash.
+-                return TessApi.BaseApiGetVersion();
++                return KhanaOcrEngineVersion;
++
++                // return Interop.KhanaOcrEngineApi.Native.GetVersion();
+             }
+         }
+ 
+@@ -261,22 +249,97 @@
+             processCount++;
+ 
+             var actualPageSegmentMode = pageSegMode.HasValue ? pageSegMode.Value : DefaultPageSegMode;
+-            Interop.TessApi.Native.BaseAPISetPageSegMode(handle, actualPageSegmentMode);
+-            Interop.TessApi.Native.BaseApiSetImage(handle, image.Handle);
++            Interop.KhanaOcrEngineApi.Native.BaseAPISetPageSegMode(handle, actualPageSegmentMode);
++            Interop.KhanaOcrEngineApi.Native.BaseApiSetImage(handle, image.Handle);
+             if (!String.IsNullOrEmpty(inputName))
+             {
+-                Interop.TessApi.Native.BaseApiSetInputName(handle, inputName);
++                Interop.KhanaOcrEngineApi.Native.BaseApiSetInputName(handle, inputName);
+             }
+             var page = new Page(this, image, inputName, region, actualPageSegmentMode);
+             page.Disposed += OnIteratorDisposed;
+             return page;
+         }
+-        
++
++#if NETFULL
++
++        /// <summary>
++        /// Process the specified bitmap image.
++        /// </summary>
++        /// <remarks>
++        /// Please consider <see cref="Process(Pix, PageSegMode?)"/> instead. This is because
++        /// this method must convert the bitmap to a pix for processing which will add additional overhead.
++        /// Leptonica also supports a large number of image pre-processing functions as well.
++        /// </remarks>
++        /// <param name="image">The image to process.</param>
++        /// <param name="pageSegMode">The page segmentation mode.</param>
++        /// <returns></returns>
++        public Page Process(Bitmap image, PageSegMode? pageSegMode = null)
++        {
++            return Process(image, new Rect(0, 0, image.Width, image.Height), pageSegMode);
++        }
++
++        /// <summary>
++        /// Process the specified bitmap image.
++        /// </summary>
++        /// <remarks>
++        /// Please consider <see cref="Process(Pix, String, PageSegMode?)"/> instead. This is because
++        /// this method must convert the bitmap to a pix for processing which will add additional overhead.
++        /// Leptonica also supports a large number of image pre-processing functions as well.
++        /// </remarks>
++        /// <param name="image">The image to process.</param>
++        /// <param name="inputName">Sets the input file's name, only needed for training or loading a uzn file.</param>
++        /// <param name="pageSegMode">The page segmentation mode.</param>
++        /// <returns></returns>
++        public Page Process(Bitmap image, string inputName, PageSegMode? pageSegMode = null)
++        {
++            return Process(image, inputName, new Rect(0, 0, image.Width, image.Height), pageSegMode);
++        }
++
++        /// <summary>
++        /// Process the specified bitmap image.
++        /// </summary>
++        /// <remarks>
++        /// Please consider <see cref="KhanaOcrEngine.Process(Pix, Rect, PageSegMode?)"/> instead. This is because
++        /// this method must convert the bitmap to a pix for processing which will add additional overhead.
++        /// Leptonica also supports a large number of image pre-processing functions as well.
++        /// </remarks>
++        /// <param name="image">The image to process.</param>
++        /// <param name="region">The region of the image to process.</param>
++        /// <param name="pageSegMode">The page segmentation mode.</param>
++        /// <returns></returns>
++        public Page Process(Bitmap image, Rect region, PageSegMode? pageSegMode = null)
++        {
++            return Process(image, null, region, pageSegMode);
++        }
++
++        /// <summary>
++        /// Process the specified bitmap image.
++        /// </summary>
++        /// <remarks>
++        /// Please consider <see cref="KhanaOcrEngine.Process(Pix, String, Rect, PageSegMode?)"/> instead. This is because
++        /// this method must convert the bitmap to a pix for processing which will add additional overhead.
++        /// Leptonica also supports a large number of image pre-processing functions as well.
++        /// </remarks>
++        /// <param name="image">The image to process.</param>
++        /// <param name="inputName">Sets the input file's name, only needed for training or loading a uzn file.</param>
++        /// <param name="region">The region of the image to process.</param>
++        /// <param name="pageSegMode">The page segmentation mode.</param>
++        /// <returns></returns>
++        public Page Process(Bitmap image, string inputName, Rect region, PageSegMode? pageSegMode = null)
++        {
++            var pix = PixConverter.ToPix(image);
++            var page = Process(pix, inputName, region, pageSegMode);
++            new PageDisposalHandle(page, pix);
++            return page;
++        }
++
++#endif
++
+         protected override void Dispose(bool disposing)
+         {
+             if (handle.Handle != IntPtr.Zero)
+             {
+-                Interop.TessApi.Native.BaseApiDelete(handle);
++                Interop.KhanaOcrEngineApi.Native.BaseApiDelete(handle);
+                 handle = new HandleRef(this, IntPtr.Zero);
+             }
+         }
+@@ -294,11 +357,30 @@
+             }
+         }
+ 
+-        private void Initialise(string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialValues, bool setOnlyNonDebugVariables)
++        private void Initialise(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialValues, bool setOnlyNonDebugVariables)
+         {
+             Guard.RequireNotNullOrEmpty("language", language);
+-
+-            // do some minor processing on datapath to fix some common errors (this basically mirrors what tesseract does as of 3.04)
++#if !DESKTOP_WITHOUT_LICENSING
++            Guard.Require("License", languageModel.IsValid);
++            //Nigje_lan
++            if (!(languageModel.AppName == languageModel.LicenseAppName))
++            {
++                Guard.Require("License", false);
++            }
++            if (!(languageModel.IsValid && languageModel.UID == languageModel.AppKey))
++            {
++                Guard.Require("License", false);
++            }
++            if (!languageModel.Language.ToLower().Contains(language.ToLower()))
++            {
++                Guard.Require("License", false);
++            }
++            if (languageModel.ExpireDateTime < DateTime.Now)
++            {
++                Guard.Require("License", false);
++            }
++#endif
++            // do some minor processing on datapath to fix some common errors (this basically mirrors what KhanaOcrEngine does as of 3.04)
+             if (!String.IsNullOrEmpty(datapath))
+             {
+                 // remove any excess whitespace
+@@ -311,20 +393,20 @@
+                 }
+             }
+ 
+-            if (Interop.TessApi.BaseApiInit(handle, datapath, language, (int)engineMode, configFiles ?? new List<string>(), initialValues ?? new Dictionary<string, object>(), setOnlyNonDebugVariables) != 0)
++            if (Interop.KhanaOcrEngineApi.BaseApiInit(languageModel,handle, datapath, language, (int)engineMode, configFiles ?? new List<string>(), initialValues ?? new Dictionary<string, object>(), setOnlyNonDebugVariables) != 0)
+             {
+                 // Special case logic to handle cleaning up as init has already released the handle if it fails.
+                 handle = new HandleRef(this, IntPtr.Zero);
+                 GC.SuppressFinalize(this);
+ 
+-                throw new TesseractException(ErrorMessage.Format(1, "Failed to initialise tesseract engine."));
++                throw new KhanaOcrEngineException(ErrorMessage.Format(1, "Failed to initialise KhanaOcrEngine engine."));
+             }
+         }
+ 
+         /// <summary>
+         /// Ties the specified pix to the lifecycle of a page.
+         /// </summary>
+-        public class PageDisposalHandle
++        private class PageDisposalHandle
+         {
+             private readonly Page page;
+             private readonly Pix pix;
+@@ -347,7 +429,7 @@
+         #region Config
+ 
+         /// <summary>
+-        /// Gets or sets default <see cref="PageSegMode" /> mode used by <see cref="Tesseract.TesseractEngine.Process(Pix, Rect, PageSegMode?)" />.
++        /// Gets or sets default <see cref="PageSegMode" /> mode used by <see cref="KhanaOcrEngine.Process(Pix, Rect, PageSegMode?)" />.
+         /// </summary>
+         public PageSegMode DefaultPageSegMode
+         {
+@@ -357,7 +439,7 @@
+ 
+         public bool SetDebugVariable(string name, string value)
+         {
+-            return Interop.TessApi.BaseApiSetDebugVariable(handle, name, value) != 0;
++            return Interop.KhanaOcrEngineApi.BaseApiSetDebugVariable(handle, name, value) != 0;
+         }
+ 
+         /// <summary>
+@@ -368,7 +450,7 @@
+         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
+         public bool SetVariable(string name, string value)
+         {
+-            return Interop.TessApi.BaseApiSetVariable(handle, name, value) != 0;
++            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, value) != 0;
+         }
+ 
+         /// <summary>
+@@ -380,7 +462,7 @@
+         public bool SetVariable(string name, bool value)
+         {
+             var strEncodedValue = value ? "TRUE" : "FALSE";
+-            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
++            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+         }
+ 
+         /// <summary>
+@@ -392,7 +474,7 @@
+         public bool SetVariable(string name, int value)
+         {
+             var strEncodedValue = value.ToString("D", CultureInfo.InvariantCulture.NumberFormat);
+-            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
++            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+         }
+ 
+         /// <summary>
+@@ -404,7 +486,7 @@
+         public bool SetVariable(string name, double value)
+         {
+             var strEncodedValue = value.ToString("R", CultureInfo.InvariantCulture.NumberFormat);
+-            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
++            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+         }
+ 
+         /// <summary>
+@@ -416,7 +498,7 @@
+         public bool TryGetBoolVariable(string name, out bool value)
+         {
+             int val;
+-            if (Interop.TessApi.Native.BaseApiGetBoolVariable(handle, name, out val) != 0)
++            if (Interop.KhanaOcrEngineApi.Native.BaseApiGetBoolVariable(handle, name, out val) != 0)
+             {
+                 value = (val != 0);
+                 return true;
+@@ -436,7 +518,7 @@
+         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
+         public bool TryGetDoubleVariable(string name, out double value)
+         {
+-            return Interop.TessApi.Native.BaseApiGetDoubleVariable(handle, name, out value) != 0;
++            return Interop.KhanaOcrEngineApi.Native.BaseApiGetDoubleVariable(handle, name, out value) != 0;
+         }
+ 
+         /// <summary>
+@@ -447,7 +529,7 @@
+         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
+         public bool TryGetIntVariable(string name, out int value)
+         {
+-            return Interop.TessApi.Native.BaseApiGetIntVariable(handle, name, out value) != 0;
++            return Interop.KhanaOcrEngineApi.Native.BaseApiGetIntVariable(handle, name, out value) != 0;
+         }
+ 
+         /// <summary>
+@@ -458,7 +540,7 @@
+         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
+         public bool TryGetStringVariable(string name, out string value)
+         {
+-            value = Interop.TessApi.BaseApiGetStringVariable(handle, name);
++            value = Interop.KhanaOcrEngineApi.BaseApiGetStringVariable(handle, name);
+             return value != null;
+         }
+ 
+@@ -469,7 +551,7 @@
+         /// <returns></returns>
+         public bool TryPrintVariablesToFile(string filename)
+         {
+-            return Interop.TessApi.Native.BaseApiPrintVariablesToFile(handle, filename) != 0;
++            return Interop.KhanaOcrEngineApi.Native.BaseApiPrintVariablesToFile(handle, filename) != 0;
+         }
+ 
+         #endregion Config
+--- upstream/TesseractEnviornment.cs
++++ local/TesseractEnviornment.cs
+@@ -3,12 +3,12 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-    public static class TesseractEnviornment
++    internal static class KhanaOcrEngineEnviornment
+     {
+         /// <summary>
+-        /// Gets or sets a search path that will be checked first when attempting to load the Tesseract and Leptonica dlls.
++        /// Gets or sets a search path that will be checked first when attempting to load the KhanaOcrEngine and Leptonica dlls.
+         /// </summary>
+         /// <remarks>
+         /// This search path should not include the platform component as this will automatically be appended to the string based on the detected platform.
+--- upstream/TesseractException.cs
++++ local/TesseractException.cs
+@@ -2,28 +2,28 @@
+ using System;
+ using System.Runtime.Serialization;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+ 	/// <summary>
+-	/// Desctiption of TesseractException.
++	/// Desctiption of KhanaOcrEngineException.
+ 	/// </summary>
+ 	[Serializable]
+-	public class TesseractException : Exception, ISerializable
++    internal class KhanaOcrEngineException : Exception, ISerializable
+ 	{
+-		public TesseractException()
++		public KhanaOcrEngineException()
+ 		{
+ 		}
+ 
+-	 	public TesseractException(string message) : base(message)
++	 	public KhanaOcrEngineException(string message) : base(message)
+ 		{
+ 		}
+ 
+-		public TesseractException(string message, Exception innerException) : base(message, innerException)
++		public KhanaOcrEngineException(string message, Exception innerException) : base(message, innerException)
+ 		{
+ 		}
+ 
+ 		// This constructor is needed for serialization.
+-		protected TesseractException(SerializationInfo info, StreamingContext context) : base(info, context)
++		protected KhanaOcrEngineException(SerializationInfo info, StreamingContext context) : base(info, context)
+ 		{
+ 		}
+ 	}
+--- upstream/TextLineOrder.cs
++++ local/TextLineOrder.cs
+@@ -1,20 +1,20 @@
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// The text lines are read in the given sequence.
+-	/// </summary>
+-	/// <remarks>
+-	/// <para>
+-	/// For example in English the order is top-to-bottom. Chinese vertical text lines
+-	/// are read right-to-left. While Mongolian is written in vertical columns
+-	/// like Chinese but read left-to-right.
+-	/// </para>
+-	/// <para>
+-	/// Note that only some combinations makes sense for example <see cref="WritingDirection.LeftToRight"/> implies
+-	/// <see cref="TextLineOrder.TopToBottom" />.
+-	/// </para>
+-	/// </remarks>
++    /// <summary>
++    /// The text lines are read in the given sequence.
++    /// </summary>
++    /// <remarks>
++    /// <para>
++    /// For example in English the order is top-to-bottom. Chinese vertical text lines
++    /// are read right-to-left. While Mongolian is written in vertical columns
++    /// like Chinese but read left-to-right.
++    /// </para>
++    /// <para>
++    /// Note that only some combinations makes sense for example <see cref="WritingDirection.LeftToRight"/> implies
++    /// <see cref="TextLineOrder.TopToBottom" />.
++    /// </para>
++    /// </remarks>
+     public enum TextLineOrder : int
+     {
+     	/// <summary>
+--- upstream/WritingDirection.cs
++++ local/WritingDirection.cs
+@@ -2,12 +2,12 @@
+ using System.Collections.Generic;
+ using System.Text;
+ 
+-namespace Tesseract
++namespace DSP.Khana.Ocr
+ {
+-	/// <summary>
+-	/// The grapheme cluster within a line of text are laid out logically in this direction,
+-	/// judged when looking at the text line rotated so that Orientation is "page up".
+-	/// </summary>
++    /// <summary>
++    /// The grapheme cluster within a line of text are laid out logically in this direction,
++    /// judged when looking at the text line rotated so that Orientation is "page up".
++    /// </summary>
+     public enum WritingDirection
+     {
+     	/// <summary>

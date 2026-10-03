@@ -1,10 +1,14 @@
-﻿//  Copyright (c) 2014 Andrey Akinshin
+﻿// SPDX-License-Identifier: MIT
+// Modified for DSP.Khana.Ocr: wrapper integration and .NET runtime compatibility.
+// See THIRD-PARTY-NOTICES.md and LICENSES/InteropDotNet-MIT.txt.
+
+//  Copyright (c) 2014 Andrey Akinshin
 //  Project URL: https://github.com/AndreyAkinshin/InteropDotNet
 //  Distributed under the MIT License: http://opensource.org/licenses/MIT
 using System;
 using System.Runtime.InteropServices;
-using DSP.Khana.Ocr;
-using DSP.Khana.Ocr.Internal;
+using Tesseract;
+using Tesseract.Internal;
 
 namespace InteropDotNet
 {
@@ -66,7 +70,7 @@ namespace InteropDotNet
                 }
                 else
                 {
-                    throw new DSP.Khana.Ocr.LoadLibraryException(String.Format(
+                    throw new Tesseract.LoadLibraryException(String.Format(
                         "Failed to load native function \"{0}\" from library with handle  {1}.",
                         functionName, libraryHandle));
 
@@ -76,7 +80,7 @@ namespace InteropDotNet
             catch (Exception e)
             {
                 var lastError = WindowsGetLastError();
-                throw new DSP.Khana.Ocr.LoadLibraryException(
+                throw new Tesseract.LoadLibraryException(
                     String.Format("Failed to load native function \"{0}\" from library with handle  {1}.\r\nLast Error:{1}\r\nCheck inner exception and\\or windows event log.\r\nInner Exception: {2}", functionName, libraryHandle, lastError, e.ToString()),
                     e);
             }

@@ -1,12 +1,26 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using DSP.Khana.Ocr.Internal;
+using Tesseract.Internal;
 
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     /// <summary>
-    /// Rendered formats supported by KhanaOcrEngine.
+    /// Rendered formats supported by TesseractEngine.
     /// </summary>
     internal enum RenderedFormat
     {
@@ -47,7 +61,7 @@ namespace DSP.Khana.Ocr
                         }
                         else
                         {
-                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new TextResultRenderer(outputbase).Handle);
+                            Interop.TessApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new TextResultRenderer(outputbase).Handle);
                         }
                         break;
                     case RenderedFormat.HOCR:
@@ -57,7 +71,7 @@ namespace DSP.Khana.Ocr
                         }
                         else
                         {
-                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new HOcrResultRenderer(outputbase).Handle);
+                            Interop.TessApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new HOcrResultRenderer(outputbase).Handle);
                         }
                         break;
                     case RenderedFormat.PDF:
@@ -67,7 +81,7 @@ namespace DSP.Khana.Ocr
                         }
                         else
                         {
-                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new PdfResultRenderer(outputbase, dataPath, false).Handle);
+                            Interop.TessApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new PdfResultRenderer(outputbase, dataPath, false).Handle);
                         }
                         break;
                     case RenderedFormat.BOX:
@@ -77,7 +91,7 @@ namespace DSP.Khana.Ocr
                         }
                         else
                         {
-                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new BoxResultRenderer(outputbase).Handle);
+                            Interop.TessApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new BoxResultRenderer(outputbase).Handle);
                         }
                         break;
                     case RenderedFormat.UNLV:
@@ -87,7 +101,7 @@ namespace DSP.Khana.Ocr
                         }
                         else
                         {
-                            Interop.KhanaOcrEngineApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new UnlvResultRenderer(outputbase).Handle);
+                            Interop.TessApi.Native.ResultRendererInsert(((ResultRenderer)renderer).Handle, new UnlvResultRenderer(outputbase).Handle);
                         }
                         break;
                 }
@@ -98,7 +112,7 @@ namespace DSP.Khana.Ocr
 
         /// <summary>
         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a searchable
-        /// pdf file from KhanaOcrEngine's output.
+        /// pdf file from TesseractEngine's output.
         /// </summary>
         /// <param name="outputFilename">The filename of the pdf file to be generated without the file extension.</param>
         /// <param name="fontDirectory">The directory containing the pdf font data, normally same as your tessdata directory.</param>
@@ -111,7 +125,7 @@ namespace DSP.Khana.Ocr
 
         /// <summary>
         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates UTF-8 encoded text
-        /// file from KhanaOcrEngine's output.
+        /// file from TesseractEngine's output.
         /// </summary>
         /// <param name="outputFilename">The path to the text file to be generated without the file extension.</param>
         /// <returns></returns>
@@ -122,7 +136,7 @@ namespace DSP.Khana.Ocr
 
         /// <summary>
         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a HOCR
-        /// file from KhanaOcrEngine's output.
+        /// file from TesseractEngine's output.
         /// </summary>
         /// <param name="outputFilename">The path to the hocr file to be generated without the file extension.</param>
         /// <param name="fontInfo">Determines if the generated HOCR file includes font information or not.</param>
@@ -134,7 +148,7 @@ namespace DSP.Khana.Ocr
 
         /// <summary>
         /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a unlv
-        /// file from KhanaOcrEngine's output.
+        /// file from TesseractEngine's output.
         /// </summary>
         /// <param name="outputFilename">The path to the unlv file to be created without the file extension.</param>
         /// <returns></returns>
@@ -144,7 +158,7 @@ namespace DSP.Khana.Ocr
         }
 
         /// <summary>
-        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a box text file from KhanaOcrEngine's output.
+        /// Creates a <see cref="IResultRenderer">result renderer</see> that render that generates a box text file from TesseractEngine's output.
         /// </summary>
         /// <param name="outputFilename">The path to the box file to be created without the file extension.</param>
         /// <returns></returns>
@@ -178,7 +192,7 @@ namespace DSP.Khana.Ocr
                         Guard.Verify(_renderer._currentDocumentHandle == this, "Expected the Result Render's active document to be this document.");
 
                         // End the renderer
-                        Interop.KhanaOcrEngineApi.Native.ResultRendererEndDocument(_renderer._handle);
+                        Interop.TessApi.Native.ResultRendererEndDocument(_renderer._handle);
                         _renderer._currentDocumentHandle = null;
                     }
                 }
@@ -229,7 +243,7 @@ namespace DSP.Khana.Ocr
             // implicitly if required. This is why I've only made Page.Recognise internal not public.
             page.Recognize();
 
-            return Interop.KhanaOcrEngineApi.Native.ResultRendererAddImage(Handle, page.Engine.Handle) != 0;
+            return Interop.TessApi.Native.ResultRendererAddImage(Handle, page.Engine.Handle) != 0;
         }
 
         /// <summary>
@@ -244,7 +258,7 @@ namespace DSP.Khana.Ocr
             Guard.Verify(_currentDocumentHandle == null, "Cannot begin document \"{0}\" as another document is currently being processed which must be dispose off first.", title);
 
             IntPtr titlePtr = Marshal.StringToHGlobalAnsi(title);
-            if (Interop.KhanaOcrEngineApi.Native.ResultRendererBeginDocument(Handle, titlePtr) == 0)
+            if (Interop.TessApi.Native.ResultRendererBeginDocument(Handle, titlePtr) == 0)
             {
                 // release the pointer first before throwing an error.
                 Marshal.FreeHGlobal(titlePtr);
@@ -267,7 +281,7 @@ namespace DSP.Khana.Ocr
             {
                 VerifyNotDisposed();
 
-                return Interop.KhanaOcrEngineApi.Native.ResultRendererImageNum(Handle);
+                return Interop.TessApi.Native.ResultRendererImageNum(Handle);
             }
         }
 
@@ -289,7 +303,7 @@ namespace DSP.Khana.Ocr
             {
                 if (_handle.Handle != IntPtr.Zero)
                 {
-                    Interop.KhanaOcrEngineApi.Native.DeleteResultRenderer(_handle);
+                    Interop.TessApi.Native.DeleteResultRenderer(_handle);
                     _handle = new HandleRef(this, IntPtr.Zero);
                 }
             }
@@ -300,7 +314,7 @@ namespace DSP.Khana.Ocr
     {
         public TextResultRenderer(string outputFilename)
         {
-            var rendererHandle = Interop.KhanaOcrEngineApi.Native.TextRendererCreate(outputFilename);
+            var rendererHandle = Interop.TessApi.Native.TextRendererCreate(outputFilename);
             Initialise(rendererHandle);
         }
     }
@@ -309,7 +323,7 @@ namespace DSP.Khana.Ocr
     {
         public HOcrResultRenderer(string outputFilename, bool fontInfo = false)
         {
-            var rendererHandle = Interop.KhanaOcrEngineApi.Native.HOcrRendererCreate2(outputFilename, fontInfo ? 1 : 0);
+            var rendererHandle = Interop.TessApi.Native.HOcrRendererCreate2(outputFilename, fontInfo ? 1 : 0);
             Initialise(rendererHandle);
         }
     }
@@ -318,7 +332,7 @@ namespace DSP.Khana.Ocr
     {
         public UnlvResultRenderer(string outputFilename)
         {
-            var rendererHandle = Interop.KhanaOcrEngineApi.Native.UnlvRendererCreate(outputFilename);
+            var rendererHandle = Interop.TessApi.Native.UnlvRendererCreate(outputFilename);
             Initialise(rendererHandle);
         }
     }
@@ -327,7 +341,7 @@ namespace DSP.Khana.Ocr
     {
         public BoxResultRenderer(string outputFilename)
         {
-            var rendererHandle = Interop.KhanaOcrEngineApi.Native.BoxTextRendererCreate(outputFilename);
+            var rendererHandle = Interop.TessApi.Native.BoxTextRendererCreate(outputFilename);
             Initialise(rendererHandle);
         }
     }
@@ -339,7 +353,7 @@ namespace DSP.Khana.Ocr
         public PdfResultRenderer(string outputFilename, string fontDirectory, bool textonly)
         {
             var fontDirectoryHandle = Marshal.StringToHGlobalAnsi(fontDirectory);
-            var rendererHandle = Interop.KhanaOcrEngineApi.Native.PDFRendererCreate(outputFilename, fontDirectoryHandle, textonly ? 1 : 0);
+            var rendererHandle = Interop.TessApi.Native.PDFRendererCreate(outputFilename, fontDirectoryHandle, textonly ? 1 : 0);
 
             Initialise(rendererHandle);
         }

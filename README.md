@@ -2,9 +2,17 @@
 
 A Windows Forms desktop application that converts images and PDF pages into editable text using Persian, English, or mixed-language OCR. Users can prepare images, recognize individual images or a batch, edit the results, and export them.
 
-This solution contains the desktop application and its seven supporting projects. Existing namespaces and project names are preserved, including the original `Wapper` spelling. Desktop builds use the license-free profile; activation and licensing projects are not required.
+This solution contains the desktop application and its seven supporting projects. Application namespaces and project names are preserved, including the original `Wapper` spelling; the managed OCR engine uses the upstream Tesseract namespaces. Desktop builds use the license-free profile; activation and licensing projects are not required.
 
 See [CHANGELOG.md](CHANGELOG.md) for the accumulated changes and notes for the next release.
+
+## OCR engine attribution and licensing
+
+`DSP.Khana.Ocr.Engine.v5` is a modified copy of [Charles Weld's Tesseract .NET wrapper](https://github.com/charlesw/tesseract), licensed under **Apache-2.0**, incorporating [Andrey Akinshin's InteropDotNet](https://github.com/AndreyAkinshin/InteropDotNet), licensed under **MIT**. Copyright 2012-2022 Charles Weld; Copyright (c) 2014 Andrey Akinshin.
+
+The engine uses the upstream namespaces and type names, with local requirements documented in its [README](DSP.Khana.Ocr.Engine.v5/README.md). See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and the full license texts in [LICENSES](LICENSES). Attribution is also shown in the English and Persian About dialogs, and the notice and license files accompany build and publish output.
+
+These notices cover the managed OCR components. A license for independently authored application code has not yet been selected, and the remaining bundled dependencies and assets need separate license review before publishing the complete solution as open source.
 
 ## Build and run
 

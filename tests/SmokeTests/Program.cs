@@ -14,7 +14,7 @@ using DSP.Bina.Ocr.DesktopApplication.V3;
 using DSP.Bina.Ocr.DesktopApplication.V3.Forms;
 using DSP.Bina.Ocr.DesktopApplication.V3.Model;
 using DSP.Khana.ImageTools.Models;
-using DSP.Khana.Ocr;
+using Tesseract;
 using Xceed.Words.NET;
 
 internal static partial class SmokeTests
@@ -139,7 +139,7 @@ internal static partial class SmokeTests
             }
             foreach (string language in new[] { "English", "Farsi", "Mix" })
             {
-                using (var engine = new KhanaOcrEngine(null, models, language, EngineMode.LstmOnly, native))
+                using (var engine = new TesseractEngine(null, models, language, EngineMode.LstmOnly, native))
                 using (var page = engine.Process(image, PageSegMode.SingleLine))
                 {
                     string text = page.GetText();

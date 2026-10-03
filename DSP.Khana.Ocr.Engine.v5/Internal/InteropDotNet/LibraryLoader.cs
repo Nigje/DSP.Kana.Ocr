@@ -1,12 +1,16 @@
-﻿//  Copyright (c) 2014 Andrey Akinshin
+// SPDX-License-Identifier: MIT
+// Modified for DSP.Khana.Ocr: wrapper integration and .NET runtime compatibility.
+// See THIRD-PARTY-NOTICES.md and LICENSES/InteropDotNet-MIT.txt.
+
+//  Copyright (c) 2014 Andrey Akinshin
 //  Project URL: https://github.com/AndreyAkinshin/InteropDotNet
 //  Distributed under the MIT License: http://opensource.org/licenses/MIT
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using DSP.Khana.Ocr;
-using DSP.Khana.Ocr.Internal;
+using Tesseract;
+using Tesseract.Internal;
 
 namespace InteropDotNet
 {
@@ -45,7 +49,7 @@ namespace InteropDotNet
                     
                     //searchAppData
                     if (dllHandle == IntPtr.Zero)
-                        dllHandle = CheckAppDataDirecotry(KhanaOcrEngine.DllDirectory,fileName);
+                        dllHandle = CheckAppDataDirecotry(TesseractEngine.DllDirectory,fileName);
 
                     if (dllHandle == IntPtr.Zero)
                         dllHandle = CheckExecutingAssemblyDomain(fileName, platformName);
@@ -107,7 +111,7 @@ namespace InteropDotNet
         /// 
         /// <list type="bullet">
         ///     <item>That the current application domain's location for web applications corresponds to the web applications root directory.</item>
-        ///     <item>That the DSP.Khana.Ocr\leptonica dlls reside in the corresponding x86 or x64 directories in the bin directory under the apps root directory.</item>
+        ///     <item>That the tesseract\leptonica dlls reside in the corresponding x86 or x64 directories in the bin directory under the apps root directory.</item>
         /// </list>
         /// </remarks>
         /// <param name="fileName"></param>

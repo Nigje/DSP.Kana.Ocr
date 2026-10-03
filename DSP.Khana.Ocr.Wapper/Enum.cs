@@ -116,7 +116,7 @@ namespace Bina.Ocr.Wapper
 
         /// <summary>
         /// باز شناسی تصویر با فرض آنکه تصویر ورودی از یک خط تشکیل شده است - حالت دوم
-        /// Treat the image as a single text line, bypassing hacks that are KhanaOcrEngine-specific.
+        /// Treat the image as a single text line, bypassing hacks that are TesseractEngine-specific.
         /// </summary>
         RawLine,
 

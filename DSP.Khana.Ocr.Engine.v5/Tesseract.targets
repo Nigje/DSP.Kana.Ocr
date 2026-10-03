@@ -1,4 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2012-2022 Charles Weld.
+  SPDX-License-Identifier: Apache-2.0
+  Derived from https://github.com/charlesw/tesseract.
+  Modified for DSP.Khana.Ocr native library packaging.
+  See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+  Legacy packaging file; the current SDK project does not import this file.
+-->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup>
         <None Include="$(MSBuildThisFileDirectory)\..\x86\liblept1744.dll">

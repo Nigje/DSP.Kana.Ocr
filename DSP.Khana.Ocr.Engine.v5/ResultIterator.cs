@@ -1,10 +1,24 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-using DSP.Khana.Ocr.Interop;
+using Tesseract.Interop;
 
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     internal sealed class ResultIterator : PageIterator
     {
@@ -19,7 +33,7 @@ namespace DSP.Khana.Ocr
             if (handle.Handle == IntPtr.Zero)
                 return 0f;
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorGetConfidence(handle, level);
+            return Interop.TessApi.Native.ResultIteratorGetConfidence(handle, level);
         }
 
         public string GetText(PageIteratorLevel level)
@@ -29,7 +43,7 @@ namespace DSP.Khana.Ocr
                 return String.Empty;
             }
 
-            return Interop.KhanaOcrEngineApi.ResultIteratorGetUTF8Text(handle, level);
+            return Interop.TessApi.ResultIteratorGetUTF8Text(handle, level);
         }
         
         private Dictionary<int, FontInfo> _fontInfoCache = new Dictionary<int, FontInfo>();
@@ -45,7 +59,7 @@ namespace DSP.Khana.Ocr
            
             // this return value points to an internal table and should not be deleted.
             IntPtr nameHandle =
-                Interop.KhanaOcrEngineApi.Native.ResultIteratorWordFontAttributes(
+                Interop.TessApi.Native.ResultIteratorWordFontAttributes(
                     handle,
                     out isBold, out isItalic, out isUnderlined,
                     out isMonospace, out isSerif, out isSmallCaps,
@@ -73,7 +87,7 @@ namespace DSP.Khana.Ocr
                 return null;
             }
 
-            return Interop.KhanaOcrEngineApi.ResultIteratorWordRecognitionLanguage(handle);
+            return Interop.TessApi.ResultIteratorWordRecognitionLanguage(handle);
         }
 
         public bool GetWordIsFromDictionary()
@@ -83,7 +97,7 @@ namespace DSP.Khana.Ocr
                 return false;
             }
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorWordIsFromDictionary(handle);
+            return Interop.TessApi.Native.ResultIteratorWordIsFromDictionary(handle);
         }
 
         public bool GetWordIsNumeric()
@@ -93,7 +107,7 @@ namespace DSP.Khana.Ocr
                 return false;
             }
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorWordIsNumeric(handle);
+            return Interop.TessApi.Native.ResultIteratorWordIsNumeric(handle);
         }
 
         public bool GetSymbolIsSuperscript()
@@ -103,7 +117,7 @@ namespace DSP.Khana.Ocr
                 return false;
             }
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsSuperscript(handle);
+            return Interop.TessApi.Native.ResultIteratorSymbolIsSuperscript(handle);
         }
 
         public bool GetSymbolIsSubscript()
@@ -113,7 +127,7 @@ namespace DSP.Khana.Ocr
                 return false;
             }
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsSubscript(handle);
+            return Interop.TessApi.Native.ResultIteratorSymbolIsSubscript(handle);
         }
 
         public bool GetSymbolIsDropcap()
@@ -123,7 +137,7 @@ namespace DSP.Khana.Ocr
                 return false;
             }
 
-            return Interop.KhanaOcrEngineApi.Native.ResultIteratorSymbolIsDropcap(handle);
+            return Interop.TessApi.Native.ResultIteratorSymbolIsDropcap(handle);
         }
 
         /// <summary>
@@ -133,7 +147,7 @@ namespace DSP.Khana.Ocr
         /// <returns>an instance of a Choice Iterator</returns>
         public ChoiceIterator GetChoiceIterator()
         {
-            var choiceIteratorHandle = Interop.KhanaOcrEngineApi.Native.ResultIteratorGetChoiceIterator(this.handle);
+            var choiceIteratorHandle = Interop.TessApi.Native.ResultIteratorGetChoiceIterator(this.handle);
             if (choiceIteratorHandle == IntPtr.Zero)
                 return null;
             return new ChoiceIterator(choiceIteratorHandle);

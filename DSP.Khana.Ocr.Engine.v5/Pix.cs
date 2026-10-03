@@ -1,10 +1,24 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using DSP.Khana.Ocr.Internal;
+using Tesseract.Internal;
 
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     public unsafe sealed class Pix : DisposableBase, IEquatable<Pix>
     {
@@ -206,7 +220,7 @@ namespace DSP.Khana.Ocr
             int same;
             if(Interop.LeptonicaApi.Native.pixEqual(Handle, other.Handle, out same) != 0)
             {
-                throw new KhanaOcrEngineException("Failed to compare pix");
+                throw new TesseractException("Failed to compare pix");
             }
             return same != 0;
         }
@@ -299,7 +313,7 @@ namespace DSP.Khana.Ocr
                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
             }
 
-            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+            if (result == 1) throw new TesseractException("Failed to binarize image.");
 
             return new Pix(ppixd);
         }
@@ -363,7 +377,7 @@ namespace DSP.Khana.Ocr
                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
             }
 
-            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+            if (result == 1) throw new TesseractException("Failed to binarize image.");
 
             return new Pix(ppixd);
         }
@@ -405,7 +419,7 @@ namespace DSP.Khana.Ocr
                 Interop.LeptonicaApi.Native.pixDestroy(ref ppixth);
             }
 
-            if (result == 1) throw new KhanaOcrEngineException("Failed to binarize image.");
+            if (result == 1) throw new TesseractException("Failed to binarize image.");
 
             return new Pix(ppixd);
         }
@@ -425,7 +439,7 @@ namespace DSP.Khana.Ocr
             Guard.Require("bwt", bwt >= 0, "All weights must be greater than or equal to zero; blue was not.");
 
             var resultPixHandle = Interop.LeptonicaApi.Native.pixConvertRGBToGray(handle, rwt, gwt, bwt);
-            if (resultPixHandle == IntPtr.Zero) throw new KhanaOcrEngineException("Failed to convert to grayscale.");
+            if (resultPixHandle == IntPtr.Zero) throw new TesseractException("Failed to convert to grayscale.");
             return new Pix(resultPixHandle);
         }
         /// <summary>
@@ -486,7 +500,7 @@ namespace DSP.Khana.Ocr
                 Interop.LeptonicaApi.Native.pixCombineMasked(new HandleRef(this, pix8), new HandleRef(this, pix9), new HandleRef(this, pix7));
                 if (pix8 == IntPtr.Zero)
                 {
-                    throw new KhanaOcrEngineException("Failed to remove lines from image.");
+                    throw new TesseractException("Failed to remove lines from image.");
                 }
 
                 return new Pix(pix8);
@@ -596,7 +610,7 @@ namespace DSP.Khana.Ocr
 
             if (pix6 == IntPtr.Zero)
             {
-                throw new KhanaOcrEngineException("Failed to despeckle image.");
+                throw new TesseractException("Failed to despeckle image.");
             }
 
             return new Pix(pix6);
@@ -665,7 +679,7 @@ namespace DSP.Khana.Ocr
         {
             float pAngle, pConf;
             var resultPixHandle = Interop.LeptonicaApi.Native.pixDeskewGeneral(handle, sweep.Reduction, sweep.Range, sweep.Delta, redSearch, thresh, out pAngle, out pConf);
-            if (resultPixHandle == IntPtr.Zero) throw new KhanaOcrEngineException("Failed to deskew image.");
+            if (resultPixHandle == IntPtr.Zero) throw new TesseractException("Failed to deskew image.");
             scew = new Scew(pAngle, pConf);
             return new Pix(resultPixHandle);
         }

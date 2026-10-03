@@ -1,11 +1,25 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
 
-namespace DSP.Khana.Ocr.Internal
+using System;
+
+namespace Tesseract.Internal
 {
 	static class ErrorMessage 
 	{
 		private const string ErrorMessageFormat = "{0}. See {1} for details.";
-		private const string WikiUrlFormat = "https://KhanaSoft.com";
+		private const string WikiUrlFormat = "https://github.com/charlesw/tesseract/wiki/Error-{0}";
 		
 		public static string Format(int errorNumber, string messageFormat, params object[] messageArgs)
 		{

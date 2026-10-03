@@ -1,32 +1,46 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
-using DSP.Khana.Ocr.Internal;
+using Tesseract.Internal;
 using DSP.Khana.Ocr.Engine.v5;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Bina.Ocr.Wapper")]
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     /// <summary>
-    /// The KhanaOcrEngine .
+    /// The TesseractEngine .
     /// </summary>
     
-    internal class KhanaOcrEngine : DisposableBase
+    internal class TesseractEngine : DisposableBase
     {
-        private const string KhanaOcrEngineVersion = "5.00.00";
-        private static readonly TraceSource trace = new TraceSource("KhanaOcrEngine");
+        private const string TesseractVersion = "5.00.00";
+        private static readonly TraceSource trace = new TraceSource("Tesseract");
         public static string DllDirectory="";
         private HandleRef handle;
 
         private int processCount = 0;
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> using the <see cref="EngineMode.Default"/> mode.
+        /// Creates a new instance of <see cref="TesseractEngine"/> using the <see cref="EngineMode.Default"/> mode.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -34,13 +48,13 @@ namespace DSP.Khana.Ocr
         /// </para>
         /// </remarks>
        
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, string dllDirectory = "")
             : this(languageModel, datapath, language, EngineMode.Default, new string[0], new Dictionary<string, object>(), false,dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="configFile"/>
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="configFile"/>
         /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
         /// </summary>
         /// <remarks>
@@ -52,13 +66,13 @@ namespace DSP.Khana.Ocr
         /// </para>
         /// </remarks>
       
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, string configFile, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, string configFile, string dllDirectory = "")
             : this( languageModel, datapath, language, EngineMode.Default, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false, dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="configFiles"/>
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="configFiles"/>
         /// using the <see cref="EngineMode.Default">Default Engine Mode</see>.
         /// </summary>
         /// <remarks>
@@ -67,13 +81,13 @@ namespace DSP.Khana.Ocr
         /// </para>
         /// </remarks>
       
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, IEnumerable<string> configFiles, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, IEnumerable<string> configFiles, string dllDirectory = "")
             : this( languageModel, datapath, language, EngineMode.Default, configFiles, new Dictionary<string, object>(), false,dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/>.
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/>.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -81,14 +95,14 @@ namespace DSP.Khana.Ocr
         /// </remarks>
         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
         /// <param name="language">The language to load, for example 'eng' for English.</param>
-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string dllDirectory = "")
+        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the TesseractEngine engine.</param>
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string dllDirectory = "")
             : this( languageModel, datapath, language, engineMode, new string[0], new Dictionary<string, object>(), false,dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFile"/>.
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFile"/>.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -100,18 +114,18 @@ namespace DSP.Khana.Ocr
         /// </remarks>
         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
         /// <param name="language">The language to load, for example 'eng' for English.</param>
-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
+        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the TesseractEngine engine.</param>
         /// <param name="configFile">
-        /// An optional KhanaOcrEngine configuration file that is encoded using UTF8 without BOM
+        /// An optional TesseractEngine configuration file that is encoded using UTF8 without BOM
         /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
         /// </param>
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string configFile, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, string configFile, string dllDirectory = "")
             : this( languageModel, datapath, language, engineMode, configFile != null ? new[] { configFile } : new string[0], new Dictionary<string, object>(), false,dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -120,18 +134,18 @@ namespace DSP.Khana.Ocr
         /// </remarks>
         /// <param name="datapath">The path to the parent directory that contains the 'tessdata' directory, ignored if the <c>TESSDATA_PREFIX</c> environment variable is defined.</param>
         /// <param name="language">The language to load, for example 'eng' for English.</param>
-        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the KhanaOcrEngine engine.</param>
+        /// <param name="engineMode">The <see cref="EngineMode"/> value to use when initialising the TesseractEngine engine.</param>
         /// <param name="configFiles">
-        /// An optional sequence of KhanaOcrEngine configuration files to load, encoded using UTF8 without BOM
+        /// An optional sequence of TesseractEngine configuration files to load, encoded using UTF8 without BOM
         /// with Unix end of line characters you can use an advanced text editor such as Notepad++ to accomplish this.
         /// </param>
-        public KhanaOcrEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel, string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, string dllDirectory = "")
             : this(languageModel, datapath, language, engineMode, configFiles, new Dictionary<string, object>(), false,dllDirectory)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="KhanaOcrEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
+        /// Creates a new instance of <see cref="TesseractEngine"/> with the specified <paramref name="engineMode"/> and <paramref name="configFiles"/>.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -139,13 +153,13 @@ namespace DSP.Khana.Ocr
         /// </para>
         /// </remarks>
    
-        public KhanaOcrEngine(LanguageModel languageModel,string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialOptions, bool setOnlyNonDebugVariables, string dllDirectory = "")
+        public TesseractEngine(LanguageModel languageModel,string datapath, string language, EngineMode engineMode, IEnumerable<string> configFiles, IDictionary<string, object> initialOptions, bool setOnlyNonDebugVariables, string dllDirectory = "")
         {
             DllDirectory = dllDirectory;
             Guard.RequireNotNullOrEmpty("language", language);
 
             DefaultPageSegMode = PageSegMode.Auto;
-            handle = new HandleRef(this, Interop.KhanaOcrEngineApi.Native.BaseApiCreate());
+            handle = new HandleRef(this, Interop.TessApi.Native.BaseApiCreate());
 #if !DESKTOP_WITHOUT_LICENSING
             Guard.Require("License", languageModel.IsValid);
             //Nigje_lan
@@ -175,9 +189,9 @@ namespace DSP.Khana.Ocr
             {
                 // Get version doesn't work for x64, might be compilation related for now just
                 // return constant so we don't crash.
-                return KhanaOcrEngineVersion;
+                return TesseractVersion;
 
-                // return Interop.KhanaOcrEngineApi.Native.GetVersion();
+                // return Interop.TessApi.Native.GetVersion();
             }
         }
 
@@ -249,11 +263,11 @@ namespace DSP.Khana.Ocr
             processCount++;
 
             var actualPageSegmentMode = pageSegMode.HasValue ? pageSegMode.Value : DefaultPageSegMode;
-            Interop.KhanaOcrEngineApi.Native.BaseAPISetPageSegMode(handle, actualPageSegmentMode);
-            Interop.KhanaOcrEngineApi.Native.BaseApiSetImage(handle, image.Handle);
+            Interop.TessApi.Native.BaseAPISetPageSegMode(handle, actualPageSegmentMode);
+            Interop.TessApi.Native.BaseApiSetImage(handle, image.Handle);
             if (!String.IsNullOrEmpty(inputName))
             {
-                Interop.KhanaOcrEngineApi.Native.BaseApiSetInputName(handle, inputName);
+                Interop.TessApi.Native.BaseApiSetInputName(handle, inputName);
             }
             var page = new Page(this, image, inputName, region, actualPageSegmentMode);
             page.Disposed += OnIteratorDisposed;
@@ -299,7 +313,7 @@ namespace DSP.Khana.Ocr
         /// Process the specified bitmap image.
         /// </summary>
         /// <remarks>
-        /// Please consider <see cref="KhanaOcrEngine.Process(Pix, Rect, PageSegMode?)"/> instead. This is because
+        /// Please consider <see cref="TesseractEngine.Process(Pix, Rect, PageSegMode?)"/> instead. This is because
         /// this method must convert the bitmap to a pix for processing which will add additional overhead.
         /// Leptonica also supports a large number of image pre-processing functions as well.
         /// </remarks>
@@ -316,7 +330,7 @@ namespace DSP.Khana.Ocr
         /// Process the specified bitmap image.
         /// </summary>
         /// <remarks>
-        /// Please consider <see cref="KhanaOcrEngine.Process(Pix, String, Rect, PageSegMode?)"/> instead. This is because
+        /// Please consider <see cref="TesseractEngine.Process(Pix, String, Rect, PageSegMode?)"/> instead. This is because
         /// this method must convert the bitmap to a pix for processing which will add additional overhead.
         /// Leptonica also supports a large number of image pre-processing functions as well.
         /// </remarks>
@@ -339,7 +353,7 @@ namespace DSP.Khana.Ocr
         {
             if (handle.Handle != IntPtr.Zero)
             {
-                Interop.KhanaOcrEngineApi.Native.BaseApiDelete(handle);
+                Interop.TessApi.Native.BaseApiDelete(handle);
                 handle = new HandleRef(this, IntPtr.Zero);
             }
         }
@@ -380,7 +394,7 @@ namespace DSP.Khana.Ocr
                 Guard.Require("License", false);
             }
 #endif
-            // do some minor processing on datapath to fix some common errors (this basically mirrors what KhanaOcrEngine does as of 3.04)
+            // do some minor processing on datapath to fix some common errors (this basically mirrors what TesseractEngine does as of 3.04)
             if (!String.IsNullOrEmpty(datapath))
             {
                 // remove any excess whitespace
@@ -393,13 +407,13 @@ namespace DSP.Khana.Ocr
                 }
             }
 
-            if (Interop.KhanaOcrEngineApi.BaseApiInit(languageModel,handle, datapath, language, (int)engineMode, configFiles ?? new List<string>(), initialValues ?? new Dictionary<string, object>(), setOnlyNonDebugVariables) != 0)
+            if (Interop.TessApi.BaseApiInit(languageModel,handle, datapath, language, (int)engineMode, configFiles ?? new List<string>(), initialValues ?? new Dictionary<string, object>(), setOnlyNonDebugVariables) != 0)
             {
                 // Special case logic to handle cleaning up as init has already released the handle if it fails.
                 handle = new HandleRef(this, IntPtr.Zero);
                 GC.SuppressFinalize(this);
 
-                throw new KhanaOcrEngineException(ErrorMessage.Format(1, "Failed to initialise KhanaOcrEngine engine."));
+                throw new TesseractException(ErrorMessage.Format(1, "Failed to initialise TesseractEngine engine."));
             }
         }
 
@@ -429,7 +443,7 @@ namespace DSP.Khana.Ocr
         #region Config
 
         /// <summary>
-        /// Gets or sets default <see cref="PageSegMode" /> mode used by <see cref="KhanaOcrEngine.Process(Pix, Rect, PageSegMode?)" />.
+        /// Gets or sets default <see cref="PageSegMode" /> mode used by <see cref="TesseractEngine.Process(Pix, Rect, PageSegMode?)" />.
         /// </summary>
         public PageSegMode DefaultPageSegMode
         {
@@ -439,7 +453,7 @@ namespace DSP.Khana.Ocr
 
         public bool SetDebugVariable(string name, string value)
         {
-            return Interop.KhanaOcrEngineApi.BaseApiSetDebugVariable(handle, name, value) != 0;
+            return Interop.TessApi.BaseApiSetDebugVariable(handle, name, value) != 0;
         }
 
         /// <summary>
@@ -450,7 +464,7 @@ namespace DSP.Khana.Ocr
         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
         public bool SetVariable(string name, string value)
         {
-            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, value) != 0;
+            return Interop.TessApi.BaseApiSetVariable(handle, name, value) != 0;
         }
 
         /// <summary>
@@ -462,7 +476,7 @@ namespace DSP.Khana.Ocr
         public bool SetVariable(string name, bool value)
         {
             var strEncodedValue = value ? "TRUE" : "FALSE";
-            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
         }
 
         /// <summary>
@@ -474,7 +488,7 @@ namespace DSP.Khana.Ocr
         public bool SetVariable(string name, int value)
         {
             var strEncodedValue = value.ToString("D", CultureInfo.InvariantCulture.NumberFormat);
-            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
         }
 
         /// <summary>
@@ -486,7 +500,7 @@ namespace DSP.Khana.Ocr
         public bool SetVariable(string name, double value)
         {
             var strEncodedValue = value.ToString("R", CultureInfo.InvariantCulture.NumberFormat);
-            return Interop.KhanaOcrEngineApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
+            return Interop.TessApi.BaseApiSetVariable(handle, name, strEncodedValue) != 0;
         }
 
         /// <summary>
@@ -498,7 +512,7 @@ namespace DSP.Khana.Ocr
         public bool TryGetBoolVariable(string name, out bool value)
         {
             int val;
-            if (Interop.KhanaOcrEngineApi.Native.BaseApiGetBoolVariable(handle, name, out val) != 0)
+            if (Interop.TessApi.Native.BaseApiGetBoolVariable(handle, name, out val) != 0)
             {
                 value = (val != 0);
                 return true;
@@ -518,7 +532,7 @@ namespace DSP.Khana.Ocr
         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
         public bool TryGetDoubleVariable(string name, out double value)
         {
-            return Interop.KhanaOcrEngineApi.Native.BaseApiGetDoubleVariable(handle, name, out value) != 0;
+            return Interop.TessApi.Native.BaseApiGetDoubleVariable(handle, name, out value) != 0;
         }
 
         /// <summary>
@@ -529,7 +543,7 @@ namespace DSP.Khana.Ocr
         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
         public bool TryGetIntVariable(string name, out int value)
         {
-            return Interop.KhanaOcrEngineApi.Native.BaseApiGetIntVariable(handle, name, out value) != 0;
+            return Interop.TessApi.Native.BaseApiGetIntVariable(handle, name, out value) != 0;
         }
 
         /// <summary>
@@ -540,7 +554,7 @@ namespace DSP.Khana.Ocr
         /// <returns>Returns <c>True</c> if successful; otherwise <c>False</c>.</returns>
         public bool TryGetStringVariable(string name, out string value)
         {
-            value = Interop.KhanaOcrEngineApi.BaseApiGetStringVariable(handle, name);
+            value = Interop.TessApi.BaseApiGetStringVariable(handle, name);
             return value != null;
         }
 
@@ -551,7 +565,7 @@ namespace DSP.Khana.Ocr
         /// <returns></returns>
         public bool TryPrintVariablesToFile(string filename)
         {
-            return Interop.KhanaOcrEngineApi.Native.BaseApiPrintVariablesToFile(handle, filename) != 0;
+            return Interop.TessApi.Native.BaseApiPrintVariablesToFile(handle, filename) != 0;
         }
 
         #endregion Config

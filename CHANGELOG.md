@@ -4,6 +4,13 @@ This file records the changes completed during the standalone desktop modernizat
 
 ## Unreleased
 
+### OCR source attribution and licensing
+
+- Restored the Tesseract wrapper's original namespaces, engine/API/exception/environment names, engine-mode member names, logging identity, and error-help URL. Source filenames already matched upstream. The local project/assembly identity and runtime integration are retained.
+- Updated the application facade and smoke tests to use the restored names.
+- Credited Charles Weld's Apache-2.0 Tesseract .NET wrapper and Andrey Akinshin's MIT InteropDotNet in source headers, documentation, and the English/Persian About dialogs.
+- Added the full upstream license texts and third-party notice to build and publish output. A repository-wide application license and the remaining dependency review are still separate release tasks.
+
 ### Release summary
 
 The OCR desktop application now supports English and Persian interfaces with matching left-to-right and right-to-left layouts. The standalone solution has been upgraded to .NET 10 LTS, desktop activation has been removed, and recognition, image editing, and document export have been refactored. This update fixes startup failures, improves resource cleanup and cancellation, preserves edited and formatted recognition results per image, and prevents exported documents from overwriting existing files.

@@ -1,15 +1,29 @@
-﻿using System;
+﻿// Copyright 2012-2022 Charles Weld.
+// SPDX-License-Identifier: Apache-2.0
+// Derived from https://github.com/charlesw/tesseract.
+// Modified for DSP.Khana.Ocr: type visibility, local integration, and build/runtime
+// compatibility where applicable; upstream namespaces and type names restored.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy at https://www.apache.org/licenses/LICENSE-2.0.
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See THIRD-PARTY-NOTICES.md and LICENSES/Tesseract-Apache-2.0.txt.
+
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace DSP.Khana.Ocr
+namespace Tesseract
 {
     /// <summary>
-    /// Represents an object that can iterate over KhanaOcrEngine's page structure.
+    /// Represents an object that can iterate over TesseractEngine's page structure.
     /// </summary>
     /// <remarks>
-    /// The iterator points to KhanaOcrEngine's internal page structure and is only valid while the Engine instance that created it exists
+    /// The iterator points to TesseractEngine's internal page structure and is only valid while the Engine instance that created it exists
     /// and has not been subjected to a call to Recognize since the iterator was created.
     /// </remarks>
     internal class PageIterator : DisposableBase
@@ -30,7 +44,7 @@ namespace DSP.Khana.Ocr
         {
             VerifyNotDisposed();
             if (handle.Handle != IntPtr.Zero) {
-                Interop.KhanaOcrEngineApi.Native.PageIteratorBegin(handle);
+                Interop.TessApi.Native.PageIteratorBegin(handle);
             }
         }
 
@@ -47,7 +61,7 @@ namespace DSP.Khana.Ocr
             VerifyNotDisposed();
             if (handle.Handle == IntPtr.Zero)
                 return false;
-            return Interop.KhanaOcrEngineApi.Native.PageIteratorNext(handle, level) != 0;
+            return Interop.TessApi.Native.PageIteratorNext(handle, level) != 0;
         }
 
         /// <summary>
@@ -82,7 +96,7 @@ namespace DSP.Khana.Ocr
 
             if (handle.Handle == IntPtr.Zero)
                 return false;
-            return Interop.KhanaOcrEngineApi.Native.PageIteratorIsAtBeginningOf(handle, level) != 0;
+            return Interop.TessApi.Native.PageIteratorIsAtBeginningOf(handle, level) != 0;
         }
 
         /// <summary>
@@ -97,7 +111,7 @@ namespace DSP.Khana.Ocr
 
             if (handle.Handle == IntPtr.Zero)
                 return false;
-            return Interop.KhanaOcrEngineApi.Native.PageIteratorIsAtFinalElement(handle, level, element) != 0;
+            return Interop.TessApi.Native.PageIteratorIsAtFinalElement(handle, level, element) != 0;
         }
 
         public PolyBlockType BlockType
@@ -108,7 +122,7 @@ namespace DSP.Khana.Ocr
 
                 if (handle.Handle == IntPtr.Zero)
                     return PolyBlockType.Unknown;
-                return Interop.KhanaOcrEngineApi.Native.PageIteratorBlockType(handle);
+                return Interop.TessApi.Native.PageIteratorBlockType(handle);
             }
         }
 
@@ -119,7 +133,7 @@ namespace DSP.Khana.Ocr
                 return null;
             }
 
-            return Pix.Create(Interop.KhanaOcrEngineApi.Native.PageIteratorGetBinaryImage(handle, level));
+            return Pix.Create(Interop.TessApi.Native.PageIteratorGetBinaryImage(handle, level));
         }
 
         public Pix GetImage(PageIteratorLevel level, int padding, out int x, out int y)
@@ -132,7 +146,7 @@ namespace DSP.Khana.Ocr
                 return null;
             }
 
-            return Pix.Create(Interop.KhanaOcrEngineApi.Native.PageIteratorGetImage(handle, level, padding, page.Image.Handle, out x, out y));
+            return Pix.Create(Interop.TessApi.Native.PageIteratorGetImage(handle, level, padding, page.Image.Handle, out x, out y));
         }
 
         /// <summary>
@@ -145,7 +159,7 @@ namespace DSP.Khana.Ocr
         {
             VerifyNotDisposed();
             int x1, y1, x2, y2;
-            if (handle.Handle != IntPtr.Zero && Interop.KhanaOcrEngineApi.Native.PageIteratorBoundingBox(handle, level, out x1, out y1, out x2, out y2) != 0)
+            if (handle.Handle != IntPtr.Zero && Interop.TessApi.Native.PageIteratorBoundingBox(handle, level, out x1, out y1, out x2, out y2) != 0)
             {
                 bounds = Rect.FromCoords(x1, y1, x2, y2);
                 return true;
@@ -168,7 +182,7 @@ namespace DSP.Khana.Ocr
         {
             VerifyNotDisposed();
             int x1, y1, x2, y2;
-            if (handle.Handle != IntPtr.Zero && Interop.KhanaOcrEngineApi.Native.PageIteratorBaseline(handle, level, out x1, out y1, out x2, out y2) != 0)
+            if (handle.Handle != IntPtr.Zero && Interop.TessApi.Native.PageIteratorBaseline(handle, level, out x1, out y1, out x2, out y2) != 0)
             {
                 bounds = Rect.FromCoords(x1, y1, x2, y2);
                 return true;
@@ -192,7 +206,7 @@ namespace DSP.Khana.Ocr
             WritingDirection writing_direction;
             TextLineOrder textLineOrder;
             float deskew_angle;
-            Interop.KhanaOcrEngineApi.Native.PageIteratorOrientation(handle, out orientation, out writing_direction, out textLineOrder, out deskew_angle);
+            Interop.TessApi.Native.PageIteratorOrientation(handle, out orientation, out writing_direction, out textLineOrder, out deskew_angle);
 
             return new ElementProperties(orientation, textLineOrder, writing_direction, deskew_angle);
         }
@@ -201,7 +215,7 @@ namespace DSP.Khana.Ocr
         protected override void Dispose(bool disposing)
         {
             if (handle.Handle != IntPtr.Zero) {
-                Interop.KhanaOcrEngineApi.Native.PageIteratorDelete(handle);
+                Interop.TessApi.Native.PageIteratorDelete(handle);
             }
         }
     }

@@ -1680,7 +1680,7 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             Name = "MainForm";
             Padding = new System.Windows.Forms.Padding(2);
-            RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            RightToLeft = System.Windows.Forms.RightToLeft.No;
             Text = "Bina OCR";
             mainTableLayoutPanel.ResumeLayout(false);
             headerPanel.ResumeLayout(false);

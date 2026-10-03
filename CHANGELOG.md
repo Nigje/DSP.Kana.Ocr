@@ -4,6 +4,12 @@ This file records the changes completed during the standalone desktop modernizat
 
 ## Unreleased
 
+### UI language switching
+
+- Keep the main window alive when switching between English and Persian by applying text direction to content containers instead of recreating the form's native window.
+- Batch translation and child layouts with native redraw paused until completion, preventing partially updated controls from flashing. Redraw is restored even if translation fails, and hidden forms stay hidden.
+- Added regressions for repeated switches, retained editor text/formatting/selection, selected images, OCR options, and bilingual layout after resizing.
+
 ### DOCX export dependency replacement
 
 - Implemented DOCX export using MIT-licensed Open XML SDK (`DocumentFormat.OpenXml` 3.5.1).

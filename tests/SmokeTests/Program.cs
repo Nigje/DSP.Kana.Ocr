@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -35,6 +36,7 @@ internal static partial class SmokeTests
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            if (args.Contains("--forms-only")) { CheckForms(); Console.WriteLine("PASS: bilingual form checks."); return 0; }
             if (args.Contains("--refactoring-only")) { CheckRefactorings(); Console.WriteLine("PASS: desktop refactoring checks."); return 0; }
             CheckResources();
             CheckDocx();
@@ -192,6 +194,9 @@ internal static partial class SmokeTests
         Console.WriteLine("Image history: undo, redo invalidation, bounded history, and filename handling passed.");
     }
 
+    [DllImport("user32.dll", EntryPoint = "GetPropW", CharSet = CharSet.Unicode)]
+    private static extern IntPtr GetWindowProperty(IntPtr handle, string name);
+
     private static void CheckForms()
     {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en");
@@ -200,6 +205,8 @@ internal static partial class SmokeTests
         {
             main.ShowInTaskbar = false;
             main.Opacity = 0;
+            int loadCount = 0;
+            main.Load += (_, _) => loadCount++;
             main.Show();
             about.ShowInTaskbar = false;
             about.Opacity = 0;
@@ -218,13 +225,51 @@ internal static partial class SmokeTests
             Assert(Field<Guid>(main, "selectedImageId") == sample.Id, "Image list selection handler is wired.");
             var selector = Field<ComboBox>(main, "uiLanguageComboBox");
             var editor = Field<RichTextBox>(about, "descriptionTextBox");
+            var recognitionEditor = Field<RichTextBox>(main, "recognizedTextBox");
+            recognitionEditor.Text = "English and فارسی edits";
+            recognitionEditor.Select(0, 7);
+            using (var bold = new Font(recognitionEditor.Font, FontStyle.Bold)) recognitionEditor.SelectionFont = bold;
+            recognitionEditor.Select(3, 2);
+            string documentText = recognitionEditor.Text;
+            var mainHandle = main.Handle;
+            int recreatedHandles = 0;
+            main.HandleCreated += (_, _) => recreatedHandles++;
+            var ocrLanguage = Field<ComboBox>(main, "ocrLanguageComboBox");
+            var ocrEngine = Field<ComboBox>(main, "ocrEngineComboBox");
+            var segmentation = Field<ComboBox>(main, "pageSegmentationComboBox");
+            var selectedLanguage = ocrLanguage.SelectedItem;
+            var selectedEngine = ocrEngine.SelectedItem;
+            var selectedSegmentation = segmentation.SelectedItem;
+            int redrawChecks = 0;
+            foreach (var containerName in new[] { "rootPanel", "headerPanel", "recognitionToolbarPanel", "previewSplitContainer" })
+                Field<Control>(main, containerName).Layout += (_, _) =>
+                {
+                    if (!Field<bool>(main, "refreshingUiLanguage")) return;
+                    redrawChecks++;
+                    Assert(GetWindowProperty(main.Handle, "SysSetRedraw") != IntPtr.Zero,
+                        "Language-switch layout runs while native window redraw is disabled.");
+                };
             foreach (int selection in new[] { 0, 1, 0, 1 })
             {
                 selector.SelectedIndex = selection;
                 Application.DoEvents();
+                Assert(GetWindowProperty(main.Handle, "SysSetRedraw") == IntPtr.Zero && main.Visible,
+                    "Language switching restores native redraw and keeps the form visible.");
                 bool persian = selection == 1;
-                Assert(main.RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "Main form direction.");
-                Assert(about.RightToLeft == main.RightToLeft, "Live About Us direction.");
+                Assert(main.Handle == mainHandle && recreatedHandles == 0, "Switching UI language keeps the main window handle alive.");
+                Assert(loadCount == 1, "Switching UI language does not reload the form.");
+                Assert(Field<Panel>(main, "rootPanel").RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "Main content direction.");
+                Assert(about.RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "Live About Us direction.");
+                Assert(recognitionEditor.Text == documentText && recognitionEditor.SelectionStart == 3 && recognitionEditor.SelectionLength == 2
+                    && recognitionEditor.RightToLeft == RightToLeft.Yes, "UI language switching preserves editor text, direction and selection.");
+                recognitionEditor.Select(0, 7);
+                using (var selectedFont = recognitionEditor.SelectionFont) Assert(selectedFont.Bold, "Language switching preserves bold formatting.");
+                recognitionEditor.Select(8, 3);
+                using (var selectedFont = recognitionEditor.SelectionFont) Assert(!selectedFont.Bold, "Language switching preserves plain formatting.");
+                recognitionEditor.Select(3, 2);
+                Assert(Field<Guid>(main, "selectedImageId") == sample.Id && ReferenceEquals(ocrLanguage.SelectedItem, selectedLanguage)
+                    && ReferenceEquals(ocrEngine.SelectedItem, selectedEngine) && ReferenceEquals(segmentation.SelectedItem, selectedSegmentation),
+                    "UI language switching preserves the selected image and OCR options.");
                 Assert(editor.Text.Contains(persian ? "بینا" : "Bina"), "Live About Us translation.");
                 var languagePanel = selector.Parent;
                 Assert(languagePanel.Dock == DockStyle.Left, "Footer selector stays left.");
@@ -235,6 +280,19 @@ internal static partial class SmokeTests
                     Assert(selector.Width > 0 && selector.Height > 0, "Language selector layout after resize.");
                 }
             }
+            Assert(redrawChecks > 0, "The redraw regression observes language-switch layouts.");
+            EventHandler failTranslation = (_, _) => throw new InvalidOperationException("Injected translation failure");
+            var tab = Field<TabPage>(main, "recognitionTabPage");
+            tab.TextChanged += failTranslation;
+            bool updateFailed = false;
+            try { selector.SelectedIndex = 0; }
+            catch (InvalidOperationException error) { updateFailed = error.Message == "Injected translation failure"; }
+            finally { tab.TextChanged -= failTranslation; }
+            Assert(updateFailed && GetWindowProperty(main.Handle, "SysSetRedraw") == IntPtr.Zero && !Field<bool>(main, "refreshingUiLanguage"),
+                "Failed translation restores redraw and releases the language-switch guard.");
+            selector.SelectedIndex = 1;
+            Application.DoEvents();
+            Assert(main.Visible && main.Handle == mainHandle, "Language switching recovers after a failed translation.");
             var setFontSize = typeof(MainForm).GetMethod("SetFontSize", PrivateInstance);
             foreach (float invalidSize in new[] { 0f, -1f, float.NaN, float.PositiveInfinity })
             {
@@ -250,6 +308,14 @@ internal static partial class SmokeTests
             Assert(Field<RichTextBox>(main, "recognizedTextBox").Font.Size == 16f, "Valid font size is applied.");
             about.Close();
             main.Close();
+        }
+        using (var hidden = new MainForm())
+        {
+            var handle = hidden.Handle;
+            var selector = Field<ComboBox>(hidden, "uiLanguageComboBox");
+            selector.SelectedIndex = selector.SelectedIndex == 0 ? 1 : 0;
+            Assert(!hidden.Visible && hidden.Handle == handle && GetWindowProperty(handle, "SysSetRedraw") == IntPtr.Zero,
+                "Updating a hidden form neither shows it nor leaves redraw disabled.");
         }
         using (var pages = new PdfPageSelectionForm("sample.pdf")) { pages.CreateControl(); }
         using (var adjustment = new TrackBarDialog()) { adjustment.CreateControl(); }

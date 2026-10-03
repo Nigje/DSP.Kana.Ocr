@@ -29,8 +29,9 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
                 parent.SuspendLayout();
             try
             {
-                RightToLeftLayout = false;
-                RightToLeft = direction;
+                // This borderless window mirrors content manually. Changing the Form's
+                // RightToLeft recreates its native window and makes language switching flash.
+                // Keep the window direction fixed and localize the content containers instead.
                 rootPanel.RightToLeft = direction;
                 mainTabControl.RightToLeft = direction;
                 mainTabControl.RightToLeftLayout = rightToLeft;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -89,9 +90,9 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             Properties.Strings.Culture = culture;
 
             refreshingUiLanguage = true;
-            SuspendLayout();
             try
             {
+                using var update = new UiLanguageUpdate(this);
                 Text = Properties.Strings.ApplicationTitle;
                 if (cancelRecognitionButton != null) cancelRecognitionButton.Text = Properties.Strings.CancelProcessing;
                 uiLanguageLabel.Text = Properties.Strings.UiLanguageLabel;
@@ -149,9 +150,63 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             }
             finally
             {
-                ResumeLayout(true);
                 refreshingUiLanguage = false;
             }
+        }
+
+        // SuspendLayout alone does not prevent child windows from painting intermediate
+        // translations or RTL handle changes. Hold painting until all layouts have settled.
+        private sealed class UiLanguageUpdate : IDisposable
+        {
+            private readonly MainForm form;
+            private readonly List<Control> containers = new List<Control>();
+            private readonly IntPtr windowHandle;
+
+            public UiLanguageUpdate(MainForm form)
+            {
+                this.form = form;
+                CollectContainers(form);
+                foreach (var container in containers) container.SuspendLayout();
+                // WM_SETREDRAW(TRUE) makes a hidden native window visible. Only pause
+                // an already visible window, and never create a handle during startup.
+                if (form.IsHandleCreated && form.Visible)
+                {
+                    windowHandle = form.Handle;
+                    SendMessage(windowHandle, 0x000B, IntPtr.Zero, IntPtr.Zero);
+                }
+            }
+
+            private void CollectContainers(Control control)
+            {
+                if (control.Controls.Count == 0) return;
+                containers.Add(control);
+                foreach (Control child in control.Controls) CollectContainers(child);
+            }
+
+            public void Dispose()
+            {
+                try
+                {
+                    for (int index = containers.Count - 1; index >= 0; index--)
+                        if (!containers[index].IsDisposed) containers[index].ResumeLayout(true);
+                }
+                finally
+                {
+                    if (windowHandle != IntPtr.Zero && !form.IsDisposed && form.IsHandleCreated && form.Handle == windowHandle)
+                    {
+                        SendMessage(windowHandle, 0x000B, new IntPtr(1), IntPtr.Zero);
+                        // Invalidate the frame and every child as well as the client area.
+                        RedrawWindow(windowHandle, IntPtr.Zero, IntPtr.Zero, 0x0001 | 0x0004 | 0x0080 | 0x0400);
+                    }
+                }
+            }
+
+            [DllImport("user32.dll", EntryPoint = "SendMessageW", ExactSpelling = true)]
+            private static extern IntPtr SendMessage(IntPtr handle, uint message, IntPtr wParam, IntPtr lParam);
+
+            [DllImport("user32.dll", ExactSpelling = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static extern bool RedrawWindow(IntPtr handle, IntPtr updateRect, IntPtr updateRegion, uint flags);
         }
 
         private void RefreshLocalizedOcrOptions()

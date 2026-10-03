@@ -1,10 +1,39 @@
-# DSP.Khana.Ocr.New
+# Bina OCR
 
-A Windows Forms desktop application that converts images and PDF pages into editable text using Persian, English, or mixed-language OCR. Users can prepare images, recognize individual images or a batch, edit the results, and export them.
+**Turn Persian and English document images into editable, formatted Word documents.**
 
-This solution contains the desktop application and its five supporting projects. Application namespaces and project names are preserved, including the original `Wapper` spelling; the managed OCR engine uses the upstream Tesseract namespaces. Desktop builds use the license-free profile; activation and licensing projects are not required.
+Bina OCR is a Windows desktop workspace for the complete recognition process: import a document, improve its image, extract the text, review the result, and export your work. It brings image preparation and a rich text editor into one interface, so you can work from a scanned page to a reusable document without moving between separate tools.
 
-See [CHANGELOG.md](CHANGELOG.md) for the accumulated changes and notes for the next release.
+Built around Persian, English, and mixed-language recognition, Bina combines bilingual controls with practical tools for document work. Recognition and PDF rendering run locally using bundled native libraries and language models; the document-processing workflow does not require a cloud OCR service.
+
+## Features
+
+| Capability | What you can do |
+| --- | --- |
+| **Persian, English, and mixed-language OCR** | Choose the recognition model for Persian text, English text, or documents containing both. Select the interface language independently of the document language. |
+| **Image and PDF input** | Import multiple image files, load all pages of a PDF, or select the pages you need. A thumbnail workspace keeps the imported images and PDF pages accessible for review. |
+| **Image preparation** | Crop unwanted areas, rotate pages, correct skew, sharpen text, smooth noise, invert colors, or convert to grayscale and monochrome. Adjust brightness, contrast, gamma, and threshold with live previews before applying changes. |
+| **Recognition controls** | Match recognition to the source with page segmentation options for automatic analysis, text blocks, columns, individual lines, sparse text, words, and characters. Available OCR engine options follow the selected language. |
+| **Single-page and batch processing** | Recognize the selected image or process the imported collection sequentially. See which image is being processed and cancel queued work while the current native recognition call finishes safely. |
+| **Rich text review** | Correct recognition results and apply font families, sizes, bold, italic, underline, paragraph alignment, bullets, and indentation. Each image retains its own edited text, formatting, and text direction as you move through the collection. |
+| **Formatted Word export** | Save the current image's result or export the collection. DOCX output carries the edited text and supported formatting; a companion JPEG preserves the corresponding prepared image. Existing output names receive numbered suffixes to protect earlier exports. |
+| **English and Persian interface** | Switch labels, messages, and layout between English and Persian, including right-to-left presentation. Image adjustment dialogs use the shared application header and identify the active adjustment. |
+| **Inspection and reversible image edits** | Zoom in, zoom out, view actual size, or fit the image to the workspace. Undo and redo image preparation steps while comparing the source with its recognized text. |
+| **Optional Persian text cleanup** | Enable post-processing to apply the bundled Persian text cleanup rules after recognition, then review and refine the result in the editor. |
+
+## A practical document workflow
+
+1. **Bring in the source.** Load one or more images, or choose the relevant pages of a PDF. Use the thumbnails to move between documents and pages.
+2. **Prepare the page.** Inspect it at a useful zoom level, crop the reading area, correct orientation or skew, and adjust image contrast or threshold where needed. Preview slider adjustments before committing them.
+3. **Choose how to recognize it.** Select Persian, English, or mixed recognition and a segmentation mode suited to the page. The language of the interface can remain whatever you prefer.
+4. **Recognize and review.** Process one image or the collection, compare the output with the source, correct errors, and format the text for its intended use. Edits stay associated with the corresponding image throughout the session.
+5. **Export the finished work.** Write a formatted Word document and its companion image, or export the imported collection to a chosen directory.
+
+This workflow is useful for reusing text from scanned correspondence, printed reports, study material, and bilingual documents. Its strength is the combination of recognition, image preparation, and human review: you can inspect the source, correct the result, and shape the exported document in one workspace.
+
+DOCX formatting reflects the recognized text and the edits made in Bina's editor. PDF pages are rendered as images for recognition, and collection export creates separate outputs for each imported image or page. Recognition quality depends on the source image, script, font, and selected settings; reviewing the text remains part of the workflow. Image and editor state are maintained within the current session.
+
+See [CHANGELOG.md](CHANGELOG.md) for development history and notes for the next release.
 
 ## Third-party attribution and licensing
 
@@ -17,6 +46,8 @@ DOCX export uses [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) 3.5.1 by
 These notices cover the managed OCR and DOCX components. A license for independently authored application code has not yet been selected, and the remaining bundled dependencies and assets need separate license review before publishing the complete solution as open source.
 
 ## Build and run
+
+The `DSP.Khana.Ocr.New` solution contains the desktop application and its five supporting projects. Application namespaces and project names are preserved, including the original `Wapper` spelling; the managed OCR engine uses the upstream Tesseract namespaces. Desktop builds use the license-free profile; activation and licensing projects are not required.
 
 ### Prerequisites
 
@@ -45,13 +76,13 @@ Run the integration smoke checks on Windows with:
 dotnet run --project tests/SmokeTests/SmokeTests.csproj -c Release
 ```
 
-The checks exercise all 279 English/Persian resource lookups, DOCX export and reload, Open XML schema validation, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, RTL/LTR switching, and resizing. The test forms are transparent and close automatically. As during normal recognition and PDF import, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
+The checks exercise all 285 English/Persian resource lookups, DOCX export and reload, Open XML schema validation, real native OCR with the English/Persian/mixed models, the production OCR wrapper and post-processing, native PDF rendering, production form initialization, live About Us translations, batched RTL/LTR switching, adjustment dialog headings and Apply/Cancel behavior in both languages, and resizing. The test forms are transparent and close automatically. As during normal recognition and PDF import, the production wrapper extracts its runtime assets into the user's application-data folder. Test samples use a unique temporary folder; Windows can retain loaded native DLLs there until the process exits.
 
 ## How the application works
 
 1. **Startup:** [Program.cs](DSP.Bina.Ocr.DesktopApplication.V3/Program.cs) initializes WinForms, registers UI exception handling, creates `MainForm`, and enters the Windows message loop.
 2. **OCR initialization:** `OcrService` initializes `BinaOcr.Instance()` on the first recognition request. PDF import also initializes the wrapper before rendering. The wrapper extracts the embedded native OCR libraries and trained language models, selecting native binaries for the current process architecture.
-3. **Input:** The user imports images, pastes a clipboard image, or imports selected PDF pages. `PDFConvert` renders PDF pages to image files through the `DSP.Tools32.dll` / `DSP.Tools64.dll` Ghostscript API. `ImageEntity` holds each image and its associated application state; `ImageListView` presents the image list.
+3. **Input:** The user imports images or selected PDF pages. `PDFConvert` renders PDF pages to image files through the `DSP.Tools32.dll` / `DSP.Tools64.dll` Ghostscript API. `ImageEntity` holds each image and its associated application state; `ImageListView` presents the image list.
 4. **Image preparation:** The desktop uses `DSP.Khana.ImageTools` for operations such as image adjustment and deskew. Preparing an image can improve recognition before it reaches the OCR engine.
 5. **Recognition:** The form passes the selected image and a snapshot of OCR options to `OcrService`, which serializes calls to `BinaOcr`. The wrapper maps those options to the managed engine, which calls the native OCR library. Optional post-processing applies text cleanup rules to the recognized result.
 6. **Editing and export:** Text edits, RTF formatting, and text direction are stored per image and restored when selection changes. `RichTextDocumentService` captures font family/size, bold, italic, underline, color, paragraph alignment, bullets, indentation, and direction. `DocumentExportService` writes that snapshot as DOCX using Open XML SDK and saves the image as JPEG. Existing base filenames receive ` (2)`, ` (3)`, and subsequent suffixes; exclusive file creation prevents accidental overwrites. The completion message shows the actual export name or output directory.

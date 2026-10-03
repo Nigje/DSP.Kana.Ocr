@@ -59,6 +59,10 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3.Properties {
             }
         }
         
+        internal static string ApplyAdjustment => ResourceManager.GetString("ApplyAdjustment", resourceCulture);
+
+        internal static string CancelAdjustment => ResourceManager.GetString("CancelAdjustment", resourceCulture);
+
         /// <summary>
         ///   Looks up a localized string similar to About Us.
         /// </summary>

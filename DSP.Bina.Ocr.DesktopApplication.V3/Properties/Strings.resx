@@ -341,4 +341,6 @@ https://github.com/dotnet/Open-XML-SDK
   <data name="ProcessingAlreadyRunning" xml:space="preserve"><value>Wait for the current recognition task to finish or cancel it.</value></data>
   <data name="AccessDenied" xml:space="preserve"><value>Access was denied. Choose a location you can write to.</value></data>
   <data name="FileOperationFailed" xml:space="preserve"><value>The file operation failed. Check the path and available disk space.</value></data>
+  <data name="ApplyAdjustment" xml:space="preserve"><value>Apply</value></data>
+  <data name="CancelAdjustment" xml:space="preserve"><value>Cancel</value></data>
 </root>

@@ -4,6 +4,12 @@ This file records the changes completed during the standalone desktop modernizat
 
 ## Unreleased
 
+### Image adjustment dialogs
+
+- TrackBarDialog now inherits the shared BaseDialogForm header and body layout. The adjustment caption updates the heading and window title for brightness, gamma, contrast, and threshold.
+- Localized Apply/Cancel in English and Persian, added Enter/Escape actions, and made the slider layout resize with the dialog.
+- Verified adjustment captions, layout, preview events, slider defaults, and Apply/Cancel outcomes in both languages.
+
 ### UI language switching
 
 - Keep the main window alive when switching between English and Persian by applying text direction to content containers instead of recreating the form's native window.

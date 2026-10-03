@@ -2,109 +2,109 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
 {
     partial class TrackBarDialog
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            if (disposing) components?.Dispose();
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.adjustmentTrackBar = new System.Windows.Forms.TrackBar();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.applyButton = new System.Windows.Forms.Button();
-            this.adjustmentLabel = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.adjustmentTrackBar)).BeginInit();
-            this.SuspendLayout();
-            // 
-            // adjustmentTrackBar
-            // 
-            this.adjustmentTrackBar.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.adjustmentTrackBar.LargeChange = 10;
-            this.adjustmentTrackBar.Location = new System.Drawing.Point(29, 39);
-            this.adjustmentTrackBar.Maximum = 100;
-            this.adjustmentTrackBar.Minimum = -100;
-            this.adjustmentTrackBar.Name = "adjustmentTrackBar";
-            this.adjustmentTrackBar.Size = new System.Drawing.Size(168, 45);
-            this.adjustmentTrackBar.SmallChange = 5;
-            this.adjustmentTrackBar.TabIndex = 1;
-            this.adjustmentTrackBar.TickFrequency = 20;
-            this.adjustmentTrackBar.ValueChanged += new System.EventHandler(this.AdjustmentTrackBar_ValueChanged);
-            // 
-            // cancelButton
-            // 
-            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.cancelButton.Location = new System.Drawing.Point(122, 88);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 4;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
-            // 
-            // applyButton
-            // 
-            this.applyButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.applyButton.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.applyButton.Location = new System.Drawing.Point(29, 88);
-            this.applyButton.Name = "applyButton";
-            this.applyButton.Size = new System.Drawing.Size(75, 23);
-            this.applyButton.TabIndex = 3;
-            this.applyButton.Text = "Apply";
-            this.applyButton.UseVisualStyleBackColor = true;
-            this.applyButton.Click += new System.EventHandler(this.ApplyButton_Click);
-            // 
-            // adjustmentLabel
-            // 
-            this.adjustmentLabel.AutoSize = true;
-            this.adjustmentLabel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.adjustmentLabel.Location = new System.Drawing.Point(39, 9);
-            this.adjustmentLabel.Name = "adjustmentLabel";
-            this.adjustmentLabel.Size = new System.Drawing.Size(33, 13);
-            this.adjustmentLabel.TabIndex = 5;
-            this.adjustmentLabel.Text = "Label";
-            // 
-            // TrackBarDialog
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(226, 123);
-            this.Controls.Add(this.adjustmentLabel);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.applyButton);
-            this.Controls.Add(this.adjustmentTrackBar);
-            this.Name = "TrackBarDialog";
-            this.Text = "TrackBarDialog";
-            ((System.ComponentModel.ISupportInitialize)(this.adjustmentTrackBar)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            adjustmentTrackBar = new System.Windows.Forms.TrackBar();
+            cancelButton = new System.Windows.Forms.Button();
+            applyButton = new System.Windows.Forms.Button();
+            adjustmentLabel = new System.Windows.Forms.Label();
+            adjustmentLayout = new System.Windows.Forms.TableLayoutPanel();
+            actionLayout = new System.Windows.Forms.TableLayoutPanel();
+            ((System.ComponentModel.ISupportInitialize)adjustmentTrackBar).BeginInit();
+            contentPanel.SuspendLayout();
+            adjustmentLayout.SuspendLayout();
+            actionLayout.SuspendLayout();
+            SuspendLayout();
 
+            contentPanel.ForeColor = System.Drawing.SystemColors.ControlText;
+            contentPanel.Controls.Add(adjustmentLayout);
+            adjustmentLayout.Name = "adjustmentLayout";
+            adjustmentLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            adjustmentLayout.Padding = new System.Windows.Forms.Padding(16, 8, 16, 8);
+            adjustmentLayout.ColumnCount = 1;
+            adjustmentLayout.RowCount = 3;
+            adjustmentLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            adjustmentLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            adjustmentLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            adjustmentLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
+            adjustmentLayout.Controls.Add(adjustmentLabel, 0, 0);
+            adjustmentLayout.Controls.Add(adjustmentTrackBar, 0, 1);
+            adjustmentLayout.Controls.Add(actionLayout, 0, 2);
+
+            adjustmentLabel.Name = "adjustmentLabel";
+            adjustmentLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+            adjustmentLabel.Font = new System.Drawing.Font("Tahoma", 10F);
+            adjustmentLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            adjustmentTrackBar.Name = "adjustmentTrackBar";
+            adjustmentTrackBar.Dock = System.Windows.Forms.DockStyle.Fill;
+            adjustmentTrackBar.Minimum = -100;
+            adjustmentTrackBar.Maximum = 100;
+            adjustmentTrackBar.LargeChange = 10;
+            adjustmentTrackBar.SmallChange = 5;
+            adjustmentTrackBar.TickFrequency = 20;
+            adjustmentTrackBar.TabIndex = 0;
+            adjustmentTrackBar.ValueChanged += AdjustmentTrackBar_ValueChanged;
+
+            actionLayout.Name = "actionLayout";
+            actionLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            actionLayout.ColumnCount = 2;
+            actionLayout.RowCount = 1;
+            actionLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            actionLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            actionLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            actionLayout.Controls.Add(applyButton, 0, 0);
+            actionLayout.Controls.Add(cancelButton, 1, 0);
+
+            applyButton.Name = "applyButton";
+            applyButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            applyButton.AutoSize = true;
+            applyButton.MinimumSize = new System.Drawing.Size(100, 32);
+            applyButton.Font = new System.Drawing.Font("Tahoma", 9F);
+            applyButton.Text = Properties.Strings.ApplyAdjustment;
+            applyButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            applyButton.UseVisualStyleBackColor = true;
+            applyButton.TabIndex = 1;
+            applyButton.Click += ApplyButton_Click;
+
+            cancelButton.Name = "cancelButton";
+            cancelButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            cancelButton.AutoSize = true;
+            cancelButton.MinimumSize = new System.Drawing.Size(100, 32);
+            cancelButton.Font = new System.Drawing.Font("Tahoma", 9F);
+            cancelButton.Text = Properties.Strings.CancelAdjustment;
+            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            cancelButton.UseVisualStyleBackColor = true;
+            cancelButton.TabIndex = 2;
+            cancelButton.Click += CancelButton_Click;
+
+            AcceptButton = applyButton;
+            CancelButton = cancelButton;
+            MinimumSize = new System.Drawing.Size(480, 240);
+            ClientSize = new System.Drawing.Size(520, 260);
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Name = "TrackBarDialog";
+            ((System.ComponentModel.ISupportInitialize)adjustmentTrackBar).EndInit();
+            actionLayout.ResumeLayout(false);
+            actionLayout.PerformLayout();
+            adjustmentLayout.ResumeLayout(false);
+            contentPanel.ResumeLayout(false);
+            ResumeLayout(false);
         }
-
-        #endregion
 
         private System.Windows.Forms.TrackBar adjustmentTrackBar;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button applyButton;
         private System.Windows.Forms.Label adjustmentLabel;
+        private System.Windows.Forms.TableLayoutPanel adjustmentLayout;
+        private System.Windows.Forms.TableLayoutPanel actionLayout;
     }
 }

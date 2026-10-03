@@ -318,8 +318,63 @@ internal static partial class SmokeTests
                 "Updating a hidden form neither shows it nor leaves redraw disabled.");
         }
         using (var pages = new PdfPageSelectionForm("sample.pdf")) { pages.CreateControl(); }
-        using (var adjustment = new TrackBarDialog()) { adjustment.CreateControl(); }
+        CheckAdjustmentDialogs();
         Console.WriteLine("Forms: production forms, resources, live About Us translation, RTL/LTR, and resizing passed.");
+    }
+
+    private static void CheckAdjustmentDialogs()
+    {
+        var strings = typeof(MainForm).Assembly.GetType("DSP.Bina.Ocr.DesktopApplication.V3.Properties.Strings");
+        var cultureProperty = strings.GetProperty("Culture", BindingFlags.Static | BindingFlags.NonPublic);
+        var originalCulture = cultureProperty.GetValue(null);
+        try
+        {
+            foreach (string language in new[] { "en", "fa-IR" })
+            {
+                cultureProperty.SetValue(null, CultureInfo.GetCultureInfo(language));
+                foreach (string adjustment in new[] { "ImageBrightness", "Gamma", "Contrast", "Threshold" })
+                {
+                    using var dialog = new TrackBarDialog { ShowInTaskbar = false, Opacity = 0 };
+                    Assert(dialog is BaseDialogForm && dialog.FormBorderStyle == FormBorderStyle.None, "Adjustment dialogs use the shared dialog chrome.");
+                    if (adjustment == "Gamma") dialog.SetForGamma();
+                    if (adjustment == "Contrast") dialog.SetForContrast();
+                    if (adjustment == "Threshold") dialog.SetForThreshold();
+                    string caption = Resource(adjustment);
+                    dialog.LabelText = caption;
+                    var heading = dialog.Controls.Find("titleLabel", true).Single() as Label;
+                    var label = Field<Label>(dialog, "adjustmentLabel");
+                    var slider = Field<TrackBar>(dialog, "adjustmentTrackBar");
+                    var apply = Field<Button>(dialog, "applyButton");
+                    var cancel = Field<Button>(dialog, "cancelButton");
+                    Assert(dialog.Text == caption && heading.Text == caption && label.Text == caption, "Every adjustment names the window, shared heading and content.");
+                    Assert(dialog.RightToLeft == (language == "fa-IR" ? RightToLeft.Yes : RightToLeft.No), "Adjustment dialog follows the UI language.");
+                    Assert(apply.Text == Resource("ApplyAdjustment") && cancel.Text == Resource("CancelAdjustment"), "Adjustment actions are localized.");
+                    Assert(dialog.AcceptButton == apply && dialog.CancelButton == cancel, "Enter applies and Escape cancels the adjustment.");
+                    int initialValue = adjustment == "ImageBrightness" ? 0 : adjustment == "Contrast" ? 25 : 50;
+                    Assert(slider.Value == initialValue && slider.Maximum == 100, "Adjustment initialization retains the existing slider values.");
+                    float changedValue = float.NaN;
+                    dialog.ValueUpdated += (_, args) => changedValue = args.NewValue;
+                    dialog.Shown += (_, _) => dialog.BeginInvoke((Action)(() =>
+                    {
+                        Assert(TextRenderer.MeasureText(caption, heading.Font).Width <= heading.ClientSize.Width,
+                            "The shared heading has enough space for the localized adjustment name.");
+                        int sliderWidth = slider.Width;
+                        dialog.Size = new Size(640, 320);
+                        dialog.PerformLayout();
+                        Assert(slider.Width > sliderWidth && slider.Parent == Field<TableLayoutPanel>(dialog, "adjustmentLayout"),
+                            "Adjustment content stays in the shared body and expands with the dialog.");
+                        slider.Value = initialValue + 5;
+                        Assert(changedValue == slider.Value, "Moving the slider still raises image-preview updates.");
+                        apply.PerformClick();
+                    }));
+                    Assert(dialog.ShowDialog() == DialogResult.OK, "Apply confirms the adjustment.");
+                }
+                using var canceled = new TrackBarDialog { ShowInTaskbar = false, Opacity = 0 };
+                canceled.Shown += (_, _) => canceled.BeginInvoke((Action)(() => Field<Button>(canceled, "cancelButton").PerformClick()));
+                Assert(canceled.ShowDialog() == DialogResult.Cancel, "Cancel discards the adjustment.");
+            }
+        }
+        finally { cultureProperty.SetValue(null, originalCulture); }
     }
 
     private static void CheckWrapper()

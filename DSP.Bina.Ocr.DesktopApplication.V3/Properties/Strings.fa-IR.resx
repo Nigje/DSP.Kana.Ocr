@@ -341,4 +341,6 @@ https://github.com/dotnet/Open-XML-SDK
   <data name="ProcessingAlreadyRunning" xml:space="preserve"><value>منتظر پایان پردازش جاری بمانید یا آن را لغو کنید.</value></data>
   <data name="AccessDenied" xml:space="preserve"><value>دسترسی مجاز نیست. مسیری را انتخاب کنید که اجازهٔ نوشتن در آن دارید.</value></data>
   <data name="FileOperationFailed" xml:space="preserve"><value>عملیات فایل ناموفق بود. مسیر و فضای خالی دیسک را بررسی کنید.</value></data>
+  <data name="ApplyAdjustment" xml:space="preserve"><value>اعمال</value></data>
+  <data name="CancelAdjustment" xml:space="preserve"><value>انصراف</value></data>
 </root>

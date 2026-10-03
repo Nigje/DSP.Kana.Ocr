@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace DSP.Bina.Ocr.DesktopApplication.V3
 {
-    public partial class TrackBarDialog : Form
+    public partial class TrackBarDialog : BaseDialogForm
     {
         public class ValueChangedEventArgs : EventArgs
         {
@@ -27,6 +29,8 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             set
             {
                 this.adjustmentLabel.Text = value;
+                titleLabel.Text = value;
+                Text = value;
             }
         }
 
@@ -35,9 +39,22 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
         public delegate void HandleValueChange(object sender, ValueChangedEventArgs e);
         public event HandleValueChange ValueUpdated;
 
-        public TrackBarDialog()
+        public TrackBarDialog() : base(new Size(520, 260), Properties.Strings.ImageProcessingTab)
         {
             InitializeComponent();
+            var culture = Properties.Strings.Culture ?? Thread.CurrentThread.CurrentUICulture;
+            RightToLeft = culture.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+            RightToLeftLayout = culture.TextInfo.IsRightToLeft;
+            titleLabel.RightToLeft = RightToLeft;
+            titleLabel.Dock = DockStyle.Fill;
+            titleLabel.TextAlign = culture.TextInfo.IsRightToLeft ? ContentAlignment.MiddleRight : ContentAlignment.MiddleLeft;
+            // Give the inherited heading all available space instead of its fixed designer column.
+            var titleLayout = (TableLayoutPanel)titleLabel.Parent;
+            titleLayout.ColumnStyles[0].SizeType = SizeType.Percent;
+            titleLayout.ColumnStyles[0].Width = 100;
+            titleLayout.ColumnStyles[1].SizeType = SizeType.Absolute;
+            titleLayout.ColumnStyles[1].Width = 0;
+            LabelText = Properties.Strings.ImageProcessingTab;
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

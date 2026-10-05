@@ -197,8 +197,3 @@ Publish the complete folder. Keep trimming and Native AOT disabled: the applicat
 
 Add matching keys to `Strings.resx` and `Strings.fa-IR.resx`, regenerate `Strings.Designer.cs`, and bind UI text through `Properties.Strings`. Update `MainForm.Localization.cs` for new controls and `MainForm.Layout.cs` when a control needs direction-specific placement or alignment. Keep the footer selector on the left and refresh both languages when checking dialogs and resize behavior.
 
-## Version control
-
-[.gitignore](.gitignore) excludes Visual Studio user state, `bin/`, `obj/`, publish output, test/coverage output, and temporary logs. These files are recreated by tools or belong to an individual workstation.
-
-Commit the solution, project files, source, `.resx` files, resource images, embedded model ZIPs, native DLLs, and the smoke checks. NuGet packages restore automatically and should not be committed. The ignore file deliberately does **not** ignore all DLLs or ZIPs because this repository contains required binary dependencies. Private signing keys (`.snk`), private certificate/key files, and local environment files are ignored and must not be committed. A fresh checkout builds without private signing keys.

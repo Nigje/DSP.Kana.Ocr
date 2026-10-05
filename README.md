@@ -6,6 +6,26 @@ Bina OCR is a Windows desktop workspace for the complete recognition process: im
 
 Built around Persian, English, and mixed-language recognition, Bina combines bilingual controls with practical tools for document work. Recognition and PDF rendering run locally using bundled native libraries and language models; the document-processing workflow does not require a cloud OCR service.
 
+## Project history and modernization
+
+Bina OCR was originally developed about eight years ago, around 2018, using .NET Framework 4.5. This repository modernizes that desktop application for .NET 10 while preserving its core recognition, image preparation, and editing workflow.
+
+As part of preparing the project for open-source distribution, we removed the desktop activation mechanism, including activation dialogs, hardware fingerprinting, and license-manager dependencies. Components that we could not make open source have been removed or replaced. Third-party copyright notices and license terms remain in place. See [CHANGELOG.md](CHANGELOG.md) for details of the removals, replacements, migration, and other improvements.
+
+## Screenshots
+
+### Recognition and text editing
+
+The main desktop workspace combines imported page thumbnails, a source-image preview, recognition settings, and a text editor for reviewing and formatting OCR results.
+
+![Bina OCR main desktop workspace with recognition settings, document preview, and text editor](DSP.Bina.Ocr.DesktopApplication.V3/ScreenShots/DesktopMainForm.jpg)
+
+### Image improvement and adjustment
+
+The Image Processing tab provides image preparation tools, including rotation, cropping, smoothing, sharpening, and brightness, contrast, gamma, and threshold adjustments. The screenshot shows the brightness adjustment dialog.
+
+![Bina OCR Image Processing tab with image preparation tools and brightness adjustment dialog](DSP.Bina.Ocr.DesktopApplication.V3/ScreenShots/DesktopImageImrovement.jpg)
+
 ## Features
 
 | Capability | What you can do |

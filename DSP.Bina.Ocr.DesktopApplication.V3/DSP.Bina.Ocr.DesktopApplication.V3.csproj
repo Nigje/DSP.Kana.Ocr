@@ -439,6 +439,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="LogoBina.ico" />
+    <Content Include="ScreenShots\DesktopImageImrovement.jpg" />
+    <Content Include="ScreenShots\DesktopMainForm.jpg" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />

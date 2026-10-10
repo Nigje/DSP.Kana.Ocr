@@ -10,14 +10,6 @@ The project is a modified copy of Charles Weld's .NET Tesseract wrapper (`charle
 
 The current tree has 61 C# files excluding bin/obj. 60 have same-relative-path counterparts in charlesw/tesseract master. `LanguageModel.cs` is the only C# file without such a counterpart. Same paths alone do not prove provenance, but the extensive matching source does.
 
-## Reproducible comparison references
-
-- InteropDotNet master: `0b15eee809716c50562458d6fe95d52bea46b9c6` (2020-04-02), https://github.com/AndreyAkinshin/InteropDotNet/tree/0b15eee809716c50562458d6fe95d52bea46b9c6
-- charlesw/tesseract master: `b5329d5be92fa670031d94c3875f879651a01f55` (2025-04-29), https://github.com/charlesw/tesseract/tree/b5329d5be92fa670031d94c3875f879651a01f55
-- Also compared Tesseract release tags 2.4.1, 3.0.0, 3.0.2, 3.3, 4.1.1, and 5.2.0. The 3.3 tag had the highest mean normalized line similarity among these references, but lacks `Sel.cs`, and the local copy also contains later upstream functionality. The exact original imported revision is unconfirmed. The project name/version does not establish an upstream version.
-
-The raw diffs preserve names; the second Tesseract diff replaces the known DSP namespaces and renamed engine/API/exception identifiers. Both ignore original line-ending differences by reading text. Neither is an authorship or semantic-equivalence analysis. A difference from today's upstream may be a later upstream addition, not a local deletion.
-
 ## Substantive differences specific to this copy versus inspected upstream
 
 | File | Local change |
@@ -90,74 +82,4 @@ Sources:
 - https://github.com/AndreyAkinshin/InteropDotNet/blob/0b15eee809716c50562458d6fe95d52bea46b9c6/LICENSE.md
 - https://www.apache.org/licenses/LICENSE-2.0 (especially section 4)
 
-## Remaining release scope
 
-No top-level license or third-party notice was found; ImageListView has its own License.txt. This audit does not clear the entire solution for publication. Check the actual versions/terms of ImageListView, Ghostscript-based native DLLs, native Tesseract/Leptonica, trained model archives, and other shipped dependencies/assets. Identify source and terms of renamed native binaries separately; C# comparison cannot determine their origin or modifications. Verify ownership/publication rights for your own code and models. No license has been chosen or source/license metadata changed by this audit.
-
-## File inventory against current Tesseract master
-
-'Names/whitespace match' means only the known identifier substitutions and whitespace stripping were used; differences include accessibility, comments, build guards, and newer upstream features, not necessarily locally authored algorithms.
-
-| Local C# file | Comparison |
-| --- | --- |
-| `AddNewColorStatus.cs` | Differs; see normalized diff |
-| `AggregateResultRenderer.cs` | Differs; see normalized diff |
-| `BitmapHelper.cs` | Differs; see normalized diff |
-| `BitmapToPixConverter.cs` | Differs; see normalized diff |
-| `ChoiceIterator.cs` | Differs; see normalized diff |
-| `DisposableBase.cs` | Differs; see normalized diff |
-| `ElementProperties.cs` | Differs; see normalized diff |
-| `EngineConfig.cs` | Differs; see normalized diff |
-| `EngineMode.cs` | Differs; see normalized diff |
-| `FontAttributes.cs` | Differs; see normalized diff |
-| `FontInfo.cs` | Differs; see normalized diff |
-| `ImageFormat.cs` | Matches after name/whitespace normalization |
-| `Internal/ErrorMessage.cs` | Differs; see normalized diff |
-| `Internal/Guard.cs` | Matches after name/whitespace normalization |
-| `Internal/InteropDotNet/ILibraryLoaderLogic.cs` | Matches after name/whitespace normalization |
-| `Internal/InteropDotNet/InteropRuntimeImplementer.cs` | Differs; see normalized diff |
-| `Internal/InteropDotNet/LibraryLoader.cs` | Differs; see normalized diff |
-| `Internal/InteropDotNet/RuntimeDllImportAttribute.cs` | Matches after name/whitespace normalization |
-| `Internal/InteropDotNet/SystemManager.cs` | Differs; see normalized diff |
-| `Internal/InteropDotNet/UnixLibraryLoaderLogic.cs` | Differs; see normalized diff |
-| `Internal/InteropDotNet/WindowsLibraryLoaderLogic.cs` | Differs; see normalized diff |
-| `Internal/Logger.cs` | Differs; see normalized diff |
-| `Internal/TessConvert.cs` | Matches after name/whitespace normalization |
-| `Interop/BaseApi.cs` | Differs; see normalized diff |
-| `Interop/Constants.cs` | Differs; see normalized diff |
-| `Interop/HostProcessInfo.cs` | Matches after name/whitespace normalization |
-| `Interop/LeptonicaApi.cs` | Differs; see normalized diff |
-| `Interop/MarshalHelper.cs` | Matches after name/whitespace normalization |
-| `IResultRenderer.cs` | Differs; see normalized diff |
-| `LanguageModel.cs` | No same-path counterpart in upstream master |
-| `LeptonicaException.cs` | Differs; see normalized diff |
-| `LoadLibraryException.cs` | Differs; see normalized diff |
-| `MathHelper.cs` | Differs; see normalized diff |
-| `Orientation.cs` | Matches after name/whitespace normalization |
-| `Page.cs` | Differs; see normalized diff |
-| `PageIterator.cs` | Differs; see normalized diff |
-| `PageIteratorLevel.cs` | Matches after name/whitespace normalization |
-| `PageSegMode.cs` | Differs; see normalized diff |
-| `Pix.cs` | Differs; see normalized diff |
-| `PixArray.cs` | Differs; see normalized diff |
-| `PixArrayAccessType.cs` | Matches after name/whitespace normalization |
-| `PixColor.cs` | Matches after name/whitespace normalization |
-| `PixColormap.cs` | Matches after name/whitespace normalization |
-| `PixConverter.cs` | Differs; see normalized diff |
-| `PixData.cs` | Differs; see normalized diff |
-| `PixToBitmapConverter.cs` | Differs; see normalized diff |
-| `PolyBlockType.cs` | Matches after name/whitespace normalization |
-| `Properties/AssemblyInfo.cs` | Differs; see normalized diff |
-| `Rect.cs` | Differs; see normalized diff |
-| `ResultIterator.cs` | Differs; see normalized diff |
-| `ResultRenderer.cs` | Differs; see normalized diff |
-| `RotationFill.cs` | Matches after name/whitespace normalization |
-| `RotationMethod.cs` | Matches after name/whitespace normalization |
-| `Scew.cs` | Matches after name/whitespace normalization |
-| `ScewSweep.cs` | Matches after name/whitespace normalization |
-| `Sel.cs` | Matches after name/whitespace normalization |
-| `TesseractEngine.cs` | Differs; see normalized diff |
-| `TesseractEnviornment.cs` | Differs; see normalized diff |
-| `TesseractException.cs` | Differs; see normalized diff |
-| `TextLineOrder.cs` | Matches after name/whitespace normalization |
-| `WritingDirection.cs` | Matches after name/whitespace normalization |

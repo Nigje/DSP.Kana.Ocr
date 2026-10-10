@@ -6,6 +6,8 @@ Bina OCR is a Windows desktop workspace for the complete recognition process: im
 
 Built around Persian, English, and mixed-language recognition, Bina combines bilingual controls with practical tools for document work. Recognition and PDF rendering run locally using bundled native libraries and language models; the document-processing workflow does not require a cloud OCR service.
 
+Bina also uses a custom OCR model integrated into its Tesseract-based recognition pipeline. The custom model is part of the application's recognition assets and runs locally alongside the image preparation, text review, and export workflow.
+
 ## Project history and modernization
 
 Bina OCR was originally developed about eight years ago, around 2018, using .NET Framework 4.5. This repository modernizes that desktop application for .NET 10 while preserving its core recognition, image preparation, and editing workflow.
@@ -30,6 +32,7 @@ The Image Processing tab provides image preparation tools, including rotation, c
 
 | Capability | What you can do |
 | --- | --- |
+| **Custom OCR model** | Recognize documents with a custom model integrated into the application's Tesseract-based engine and loaded locally from the bundled model assets. |
 | **Persian, English, and mixed-language OCR** | Choose the recognition model for Persian text, English text, or documents containing both. Select the interface language independently of the document language. |
 | **Image and PDF input** | Import multiple image files, load all pages of a PDF, or select the pages you need. A thumbnail workspace keeps the imported images and PDF pages accessible for review. |
 | **Image preparation** | Crop unwanted areas, rotate pages, correct skew, sharpen text, smooth noise, invert colors, or convert to grayscale and monochrome. Adjust brightness, contrast, gamma, and threshold with live previews before applying changes. |

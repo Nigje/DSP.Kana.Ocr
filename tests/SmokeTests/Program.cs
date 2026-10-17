@@ -33,6 +33,8 @@ internal static partial class SmokeTests
         try
         {
             Directory.CreateDirectory(Work);
+            // Set before the facade initializes; native extraction must not replace a user's cache.
+            AppContext.SetData("Bina.Ocr.RuntimeDirectory", Work);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -384,6 +386,9 @@ internal static partial class SmokeTests
 
     private static void CheckWrapper()
     {
+        string runtimePath = (string)typeof(BinaOcr).GetField("TemporalDirectoryPath", PrivateInstance)
+            .GetValue(BinaOcr.Instance());
+        Assert(runtimePath == Path.Combine(Work, ".temporalapp"), "Production native assets use the isolated test directory.");
         using (var image = new Bitmap(900, 180))
         {
             using (var graphics = Graphics.FromImage(image))

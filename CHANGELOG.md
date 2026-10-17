@@ -4,6 +4,15 @@ This file records the changes completed during the standalone desktop modernizat
 
 ## Unreleased
 
+### Portfolio documentation and repeatable verification
+
+- Reworked the README around the application, engineering decisions, and links to implementation evidence.
+- Added an engineering case study with architecture, lifecycle tradeoffs, regression coverage, and a guided review of the actual Git history.
+- Moved build, deployment, localization, and release-readiness details into a developer guide; added contribution guidance.
+- Added `scripts/Verify.ps1` to restore, build, and run all or focused checks in a separate output folder, with failures propagated to the caller.
+- Added a Windows GitHub Actions workflow that invokes the same verification script on pushes, pull requests, and manual dispatch. Hosted results are established by workflow runs after pushing.
+- Added a host-configurable OCR extraction root and set it to a unique temporary directory in the smoke harness, avoiding access to the running application's shared model cache during verification.
+
 ### Image adjustment dialogs
 
 - TrackBarDialog now inherits the shared BaseDialogForm header and body layout. The adjustment caption updates the heading and window title for brightness, gamma, contrast, and threshold.
@@ -12,9 +21,11 @@ This file records the changes completed during the standalone desktop modernizat
 
 ### UI language switching
 
+- Select English recognition for the English interface and Persian recognition for the Persian interface, both at startup and when switching. Manual recognition-language selection remains available, including mixed mode.
+- Preserve editor RTF and selection when the recognition-language change updates text direction.
 - Keep the main window alive when switching between English and Persian by applying text direction to content containers instead of recreating the form's native window.
 - Batch translation and child layouts with native redraw paused until completion, preventing partially updated controls from flashing. Redraw is restored even if translation fails, and hidden forms stay hidden.
-- Added regressions for repeated switches, retained editor text/formatting/selection, selected images, OCR options, and bilingual layout after resizing.
+- Added regressions for repeated switches, retained editor text/formatting/selection, selected images, matching recognition languages, and bilingual layout after resizing.
 
 ### DOCX export dependency replacement
 
@@ -42,7 +53,7 @@ The OCR desktop application now supports English and Persian interfaces with mat
 - Applied left-to-right arrangement for English and right-to-left arrangement for Persian, including control alignment, margins, option rows, image actions, and dialog text.
 - Corrected the layout and wrapping of the Save All and interface-language labels.
 - Localized the About Us content and updated open dialogs when the interface language changes.
-- Kept interface language independent of the existing Persian, English, and mixed OCR language choices.
+- Retained separate Persian, English, and mixed recognition choices; changing the interface now sets the matching recognition default.
 - Added a localized Cancel OCR button and processing/cancellation feedback in the footer.
 
 ### Recognition and editing workflows
@@ -121,7 +132,7 @@ The OCR desktop application now supports English and Persian interfaces with mat
 
 ### Standalone solution and .NET 10 migration
 
-- Created a standalone repository containing the desktop application and its seven required supporting projects and assets.
+- Initially created a standalone repository containing the desktop application and seven supporting projects and assets. Replacing the two Xceed document projects with Open XML SDK later reduced the production solution to six projects.
 - Renamed the solution to `DSP.Khana.Ocr.sln`.
 - Migrated all eight production projects to SDK-style .NET 10 projects. The post-processing library targets `net10.0`; the desktop and Windows-dependent libraries target `net10.0-windows`.
 - Added shared build settings in `Directory.Build.props` and stable .NET 10 SDK selection in `global.json`, allowing newer .NET 10 feature bands.
@@ -145,7 +156,9 @@ The OCR desktop application now supports English and Persian interfaces with mat
 - Added `.gitattributes` rules for resource-file line endings to preserve localized multiline values.
 - Established the GitHub repository and main branch; private signing keys remain excluded from source control.
 
-### Validation completed
+### Historical modernization validation
+
+The results below were recorded during the modernization. Resource counts describe that snapshot; use the current [verification command](docs/development.md#repeatable-verification) to validate the current revision.
 
 - Debug solution build passed. The final incremental build reported zero warnings and zero errors; legacy dependency warnings can still appear on a clean build or another configuration.
 - Release smoke tests and focused Debug refactoring tests passed.

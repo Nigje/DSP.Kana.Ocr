@@ -1,3 +1,7 @@
+# Localization resource reference
+
+This table documents English/Persian strings. The `Properties/Strings.resx` and `Properties/Strings.fa-IR.resx` files are authoritative. See the [localization workflow](../docs/development.md#localization) for bindings, directional layout, and verification.
+
 | Key | Strings.fa-IR.resx | Strings.resx |
 | --- | --- | --- |
 | AboutUs | درباره ما | About Us |

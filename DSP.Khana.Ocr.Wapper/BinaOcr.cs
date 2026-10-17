@@ -94,7 +94,11 @@ namespace Bina.Ocr.Wapper
             temporalRootName = ".temporalapp";
             temporalModelName = ".model_" + Version;
             temporalAppName = ".app_" + Version;
-            TemporalDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + temporalRootName;
+            // Hosts such as the integration harness can isolate extracted assets from a running app.
+            string runtimeRoot = AppContext.GetData("Bina.Ocr.RuntimeDirectory") as string;
+            if (string.IsNullOrWhiteSpace(runtimeRoot))
+                runtimeRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            TemporalDirectoryPath = Path.Combine(Path.GetFullPath(runtimeRoot), temporalRootName);
             DllDirectoryPath = TemporalDirectoryPath + "\\" + temporalAppName;
             ModelDirectoryPath = TemporalDirectoryPath + "\\" + temporalModelName;
         }

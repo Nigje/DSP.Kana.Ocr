@@ -217,7 +217,7 @@ internal static partial class SmokeTests
             Assert(imageListPanel.GetPositionFromControl(imageList) == new TableLayoutPanelCellPosition(0, 1), "Image list occupies the thumbnail row.");
             Assert(imageList.ThumbnailSize == new Size(150, 150), "Image list thumbnail configuration.");
             using var sampleImage = new Bitmap(300, 100);
-            var sample = new ImageEntity(sampleImage) { Name = "startup-test.png" };
+            var sample = new ImageEntity(sampleImage) { Name = "startup-test.png", TextRightToLeft = false };
             typeof(MainForm).GetMethod("AddImage", PrivateInstance).Invoke(main, new object[] { sample });
             Assert(imageList.Items.Count == 1, "Image import reaches the initialized image list.");
             imageList.Items[0].Selected = true;
@@ -237,7 +237,8 @@ internal static partial class SmokeTests
             var ocrLanguage = Field<ComboBox>(main, "ocrLanguageComboBox");
             var ocrEngine = Field<ComboBox>(main, "ocrEngineComboBox");
             var segmentation = Field<ComboBox>(main, "pageSegmentationComboBox");
-            var selectedLanguage = ocrLanguage.SelectedItem;
+            Assert(((OcrLanguageOption)ocrLanguage.SelectedItem).Value == LanguageEnum.English,
+                "English UI selects English recognition at startup.");
             var selectedEngine = ocrEngine.SelectedItem;
             var selectedSegmentation = segmentation.SelectedItem;
             int redrawChecks = 0;
@@ -261,15 +262,17 @@ internal static partial class SmokeTests
                 Assert(Field<Panel>(main, "rootPanel").RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "Main content direction.");
                 Assert(about.RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "Live About Us direction.");
                 Assert(recognitionEditor.Text == documentText && recognitionEditor.SelectionStart == 3 && recognitionEditor.SelectionLength == 2
-                    && recognitionEditor.RightToLeft == RightToLeft.Yes, "UI language switching preserves editor text, direction and selection.");
+                    && recognitionEditor.RightToLeft == (persian ? RightToLeft.Yes : RightToLeft.No), "UI language switching preserves editor text and selection and sets recognition direction.");
                 recognitionEditor.Select(0, 7);
                 using (var selectedFont = recognitionEditor.SelectionFont) Assert(selectedFont.Bold, "Language switching preserves bold formatting.");
                 recognitionEditor.Select(8, 3);
                 using (var selectedFont = recognitionEditor.SelectionFont) Assert(!selectedFont.Bold, "Language switching preserves plain formatting.");
                 recognitionEditor.Select(3, 2);
-                Assert(Field<Guid>(main, "selectedImageId") == sample.Id && ReferenceEquals(ocrLanguage.SelectedItem, selectedLanguage)
+                Assert(((OcrLanguageOption)ocrLanguage.SelectedItem).Value == (persian ? LanguageEnum.Farsi : LanguageEnum.English),
+                    "UI language selects the corresponding OCR recognition language.");
+                Assert(Field<Guid>(main, "selectedImageId") == sample.Id
                     && ReferenceEquals(ocrEngine.SelectedItem, selectedEngine) && ReferenceEquals(segmentation.SelectedItem, selectedSegmentation),
-                    "UI language switching preserves the selected image and OCR options.");
+                    "UI language switching preserves the selected image, engine and layout.");
                 Assert(editor.Text.Contains(persian ? "بینا" : "Bina"), "Live About Us translation.");
                 var languagePanel = selector.Parent;
                 Assert(languagePanel.Dock == DockStyle.Left, "Footer selector stays left.");
@@ -311,6 +314,8 @@ internal static partial class SmokeTests
         }
         using (var hidden = new MainForm())
         {
+            Assert(((OcrLanguageOption)Field<ComboBox>(hidden, "ocrLanguageComboBox").SelectedItem).Value == LanguageEnum.Farsi,
+                "Persian UI selects Persian recognition at startup.");
             var handle = hidden.Handle;
             var selector = Field<ComboBox>(hidden, "uiLanguageComboBox");
             selector.SelectedIndex = selector.SelectedIndex == 0 ? 1 : 0;

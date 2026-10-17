@@ -152,6 +152,21 @@ namespace DSP.Bina.Ocr.DesktopApplication.V3
             {
                 refreshingUiLanguage = false;
             }
+
+            // Apply after refreshing so the selection event updates engines and text direction.
+            var recognitionLanguage = culture.TwoLetterISOLanguageName == "fa"
+                ? LanguageEnum.Farsi : LanguageEnum.English;
+            var recognitionOption = ocrLanguageOptions.First(option => option.Value == recognitionLanguage);
+            if (ocrLanguageComboBox.SelectedItem == recognitionOption) return;
+
+            // Changing RichTextBox direction recreates its native handle and can lose formatting.
+            string documentRtf = recognizedTextBox.Rtf;
+            int selectionStart = recognizedTextBox.SelectionStart;
+            int selectionLength = recognizedTextBox.SelectionLength;
+            ocrLanguageComboBox.SelectedItem = recognitionOption;
+            recognizedTextBox.Rtf = documentRtf;
+            recognizedTextBox.Select(selectionStart, selectionLength);
+            RecordEditorState();
         }
 
         // SuspendLayout alone does not prevent child windows from painting intermediate

@@ -33,7 +33,7 @@ The Image Processing tab provides image preparation tools, including rotation, c
 | Capability | What you can do |
 | --- | --- |
 | **Custom OCR model** | Recognize documents with a custom model integrated into the application's Tesseract-based engine and loaded locally from the bundled model assets. |
-| **Persian, English, and mixed-language OCR** | Choose the recognition model for Persian text, English text, or documents containing both. Select the interface language independently of the document language. |
+| **Persian, English, and mixed-language OCR** | Switching the interface to English or Persian selects the matching recognition language. You can also choose the recognition model manually for Persian text, English text, or documents containing both. |
 | **Image and PDF input** | Import multiple image files, load all pages of a PDF, or select the pages you need. A thumbnail workspace keeps the imported images and PDF pages accessible for review. |
 | **Image preparation** | Crop unwanted areas, rotate pages, correct skew, sharpen text, smooth noise, invert colors, or convert to grayscale and monochrome. Adjust brightness, contrast, gamma, and threshold with live previews before applying changes. |
 | **Recognition controls** | Match recognition to the source with page segmentation options for automatic analysis, text blocks, columns, individual lines, sparse text, words, and characters. Available OCR engine options follow the selected language. |
